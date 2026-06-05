@@ -1,0 +1,84 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net9.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\04_Dateiverarbeitung\01_leicht\Dateiverarbeitung_Grundlagen\Dateiverarbeitung_Grundlagen.csproj" />
+    <ProjectReference Include="..\04_Dateiverarbeitung\01_leicht\Hotelprotokoll\Hotelprotokoll.csproj" />
+    <ProjectReference Include="..\04_Dateiverarbeitung\02_mittel\Funktion_Schreiben_Lesen\Funktion_Schreiben_Lesen.csproj" />
+    <ProjectReference Include="..\03_Schleifen_Iteration\02_mittel\Bevoelkerung\Bevoelkerung.csproj" />
+    <ProjectReference Include="..\03_Schleifen_Iteration\01_leicht\Fakultaet\Fakultaet.csproj" />
+    <ProjectReference Include="..\Helpes\Helpers.csproj" />
+    <ProjectReference Include="..\03_Schleifen_Iteration\01_leicht\Kleine_Uebungen_Schleifen\Kleine_Uebungen_Schleifen.csproj" />
+    <ProjectReference Include="..\02_Verzweigung_Selection\01_leicht\Kleinste_Zahl\Kleinste_Zahl.csproj" />
+    <ProjectReference Include="..\03_Schleifen_Iteration\02_mittel\Millionaer_Lottogewinn\Millionaer_Lottogewinn.csproj" />
+    <ProjectReference Include="..\02_Verzweigung_Selection\01_leicht\Notenberechnung\Notenberechnung.csproj" />
+    <ProjectReference Include="..\02_Verzweigung_Selection\01_leicht\Prozentsatz\Prozentsatz.csproj" />
+    <ProjectReference Include="..\02_Verzweigung_Selection\02_mittel\Rabattrechner\Rabattrechner.csproj" />
+    <ProjectReference Include="..\03_Schleifen_Iteration\01_leicht\Rechnung\Rechnung.csproj" />
+    <ProjectReference Include="..\02_Verzweigung_Selection\03_schwer\Schaltjahrermittlung\Schaltjahrermittlung.csproj" />
+    <ProjectReference Include="..\03_Schleifen_Iteration\01_leicht\Schreibtischtest_Schleifen\Schreibtischtest_Schleifen.csproj" />
+    <ProjectReference Include="..\02_Verzweigung_Selection\02_mittel\Tankrechnung\Tankrechnung.csproj" />
+    <ProjectReference Include="..\02_Verzweigung_Selection\03_schwer\Urlaubsanspruch\Urlaubsanspruch.csproj" />
+    <ProjectReference Include="..\03_Schleifen_Iteration\02_mittel\Vertreterumsatz\Vertreterumsatz.csproj" />
+    <ProjectReference Include="..\02_Verzweigung_Selection\03_schwer\Wohngeld\Wohngeld.csproj" />
+    <ProjectReference Include="..\03_Schleifen_Iteration\02_mittel\Zahlensysteme\Zahlensysteme.csproj" />
+    <ProjectReference Include="..\zahlen\zahlen.csproj" />
+    <ProjectReference Include="..\05_Array\01_leicht\Array_Zimmervermietung\Array_Zimmervermietung.csproj" />
+    <ProjectReference Include="..\05_Array\01_leicht\Array_Grundlagen\Array_Grundlagen.csproj" />
+    <ProjectReference Include="..\05_Array\01_leicht\Array_Einfuehrung\Array_Einfuehrung.csproj" />
+    <ProjectReference Include="..\05_Array\02_mittel\GTIN_Pruefziffer\GTIN_Pruefziffer.csproj" />
+    <ProjectReference Include="..\05_Array\02_mittel\ISBN_Pruefziffer\ISBN_Pruefziffer.csproj" />
+    <ProjectReference Include="..\05_Array\02_mittel\Luhn_Pruefung\Luhn_Pruefung.csproj" />
+    <ProjectReference Include="..\05_Array\02_mittel\Wuerfel_Haeufigkeit\Wuerfel_Haeufigkeit.csproj" />
+    <ProjectReference Include="..\05_Array\02_mittel\Zahlen_Rueckwaerts\Zahlen_Rueckwaerts.csproj" />
+    <ProjectReference Include="..\05_Array\02_mittel\MinMaxMittelwert\MinMaxMittelwert.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Properties\Resources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Properties\Settings.Designer.cs">
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="UI\Main.Theme.resx">
+      <ManifestResourceName>Launcher.UI.Main.Theme</ManifestResourceName>
+    </EmbeddedResource>
+    <EmbeddedResource Update="UI\Main.Events.resx">
+      <ManifestResourceName>Launcher.UI.Main.Events</ManifestResourceName>
+    </EmbeddedResource>
+    <EmbeddedResource Update="UI\Main.Rendering.resx">
+      <ManifestResourceName>Launcher.UI.Main.Rendering</ManifestResourceName>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Resources\" />
+  </ItemGroup>
+
+</Project>

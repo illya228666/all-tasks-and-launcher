@@ -1,0 +1,14 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Launch Launcher",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build Launcher",
+      "program": "${workspaceFolder}/Launcher/bin/Debug/net7.0-windows/Launcher.dll",
+      "cwd": "${workspaceFolder}/Launcher",
+      "stopAtEntry": false
+    }
+  ]
+}
