@@ -65,7 +65,11 @@ public partial class Main : Form
         ApplyTheme();
 
         Resize += (_, __) => Render();
-        Shown += (_, __) => _petTimer.Start();
+        Shown += (_, __) =>
+        {
+            _petTimer.Start();
+            ScheduleNextPetMovement();
+        };
         FormClosing += (_, __) => PersistState();
         FormClosed += (_, __) => _petAtlas?.Dispose();
     }

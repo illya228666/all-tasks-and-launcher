@@ -13,9 +13,15 @@ public partial class Main
     private const int PetFrameWidth = 192;
     private const int PetFrameHeight = 208;
     private const int PetIdleRow = 0;
+    private const int PetMoveRightRow = 1;
+    private const int PetMoveLeftRow = 2;
     private const int PetWaveRow = 3;
     private const int PetWaveIntervalMs = 9000;
     private const int PetAppStateLoopCount = 3;
+    private const int PetMovementMinDelayMs = 15000;
+    private const int PetMovementMaxDelayMs = 30000;
+    private const int PetEdgePadding = 16;
+    private const float PetPixelsPerMovementCycle = 120f;
 
     // Source: openai/codex codex-rs/tui/src/pets/model.rs default_animations().
     private static readonly int[][] PetFrameDurationsByRow =
@@ -34,10 +40,16 @@ public partial class Main
     private Bitmap? _petAtlas;
     private Panel _petPanel = null!;
     private System.Windows.Forms.Timer _petTimer = null!;
+    private System.Windows.Forms.Timer _petMovementTimer = null!;
     private int _petRow = PetIdleRow;
     private int _petFrame;
     private int _petIdleElapsedMs;
     private int _petWaveLoopsRemaining;
+    private float _petX = float.NaN;
+    private float _petMoveStartX;
+    private float _petMoveTargetX;
+    private int _petMoveElapsedMs;
+    private int _petMoveDurationMs;
 
     #region [RU] Бизнес-логика | [DE] Fachlogik
 
@@ -80,6 +92,7 @@ public partial class Main
         }
 
         _petPanel.Width = System.Math.Max(PetFrameWidth, flpApps.ClientSize.Width - 34);
+        ClampPetPosition();
         flpApps.Controls.Add(_petPanel);
 
         flpApps.ResumeLayout();
@@ -115,13 +128,23 @@ public partial class Main
             Interval = PetFrameDurationsByRow[PetIdleRow][0]
         };
         _petTimer.Tick += PetTimer_Tick;
+
+        _petMovementTimer = new System.Windows.Forms.Timer(components);
+        _petMovementTimer.Tick += PetMovementTimer_Tick;
     }
 
     private void PetTimer_Tick(object? sender, System.EventArgs e)
     {
         int[] durations = PetFrameDurationsByRow[_petRow];
+        bool isMoving = _petRow is PetMoveRightRow or PetMoveLeftRow;
 
-        if (_petRow == PetIdleRow)
+        if (isMoving)
+        {
+            _petMoveElapsedMs += durations[_petFrame];
+            float progress = System.Math.Min(1f, (float)_petMoveElapsedMs / _petMoveDurationMs);
+            _petX = _petMoveStartX + ((_petMoveTargetX - _petMoveStartX) * progress);
+        }
+        else if (_petRow == PetIdleRow)
         {
             _petIdleElapsedMs += durations[_petFrame];
         }
@@ -138,6 +161,16 @@ public partial class Main
             }
         }
 
+        if (isMoving && _petMoveElapsedMs >= _petMoveDurationMs)
+        {
+            _petX = _petMoveTargetX;
+            ClampPetPosition();
+            _petRow = PetIdleRow;
+            _petFrame = 0;
+            _petMoveElapsedMs = 0;
+            ScheduleNextPetMovement();
+        }
+
         if (_petRow == PetIdleRow && _petIdleElapsedMs >= PetWaveIntervalMs)
         {
             _petRow = PetWaveRow;
@@ -149,6 +182,67 @@ public partial class Main
         durations = PetFrameDurationsByRow[_petRow];
         _petTimer.Interval = durations[_petFrame];
         _petPanel.Invalidate();
+    }
+
+    private void PetMovementTimer_Tick(object? sender, System.EventArgs e)
+    {
+        _petMovementTimer.Stop();
+
+        if (_petRow != PetIdleRow)
+        {
+            ScheduleNextPetMovement();
+            return;
+        }
+
+        ClampPetPosition();
+
+        float minX = PetEdgePadding;
+        float maxX = System.Math.Max(minX, _petPanel.ClientSize.Width - PetFrameWidth - PetEdgePadding);
+        float minDistance = ClientSize.Width / 8f;
+        float availableLeft = _petX - minX;
+        float availableRight = maxX - _petX;
+        bool canMoveLeft = availableLeft >= minDistance;
+        bool canMoveRight = availableRight >= minDistance;
+
+        if (!canMoveLeft && !canMoveRight)
+        {
+            ScheduleNextPetMovement();
+            return;
+        }
+
+        bool moveRight = canMoveRight && (!canMoveLeft || _random.Next(2) == 0);
+        float available = moveRight ? availableRight : availableLeft;
+        float distance = minDistance + ((float)_random.NextDouble() * (available - minDistance));
+
+        _petMoveStartX = _petX;
+        _petMoveTargetX = _petX + (moveRight ? distance : -distance);
+        int movementCycleMs = PetFrameDurationsByRow[PetMoveRightRow].Sum();
+        int movementCycles = System.Math.Max(1, (int)System.Math.Round(distance / PetPixelsPerMovementCycle));
+        _petMoveDurationMs = movementCycles * movementCycleMs;
+        _petMoveElapsedMs = 0;
+        _petIdleElapsedMs = 0;
+        _petRow = moveRight ? PetMoveRightRow : PetMoveLeftRow;
+        _petFrame = 0;
+
+        System.Diagnostics.Debug.Assert(distance >= minDistance && distance <= available);
+        _petTimer.Interval = PetFrameDurationsByRow[_petRow][0];
+        _petPanel.Invalidate();
+    }
+
+    private void ScheduleNextPetMovement()
+    {
+        _petMovementTimer.Stop();
+        _petMovementTimer.Interval = _random.Next(PetMovementMinDelayMs, PetMovementMaxDelayMs + 1);
+        _petMovementTimer.Start();
+    }
+
+    private void ClampPetPosition()
+    {
+        float minX = PetEdgePadding;
+        float maxX = System.Math.Max(minX, _petPanel.ClientSize.Width - PetFrameWidth - PetEdgePadding);
+        _petX = float.IsNaN(_petX)
+            ? System.Math.Clamp((_petPanel.ClientSize.Width - PetFrameWidth) / 2f, minX, maxX)
+            : System.Math.Clamp(_petX, minX, maxX);
     }
 
     private void PetPanel_Paint(object? sender, PaintEventArgs e)
@@ -168,8 +262,9 @@ public partial class Main
             return;
         }
 
+        ClampPetPosition();
         var destination = new Rectangle(
-            (_petPanel.ClientSize.Width - PetFrameWidth) / 2,
+            (int)System.Math.Round(_petX),
             (_petPanel.ClientSize.Height - PetFrameHeight) / 2,
             PetFrameWidth,
             PetFrameHeight);
