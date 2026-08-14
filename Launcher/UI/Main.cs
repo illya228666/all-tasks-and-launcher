@@ -69,6 +69,7 @@ public partial class Main : Form
         {
             _petTimer.Start();
             ScheduleNextPetMovement();
+            ScheduleNextPetJump();
         };
         FormClosing += (_, __) => PersistState();
         FormClosed += (_, __) => _petAtlas?.Dispose();
