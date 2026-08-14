@@ -85,6 +85,7 @@ public sealed class ProjectReferenceDiscoveryService : IAppDiscoveryService
     {
         return Directory.EnumerateFiles(baseDirectory, "*.exe", SearchOption.AllDirectories)
             .Where(path => !Path.GetFileName(path).Equals(launcherExeName, StringComparison.OrdinalIgnoreCase))
+            .Where(path => !Path.GetFileName(path).Equals("createdump.exe", StringComparison.OrdinalIgnoreCase))
             .Select(path => new AppEntry
             {
                 Name = Humanize(Path.GetFileNameWithoutExtension(path)),

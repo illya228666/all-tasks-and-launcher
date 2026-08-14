@@ -1,0 +1,9 @@
+<Project>
+  <PropertyGroup Condition="'$(PublishProfile)' == 'Windows-x64'">
+    <Configuration>Release</Configuration>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <SelfContained>true</SelfContained>
+    <DebugType>None</DebugType>
+    <DebugSymbols>false</DebugSymbols>
+  </PropertyGroup>
+</Project>
