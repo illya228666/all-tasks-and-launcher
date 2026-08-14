@@ -57,6 +57,7 @@ public partial class Main : Form
             LauncherConstants.StateFolderName,
             LauncherConstants.StateFileName);
 
+        InitializePet();
         EnableDoubleBuffer(flpApps);
 
         BindEvents();
@@ -64,7 +65,9 @@ public partial class Main : Form
         ApplyTheme();
 
         Resize += (_, __) => Render();
+        Shown += (_, __) => _petTimer.Start();
         FormClosing += (_, __) => PersistState();
+        FormClosed += (_, __) => _petAtlas?.Dispose();
     }
 
     #endregion

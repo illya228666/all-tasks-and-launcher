@@ -72,7 +72,7 @@
             this.layoutRoot.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 120F));
             this.layoutRoot.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 40F));
             this.layoutRoot.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.layoutRoot.Size = new System.Drawing.Size(1100, 720);
+            this.layoutRoot.Size = new System.Drawing.Size(1100, 800);
             this.layoutRoot.TabIndex = 0;
             // 
             // _header
@@ -284,7 +284,7 @@
             this.flpApps.Margin = new System.Windows.Forms.Padding(0);
             this.flpApps.Name = "flpApps";
             this.flpApps.Padding = new System.Windows.Forms.Padding(12);
-            this.flpApps.Size = new System.Drawing.Size(1100, 560);
+            this.flpApps.Size = new System.Drawing.Size(1100, 640);
             this.flpApps.TabIndex = 2;
             this.flpApps.WrapContents = false;
             // 
@@ -292,11 +292,11 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1100, 720);
+            this.ClientSize = new System.Drawing.Size(1100, 800);
             this.Controls.Add(this.layoutRoot);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.KeyPreview = true;
-            this.MinimumSize = new System.Drawing.Size(980, 640);
+            this.MinimumSize = new System.Drawing.Size(980, 720);
             this.Name = "Main";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Zahlen Launcher";

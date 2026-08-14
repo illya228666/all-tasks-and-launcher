@@ -10,6 +10,35 @@ namespace Launcher.UI;
 
 public partial class Main
 {
+    private const int PetFrameWidth = 192;
+    private const int PetFrameHeight = 208;
+    private const int PetIdleRow = 0;
+    private const int PetWaveRow = 3;
+    private const int PetWaveIntervalMs = 9000;
+    private const int PetAppStateLoopCount = 3;
+
+    // Source: openai/codex codex-rs/tui/src/pets/model.rs default_animations().
+    private static readonly int[][] PetFrameDurationsByRow =
+    {
+        new[] { 1680, 660, 660, 840, 840, 1920 },       // idle
+        new[] { 120, 120, 120, 120, 120, 120, 120, 220 }, // running-right / move_right
+        new[] { 120, 120, 120, 120, 120, 120, 120, 220 }, // running-left / move_left
+        new[] { 140, 140, 140, 280 },                   // waving / wave
+        new[] { 140, 140, 140, 140, 280 },              // jumping / bounce
+        new[] { 140, 140, 140, 140, 140, 140, 140, 240 }, // failed / sad
+        new[] { 150, 150, 150, 150, 150, 260 },         // waiting
+        new[] { 120, 120, 120, 120, 120, 220 },         // running
+        new[] { 150, 150, 150, 150, 150, 280 }          // review
+    };
+
+    private Bitmap? _petAtlas;
+    private Panel _petPanel = null!;
+    private System.Windows.Forms.Timer _petTimer = null!;
+    private int _petRow = PetIdleRow;
+    private int _petFrame;
+    private int _petIdleElapsedMs;
+    private int _petWaveLoopsRemaining;
+
     #region [RU] Бизнес-логика | [DE] Fachlogik
 
     /// <summary>
@@ -50,6 +79,9 @@ public partial class Main
             }
         }
 
+        _petPanel.Width = System.Math.Max(PetFrameWidth, flpApps.ClientSize.Width - 34);
+        flpApps.Controls.Add(_petPanel);
+
         flpApps.ResumeLayout();
         UpdateStats(visibleApps);
     }
@@ -57,6 +89,98 @@ public partial class Main
     #endregion
 
     #region [RU] Вспомогательные методы | [DE] Hilfsmethoden
+
+    private void InitializePet()
+    {
+        string atlasPath = Path.Combine(AppContext.BaseDirectory, "Resources", "sumrak-spritesheet.png");
+        using var source = new Bitmap(atlasPath);
+
+        if (source.Width != 1536 || source.Height != 2288)
+        {
+            throw new InvalidDataException($"Unerwartete Sumrak-Atlasgroesse: {source.Width}x{source.Height}.");
+        }
+
+        _petAtlas = new Bitmap(source);
+        _petPanel = new Panel
+        {
+            Height = PetFrameHeight,
+            Margin = new Padding(4, 0, 4, 0),
+            BackColor = Color.Transparent
+        };
+        _petPanel.Paint += PetPanel_Paint;
+        EnableDoubleBuffer(_petPanel);
+
+        _petTimer = new System.Windows.Forms.Timer(components)
+        {
+            Interval = PetFrameDurationsByRow[PetIdleRow][0]
+        };
+        _petTimer.Tick += PetTimer_Tick;
+    }
+
+    private void PetTimer_Tick(object? sender, System.EventArgs e)
+    {
+        int[] durations = PetFrameDurationsByRow[_petRow];
+
+        if (_petRow == PetIdleRow)
+        {
+            _petIdleElapsedMs += durations[_petFrame];
+        }
+
+        _petFrame++;
+
+        if (_petFrame >= durations.Length)
+        {
+            _petFrame = 0;
+
+            if (_petRow == PetWaveRow && --_petWaveLoopsRemaining == 0)
+            {
+                _petRow = PetIdleRow;
+            }
+        }
+
+        if (_petRow == PetIdleRow && _petIdleElapsedMs >= PetWaveIntervalMs)
+        {
+            _petRow = PetWaveRow;
+            _petFrame = 0;
+            _petIdleElapsedMs = 0;
+            _petWaveLoopsRemaining = PetAppStateLoopCount;
+        }
+
+        durations = PetFrameDurationsByRow[_petRow];
+        _petTimer.Interval = durations[_petFrame];
+        _petPanel.Invalidate();
+    }
+
+    private void PetPanel_Paint(object? sender, PaintEventArgs e)
+    {
+        Rectangle bounds = _petPanel.ClientRectangle;
+        e.Graphics.Clear(SurfaceAlt);
+
+        using (var pen = new Pen(BorderColor, 1f))
+        {
+            bounds.Width -= 1;
+            bounds.Height -= 1;
+            e.Graphics.DrawRectangle(pen, bounds);
+        }
+
+        if (_petAtlas is null)
+        {
+            return;
+        }
+
+        var destination = new Rectangle(
+            (_petPanel.ClientSize.Width - PetFrameWidth) / 2,
+            (_petPanel.ClientSize.Height - PetFrameHeight) / 2,
+            PetFrameWidth,
+            PetFrameHeight);
+        var source = new Rectangle(
+            _petFrame * PetFrameWidth,
+            _petRow * PetFrameHeight,
+            PetFrameWidth,
+            PetFrameHeight);
+
+        e.Graphics.DrawImage(_petAtlas, destination, source, GraphicsUnit.Pixel);
+    }
 
     private Control CreateSection(string title, List<AppEntry> apps)
     {
