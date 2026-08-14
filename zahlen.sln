@@ -95,6 +95,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Zahlen_Rueckwaerts", "05_Ar
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MinMaxMittelwert", "05_Array\02_mittel\MinMaxMittelwert\MinMaxMittelwert.csproj", "{94A8EEE0-DB06-4B5D-8474-1B2FC74FAF36}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Schwer_Zahlensysteme", "Zahlensysteme\Schwer_Zahlensysteme.csproj", "{9EF85AA8-29A2-43CF-B0AE-93B70E75FC43}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -477,6 +479,18 @@ Global
 		{94A8EEE0-DB06-4B5D-8474-1B2FC74FAF36}.Release|x64.Build.0 = Release|Any CPU
 		{94A8EEE0-DB06-4B5D-8474-1B2FC74FAF36}.Release|x86.ActiveCfg = Release|Any CPU
 		{94A8EEE0-DB06-4B5D-8474-1B2FC74FAF36}.Release|x86.Build.0 = Release|Any CPU
+		{9EF85AA8-29A2-43CF-B0AE-93B70E75FC43}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9EF85AA8-29A2-43CF-B0AE-93B70E75FC43}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9EF85AA8-29A2-43CF-B0AE-93B70E75FC43}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{9EF85AA8-29A2-43CF-B0AE-93B70E75FC43}.Debug|x64.Build.0 = Debug|Any CPU
+		{9EF85AA8-29A2-43CF-B0AE-93B70E75FC43}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{9EF85AA8-29A2-43CF-B0AE-93B70E75FC43}.Debug|x86.Build.0 = Debug|Any CPU
+		{9EF85AA8-29A2-43CF-B0AE-93B70E75FC43}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9EF85AA8-29A2-43CF-B0AE-93B70E75FC43}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9EF85AA8-29A2-43CF-B0AE-93B70E75FC43}.Release|x64.ActiveCfg = Release|Any CPU
+		{9EF85AA8-29A2-43CF-B0AE-93B70E75FC43}.Release|x64.Build.0 = Release|Any CPU
+		{9EF85AA8-29A2-43CF-B0AE-93B70E75FC43}.Release|x86.ActiveCfg = Release|Any CPU
+		{9EF85AA8-29A2-43CF-B0AE-93B70E75FC43}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
