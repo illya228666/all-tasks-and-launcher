@@ -16,11 +16,16 @@ public partial class Main
     private const int PetMoveRightRow = 1;
     private const int PetMoveLeftRow = 2;
     private const int PetWaveRow = 3;
+    private const int PetJumpRow = 4;
+    private const int PetFailedRow = 5;
     private const int PetWaveIntervalMs = 9000;
     private const int PetAppStateLoopCount = 3;
     private const int PetMovementMinDelayMs = 15000;
     private const int PetMovementMaxDelayMs = 30000;
+    private const int PetJumpMinDelayMs = 15000;
+    private const int PetJumpMaxDelayMs = 30000;
     private const int PetEdgePadding = 16;
+    private const int PetCardProbeOffset = 2;
     private const float PetPixelsPerMovementCycle = 120f;
 
     // Source: openai/codex codex-rs/tui/src/pets/model.rs default_animations().
@@ -37,19 +42,46 @@ public partial class Main
         new[] { 150, 150, 150, 150, 150, 280 }          // review
     };
 
+    private static readonly (int Row, int Frame, float Lift)[] PetSuccessfulJumpFrames =
+    {
+        (PetJumpRow, 0, 0f),
+        (PetJumpRow, 1, 0.5f),
+        (PetJumpRow, 2, 1f),
+        (PetJumpRow, 3, 0.5f),
+        (PetJumpRow, 4, 0f)
+    };
+
+    private static readonly (int Row, int Frame, float Lift)[] PetFailedJumpFrames =
+    {
+        (PetJumpRow, 0, 0f),
+        (PetJumpRow, 1, 1f),
+        (PetJumpRow, 3, 0.5f),
+        (PetFailedRow, 4, 0f),
+        (PetFailedRow, 3, 0f),
+        (PetFailedRow, 5, 0f),
+        (PetFailedRow, 6, 0f),
+        (PetFailedRow, 7, 0f)
+    };
+
     private Bitmap? _petAtlas;
     private Panel _petPanel = null!;
     private System.Windows.Forms.Timer _petTimer = null!;
     private System.Windows.Forms.Timer _petMovementTimer = null!;
+    private System.Windows.Forms.Timer _petJumpTimer = null!;
     private int _petRow = PetIdleRow;
     private int _petFrame;
     private int _petIdleElapsedMs;
     private int _petWaveLoopsRemaining;
+    private int _petGroundY;
     private float _petX = float.NaN;
     private float _petMoveStartX;
     private float _petMoveTargetX;
     private int _petMoveElapsedMs;
     private int _petMoveDurationMs;
+    private (int Row, int Frame, float Lift)[]? _petJumpSequence;
+    private int _petJumpIndex;
+    private float _petJumpPeak;
+    private bool _petJumpPending;
 
     #region [RU] Бизнес-логика | [DE] Fachlogik
 
@@ -72,6 +104,7 @@ public partial class Main
         if (visibleApps.Count == 0)
         {
             flpApps.Controls.Add(CreateEmptyState());
+            flpApps.Controls.Add(CreatePetOnlyPanel());
         }
         else
         {
@@ -80,20 +113,25 @@ public partial class Main
 
             if (groupedByCategory)
             {
-                foreach (var group in visibleApps.GroupBy(app => app.Category).OrderBy(group => group.Key))
+                var groups = visibleApps
+                    .GroupBy(app => app.Category)
+                    .OrderBy(group => group.Key)
+                    .Select(group => (group.Key, Apps: group.ToList()))
+                    .ToList();
+
+                for (int index = 0; index < groups.Count; index++)
                 {
-                    flpApps.Controls.Add(CreateSection(group.Key, group.ToList()));
+                    flpApps.Controls.Add(CreateSection(
+                        groups[index].Key,
+                        groups[index].Apps,
+                        includePetZone: index == groups.Count - 1));
                 }
             }
             else
             {
-                flpApps.Controls.Add(CreateSection($"Ergebnisse ({visibleApps.Count})", visibleApps));
+                flpApps.Controls.Add(CreateSection($"Ergebnisse ({visibleApps.Count})", visibleApps, includePetZone: true));
             }
         }
-
-        _petPanel.Width = System.Math.Max(PetFrameWidth, flpApps.ClientSize.Width - 34);
-        ClampPetPosition();
-        flpApps.Controls.Add(_petPanel);
 
         flpApps.ResumeLayout();
         UpdateStats(visibleApps);
@@ -131,10 +169,24 @@ public partial class Main
 
         _petMovementTimer = new System.Windows.Forms.Timer(components);
         _petMovementTimer.Tick += PetMovementTimer_Tick;
+
+        _petJumpTimer = new System.Windows.Forms.Timer(components);
+        _petJumpTimer.Tick += PetJumpTimer_Tick;
+
+        System.Diagnostics.Debug.Assert(!IsPetInsideCardSpan(99, 100, 400));
+        System.Diagnostics.Debug.Assert(IsPetInsideCardSpan(100, 100, 400));
+        System.Diagnostics.Debug.Assert(IsPetInsideCardSpan(250, 100, 400));
+        System.Diagnostics.Debug.Assert(!IsPetInsideCardSpan(401, 100, 400));
     }
 
     private void PetTimer_Tick(object? sender, System.EventArgs e)
     {
+        if (_petJumpSequence is not null)
+        {
+            AdvancePetJump();
+            return;
+        }
+
         int[] durations = PetFrameDurationsByRow[_petRow];
         bool isMoving = _petRow is PetMoveRightRow or PetMoveLeftRow;
 
@@ -171,6 +223,12 @@ public partial class Main
             ScheduleNextPetMovement();
         }
 
+        if (_petRow == PetIdleRow && _petJumpPending)
+        {
+            StartPetJump();
+            return;
+        }
+
         if (_petRow == PetIdleRow && _petIdleElapsedMs >= PetWaveIntervalMs)
         {
             _petRow = PetWaveRow;
@@ -182,6 +240,93 @@ public partial class Main
         durations = PetFrameDurationsByRow[_petRow];
         _petTimer.Interval = durations[_petFrame];
         _petPanel.Invalidate();
+    }
+
+    private void PetJumpTimer_Tick(object? sender, System.EventArgs e)
+    {
+        _petJumpTimer.Stop();
+
+        if (_petRow is PetMoveRightRow or PetMoveLeftRow)
+        {
+            ScheduleNextPetJump();
+            return;
+        }
+
+        if (_petRow != PetIdleRow)
+        {
+            _petJumpPending = true;
+            return;
+        }
+
+        StartPetJump();
+    }
+
+    private void StartPetJump()
+    {
+        bool failed = IsPetBelowBottomCardRow();
+        _petJumpTimer.Stop();
+        _petJumpPending = false;
+        _petJumpSequence = failed ? PetFailedJumpFrames : PetSuccessfulJumpFrames;
+        _petJumpIndex = 0;
+        _petJumpPeak = PetFrameHeight / (failed ? 4f : 3f);
+        _petIdleElapsedMs = 0;
+        ApplyCurrentPetJumpFrame();
+    }
+
+    private void AdvancePetJump()
+    {
+        _petJumpIndex++;
+
+        if (_petJumpSequence is null || _petJumpIndex >= _petJumpSequence.Length)
+        {
+            _petJumpSequence = null;
+            _petJumpIndex = 0;
+            _petRow = PetIdleRow;
+            _petFrame = 0;
+            _petIdleElapsedMs = 0;
+            _petTimer.Interval = PetFrameDurationsByRow[PetIdleRow][0];
+            ScheduleNextPetJump();
+            _petPanel.Invalidate();
+            return;
+        }
+
+        ApplyCurrentPetJumpFrame();
+    }
+
+    private void ApplyCurrentPetJumpFrame()
+    {
+        (int row, int frame, _) = _petJumpSequence![_petJumpIndex];
+        _petRow = row;
+        _petFrame = frame;
+        _petTimer.Interval = PetFrameDurationsByRow[row][frame];
+        _petPanel.Invalidate();
+    }
+
+    private bool IsPetBelowBottomCardRow()
+    {
+        List<AppCardControl> cards = _petPanel.Controls.OfType<AppCardControl>().ToList();
+
+        if (cards.Count == 0)
+        {
+            return false;
+        }
+
+        int bottomRowTop = cards.Max(card => card.Top);
+        List<AppCardControl> bottomRow = cards.Where(card => card.Top == bottomRowTop).ToList();
+        int left = bottomRow.Min(card => card.Left);
+        int right = bottomRow.Max(card => card.Right);
+
+        return IsPetInsideCardSpan(_petX + PetCardProbeOffset, left, right);
+    }
+
+    private static bool IsPetInsideCardSpan(float petX, int left, int right) => petX >= left && petX <= right;
+
+    private void ScheduleNextPetJump()
+    {
+        _petJumpPending = false;
+        _petJumpTimer.Stop();
+        _petJumpTimer.Interval = _random.Next(PetJumpMinDelayMs, PetJumpMaxDelayMs + 1);
+        _petJumpTimer.Start();
     }
 
     private void PetMovementTimer_Tick(object? sender, System.EventArgs e)
@@ -247,14 +392,12 @@ public partial class Main
 
     private void PetPanel_Paint(object? sender, PaintEventArgs e)
     {
-        Rectangle bounds = _petPanel.ClientRectangle;
         e.Graphics.Clear(SurfaceAlt);
 
         using (var pen = new Pen(BorderColor, 1f))
         {
-            bounds.Width -= 1;
-            bounds.Height -= 1;
-            e.Graphics.DrawRectangle(pen, bounds);
+            var zone = new Rectangle(0, _petGroundY, _petPanel.ClientSize.Width - 1, PetFrameHeight - 1);
+            e.Graphics.DrawRectangle(pen, zone);
         }
 
         if (_petAtlas is null)
@@ -263,9 +406,10 @@ public partial class Main
         }
 
         ClampPetPosition();
+        float jumpLift = _petJumpSequence?[_petJumpIndex].Lift * _petJumpPeak ?? 0f;
         var destination = new Rectangle(
             (int)System.Math.Round(_petX),
-            (_petPanel.ClientSize.Height - PetFrameHeight) / 2,
+            _petGroundY - (int)System.Math.Round(jumpLift),
             PetFrameWidth,
             PetFrameHeight);
         var source = new Rectangle(
@@ -277,7 +421,7 @@ public partial class Main
         e.Graphics.DrawImage(_petAtlas, destination, source, GraphicsUnit.Pixel);
     }
 
-    private Control CreateSection(string title, List<AppEntry> apps)
+    private Control CreateSection(string title, List<AppEntry> apps, bool includePetZone)
     {
         int width = System.Math.Max(860, flpApps.ClientSize.Width - 34);
 
@@ -323,13 +467,43 @@ public partial class Main
         int cardHeight = 178;
         int columns = System.Math.Max(1, cardsPanel.Width / cardWidth);
         int rows = (apps.Count + columns - 1) / columns;
-        cardsPanel.Height = System.Math.Max(cardHeight, rows * cardHeight);
+        int cardsHeight = System.Math.Max(cardHeight, rows * cardHeight);
+        cardsPanel.Height = cardsHeight + (includePetZone ? PetFrameHeight : 0);
+
+        if (includePetZone)
+        {
+            cardsPanel.BackColor = SurfaceAlt;
+            SetPetHost(cardsPanel, cardsHeight);
+        }
 
         section.Height = cardsPanel.Top + cardsPanel.Height + 10;
         section.Controls.Add(headerLabel);
         section.Controls.Add(cardsPanel);
 
         return section;
+    }
+
+    private Panel CreatePetOnlyPanel()
+    {
+        var panel = new Panel
+        {
+            Width = System.Math.Max(PetFrameWidth, flpApps.ClientSize.Width - 34),
+            Height = PetFrameHeight,
+            Margin = new Padding(4, 0, 4, 0),
+            BackColor = SurfaceAlt
+        };
+
+        SetPetHost(panel, 0);
+        return panel;
+    }
+
+    private void SetPetHost(Panel panel, int groundY)
+    {
+        _petPanel = panel;
+        _petGroundY = groundY;
+        _petPanel.Paint += PetPanel_Paint;
+        EnableDoubleBuffer(_petPanel);
+        ClampPetPosition();
     }
 
     private Control CreateEmptyState()
