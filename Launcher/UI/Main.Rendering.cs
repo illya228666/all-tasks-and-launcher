@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -10,38 +11,123 @@ namespace Launcher.UI;
 
 public partial class Main
 {
+    // Логическая зона питомца, а не размер ячейки PNG. Сохраняет прежние границы
+    // движения, центр слежения, компоновку и программную высоту прыжков.
     private const int PetFrameWidth = 192;
     private const int PetFrameHeight = 208;
+
+    // Новая сетка PNG: 8 столбцов x 11 строк, ячейка 149x200, без зазоров.
+    // Размер нарезки и отрисовки одинаковый: спрайты показываются в масштабе 1:1.
+    private const int PetAtlasColumns = 8;
+    private const int PetAtlasRows = 11;
+    private const int PetCellWidth = 149;
+    private const int PetCellHeight = 200;
+
+    // Общий отступ ячейки сверху логической зоны. Нижняя граница обычных поз
+    // оказывается на y=203; внутренний подъём в кадрах прыжка не выравниваем.
+    private const int PetAtlasTopOffset = 3;
+
+    // X середины таза относительно левого края каждой новой ячейки, в пикселях.
+    // Все точки совмещаются с x=96 логической зоны; плащ, оружие и руки не учитываются.
+    // Первый индекс — строка, второй — кадр с нуля. Здесь только 74 заполненных кадра.
+    // Увеличение числа сдвигает рисунок влево, уменьшение — вправо. Вертикальные
+    // смещения поз остаются такими, как в PNG; это не центры непрозрачных границ.
+    private static readonly int[][] PetBodyAnchorXByRow =
+    {
+        new[] { 53, 53, 53, 53, 53, 53, 53 },         // 0: idle, все 7 кадров.
+        new[] { 78, 82, 79, 77, 80, 80, 80, 75 },     // 1: бег вправо.
+        new[] { 72, 67, 63, 69, 65, 64, 68, 69 },     // 2: бег влево.
+        new[] { 53, 54, 62, 51 },                     // 3: waving.
+        new[] { 53, 58, 60, 57, 57 },                 // 4: прыжок.
+        new[] { 47, 49, 46, 65, 63, 52, 53, 55 },     // 5: неудача.
+        new[] { 45, 49, 50, 50, 50, 50 },             // 6: waiting.
+        new[] { 52, 48, 54, 52, 52, 56 },             // 7: running.
+        new[] { 56, 55, 55, 56, 55, 56 },             // 8: review.
+        new[] { 54, 68, 66, 65, 65, 66, 70, 70 },     // 9: направления 0-7.
+        new[] { 46, 50, 44, 44, 43, 41, 40, 37 }      // 10: направления 8-15.
+    };
+
+    // Номера строк атласа считаются с нуля: первая видимая строка имеет индекс 0.
+    // Эти константы только связывают имя анимации с нужной строкой спрайт-листа.
     private const int PetIdleRow = 0;
     private const int PetMoveRightRow = 1;
     private const int PetMoveLeftRow = 2;
     private const int PetWaveRow = 3;
     private const int PetJumpRow = 4;
     private const int PetFailedRow = 5;
+
+    // Строки 9 и 10 содержат 16 статичных поз слежения за курсором:
+    // направления 0-7 берутся из строки 9, направления 8-15 — из строки 10.
+    private const int PetLookFirstRow = 9;
+
+    // Примерно через столько миллисекунд накопленного idle запускается waving.
+    // Время других анимаций и режим слежения за курсором сюда не засчитываются.
     private const int PetWaveIntervalMs = 9000;
+
+    // Сколько раз подряд полностью проигрывается строка waving перед возвратом в idle.
     private const int PetAppStateLoopCount = 3;
-    private const int PetMovementMinDelayMs = 15000;
-    private const int PetMovementMaxDelayMs = 30000;
-    private const int PetJumpMinDelayMs = 15000;
-    private const int PetJumpMaxDelayMs = 30000;
+
+    // Случайная пауза перед следующим бегом, в миллисекундах. Обе границы включены.
+    // Новый интервал назначается после завершения бега и после выхода курсора из окна.
+    private const int PetMovementMinDelayMs = 5000;
+    private const int PetMovementMaxDelayMs = 17000;
+
+    // Независимая случайная пауза перед попыткой прыжка, также с включёнными границами.
+    // Если в этот момент идёт бег, попытка пропускается и назначается новая пауза.
+    private const int PetJumpMinDelayMs = 10000;
+    private const int PetJumpMaxDelayMs = 17000;
+
+    // Как часто проверяется положение курсора. Меньшее значение делает реакцию быстрее,
+    // но чаще будит UI-поток. 50 мс соответствует примерно 20 проверкам в секунду.
+    private const int PetCursorPollIntervalMs = 50;
+
+    // Радиус мёртвой зоны вокруг центра Сумрака, в пикселях. Внутри неё сохраняется
+    // последнее осмысленное направление головы, чтобы поза не дрожала возле центра.
+    private const int PetLookDeadzoneRadius = 12;
+
+    // Минимальный отступ логической зоны Сумрака от краёв его рабочей области.
     private const int PetEdgePadding = 16;
+
+    // Точка проверки карточек находится на столько пикселей правее левого края Сумрака.
+    // Увеличение значения сдвигает точку, по которой выбирается успешный/неудачный прыжок.
     private const int PetCardProbeOffset = 2;
+
+    // Сколько горизонтальных пикселей Сумрак проходит за один полный цикл кадров бега.
+    // Код делит расстояние на это число и округляет количество полных циклов:
+    // большее значение = меньше циклов и более быстрый бег, меньшее = более медленный.
     private const float PetPixelsPerMovementCycle = 120f;
 
-    // Source: openai/codex codex-rs/tui/src/pets/model.rs default_animations().
+    // Основа длительностей — openai/codex, файл
+    // codex-rs/tui/src/pets/model.rs, метод default_animations().
+    // Для idle последняя пауза 1920 мс разделена между кадрами 5 и 6:
+    // используются все 7 рисунков, а полный цикл по-прежнему занимает 6600 мс.
+    //
+    // Первый индекс массива — строка атласа (0-8), второй — номер кадра в этой строке.
+    // Каждое число задаёт время показа конкретного кадра в миллисекундах. Например,
+    // PetFrameDurationsByRow[3][0] = 140 означает: кадр 0 строки waving виден 140 мс.
+    // Меняя отдельное число, можно ускорить или задержать именно этот кадр. Количество
+    // чисел в строке должно оставаться равным количеству проигрываемых кадров.
+    // Увеличенный последний интервал создаёт естественную паузу перед новым циклом.
+    // Строки 9-10 здесь отсутствуют: позу слежения выбирает курсор, а не кадровый таймер.
     private static readonly int[][] PetFrameDurationsByRow =
     {
-        new[] { 1680, 660, 660, 840, 840, 1920 },       // idle
-        new[] { 120, 120, 120, 120, 120, 120, 120, 220 }, // running-right / move_right
-        new[] { 120, 120, 120, 120, 120, 120, 120, 220 }, // running-left / move_left
-        new[] { 140, 140, 140, 280 },                   // waving / wave
-        new[] { 140, 140, 140, 140, 280 },              // jumping / bounce
-        new[] { 140, 140, 140, 140, 140, 140, 140, 240 }, // failed / sad
-        new[] { 150, 150, 150, 150, 150, 260 },         // waiting
-        new[] { 120, 120, 120, 120, 120, 220 },         // running
-        new[] { 150, 150, 150, 150, 150, 280 }          // review
+        new[] { 1680, 660, 660, 840, 840, 960, 960 },     // Строка 0: idle.
+        new[] { 120, 120, 120, 120, 120, 120, 120, 220 }, // Строка 1: бег вправо.
+        new[] { 120, 120, 120, 120, 120, 120, 120, 220 }, // Строка 2: бег влево.
+        new[] { 140, 140, 140, 280 },                     // Строка 3: waving.
+        new[] { 140, 140, 140, 140, 280 },                // Строка 4: успешный прыжок.
+        new[] { 140, 140, 140, 140, 440, 140, 240, 440 }, // Строка 5: неудача.
+        new[] { 150, 150, 150, 150, 150, 260 },           // Строка 6: waiting, пока не используется.
+        new[] { 120, 120, 120, 120, 120, 220 },           // Строка 7: running, пока не используется.
+        new[] { 150, 150, 150, 150, 150, 280 }            // Строка 8: review, пока не используется.
     };
 
+    // Последовательность успешного прыжка. Каждый элемент — (строка, кадр, подъём).
+    // Row и Frame считаются с нуля. Lift — нормализованная высота от 0 (земля) до 1
+    // (пиковая точка); фактическое смещение равно Lift * _petJumpPeak.
+    // Порядок элементов определяет порядок проигрывания, а длительность каждого элемента
+    // берётся из PetFrameDurationsByRow[Row][Frame]. Пик успешного прыжка задаётся ниже
+    // как PetFrameHeight / 3f: уменьшение делителя поднимает Сумрака выше.
     private static readonly (int Row, int Frame, float Lift)[] PetSuccessfulJumpFrames =
     {
         (PetJumpRow, 0, 0f),
@@ -51,6 +137,9 @@ public partial class Main
         (PetJumpRow, 4, 0f)
     };
 
+    // Неудачный прыжок устроен так же, но после трёх кадров прыжка переходит на кадры
+    // строки failed. Его пик задаётся как PetFrameHeight / 4f. Значение Lift = 0 у
+    // последних кадров оставляет Сумрака на земле, пока доигрывается реакция на неудачу.
     private static readonly (int Row, int Frame, float Lift)[] PetFailedJumpFrames =
     {
         (PetJumpRow, 0, 0f),
@@ -68,6 +157,7 @@ public partial class Main
     private System.Windows.Forms.Timer _petTimer = null!;
     private System.Windows.Forms.Timer _petMovementTimer = null!;
     private System.Windows.Forms.Timer _petJumpTimer = null!;
+    private System.Windows.Forms.Timer _petCursorTimer = null!;
     private int _petRow = PetIdleRow;
     private int _petFrame;
     private int _petIdleElapsedMs;
@@ -82,6 +172,8 @@ public partial class Main
     private int _petJumpIndex;
     private float _petJumpPeak;
     private bool _petJumpPending;
+    private bool _petTrackingCursor;
+    private int _petLookIndex;
 
     #region [RU] Бизнес-логика | [DE] Fachlogik
 
@@ -143,14 +235,15 @@ public partial class Main
 
     private void InitializePet()
     {
-        string atlasPath = Path.Combine(AppContext.BaseDirectory, "Resources", "sumrak-spritesheet.png");
+        string atlasPath = Path.Combine(AppContext.BaseDirectory, "Resources", "spritesheet_sumrak_hat.png");
         using var source = new Bitmap(atlasPath);
 
-        if (source.Width != 1536 || source.Height != 2288)
+        if (source.Width != PetAtlasColumns * PetCellWidth || source.Height != PetAtlasRows * PetCellHeight)
         {
             throw new InvalidDataException($"Unerwartete Sumrak-Atlasgroesse: {source.Width}x{source.Height}.");
         }
 
+        ValidatePetAtlas(source);
         _petAtlas = new Bitmap(source);
         _petPanel = new Panel
         {
@@ -173,14 +266,90 @@ public partial class Main
         _petJumpTimer = new System.Windows.Forms.Timer(components);
         _petJumpTimer.Tick += PetJumpTimer_Tick;
 
+        _petCursorTimer = new System.Windows.Forms.Timer(components)
+        {
+            Interval = PetCursorPollIntervalMs
+        };
+        _petCursorTimer.Tick += PetCursorTimer_Tick;
+
         System.Diagnostics.Debug.Assert(!IsPetInsideCardSpan(99, 100, 400));
         System.Diagnostics.Debug.Assert(IsPetInsideCardSpan(100, 100, 400));
         System.Diagnostics.Debug.Assert(IsPetInsideCardSpan(250, 100, 400));
         System.Diagnostics.Debug.Assert(!IsPetInsideCardSpan(401, 100, 400));
+        System.Diagnostics.Debug.Assert(GetPetLookIndex(0, -1) == 0);
+        System.Diagnostics.Debug.Assert(GetPetLookIndex(1, 0) == 4);
+        System.Diagnostics.Debug.Assert(GetPetLookIndex(0, 1) == 8);
+        System.Diagnostics.Debug.Assert(GetPetLookIndex(-1, 0) == 12);
+        System.Diagnostics.Debug.Assert(GetPetLookIndex(1, -1) == 2);
+        System.Diagnostics.Debug.Assert(GetPetLookIndex(-1, -2.4142135f) == 15);
+        System.Diagnostics.Debug.Assert(GetPetLookIndex(-0.1f, -1) == 0);
+    }
+
+    private static Rectangle GetPetSourceRectangle(int row, int frame) =>
+        new(frame * PetCellWidth, row * PetCellHeight, PetCellWidth, PetCellHeight);
+
+    private static Point GetPetFrameOffset(int row, int frame) =>
+        new(PetFrameWidth / 2 - PetBodyAnchorXByRow[row][frame], PetAtlasTopOffset);
+
+    // Проверка нового атласа при Debug-запуске; в Release обход пикселей не выполняется.
+    // Проверяем также пустые ячейки, чтобы новый рисунок нельзя было незаметно пропустить.
+    [Conditional("DEBUG")]
+    private static void ValidatePetAtlas(Bitmap atlas)
+    {
+        Debug.Assert(PetBodyAnchorXByRow.Length == PetAtlasRows);
+        Debug.Assert(PetBodyAnchorXByRow.Sum(row => row.Length) == 74);
+        Debug.Assert(PetFrameDurationsByRow.Length == PetLookFirstRow);
+        Debug.Assert(PetFrameDurationsByRow[PetIdleRow].Sum() == 6600);
+        var atlasBounds = new Rectangle(Point.Empty, atlas.Size);
+        var logicalBounds = new Rectangle(0, 0, PetFrameWidth, PetFrameHeight);
+
+        for (int row = 0; row < PetAtlasRows; row++)
+        {
+            int frameCount = PetBodyAnchorXByRow[row].Length;
+            Debug.Assert(frameCount > 0 && frameCount <= PetAtlasColumns);
+            Debug.Assert(frameCount == (row < PetLookFirstRow
+                ? PetFrameDurationsByRow[row].Length : PetAtlasColumns));
+
+            for (int frame = 0; frame < PetAtlasColumns; frame++)
+            {
+                Rectangle source = GetPetSourceRectangle(row, frame);
+                Debug.Assert(atlasBounds.Contains(source));
+                int left = PetCellWidth, top = PetCellHeight, right = -1, bottom = -1;
+                for (int y = 0; y < PetCellHeight; y++)
+                {
+                    for (int x = 0; x < PetCellWidth; x++)
+                    {
+                        if (atlas.GetPixel(source.X + x, source.Y + y).A == 0)
+                            continue;
+                        left = System.Math.Min(left, x);
+                        top = System.Math.Min(top, y);
+                        right = System.Math.Max(right, x);
+                        bottom = System.Math.Max(bottom, y);
+                    }
+                }
+
+                bool populated = right >= left;
+                Debug.Assert(populated == (frame < frameCount), $"Sumrak: row={row}, frame={frame}");
+                if (!populated || frame >= frameCount)
+                    continue;
+
+                int anchor = PetBodyAnchorXByRow[row][frame];
+                Debug.Assert(anchor >= left && anchor <= right);
+                Point offset = GetPetFrameOffset(row, frame);
+                var visibleBounds = Rectangle.FromLTRB(
+                    offset.X + left, offset.Y + top, offset.X + right + 1, offset.Y + bottom + 1);
+                Debug.Assert(logicalBounds.Contains(visibleBounds), $"Sumrak bounds: row={row}, frame={frame}");
+            }
+        }
     }
 
     private void PetTimer_Tick(object? sender, System.EventArgs e)
     {
+        if (_petTrackingCursor)
+        {
+            return;
+        }
+
         if (_petJumpSequence is not null)
         {
             AdvancePetJump();
@@ -245,6 +414,11 @@ public partial class Main
     private void PetJumpTimer_Tick(object? sender, System.EventArgs e)
     {
         _petJumpTimer.Stop();
+
+        if (_petTrackingCursor)
+        {
+            return;
+        }
 
         if (_petRow is PetMoveRightRow or PetMoveLeftRow)
         {
@@ -325,6 +499,12 @@ public partial class Main
     {
         _petJumpPending = false;
         _petJumpTimer.Stop();
+
+        if (_petTrackingCursor)
+        {
+            return;
+        }
+
         _petJumpTimer.Interval = _random.Next(PetJumpMinDelayMs, PetJumpMaxDelayMs + 1);
         _petJumpTimer.Start();
     }
@@ -332,6 +512,11 @@ public partial class Main
     private void PetMovementTimer_Tick(object? sender, System.EventArgs e)
     {
         _petMovementTimer.Stop();
+
+        if (_petTrackingCursor)
+        {
+            return;
+        }
 
         if (_petRow != PetIdleRow)
         {
@@ -377,8 +562,102 @@ public partial class Main
     private void ScheduleNextPetMovement()
     {
         _petMovementTimer.Stop();
+
+        if (_petTrackingCursor)
+        {
+            return;
+        }
+
         _petMovementTimer.Interval = _random.Next(PetMovementMinDelayMs, PetMovementMaxDelayMs + 1);
         _petMovementTimer.Start();
+    }
+
+    private void PetCursorTimer_Tick(object? sender, System.EventArgs e) => UpdatePetCursorTracking();
+
+    private void UpdatePetCursorTracking()
+    {
+        if (!IsHandleCreated || !_petPanel.IsHandleCreated)
+        {
+            return;
+        }
+
+        ClampPetPosition();
+        Point cursor = Cursor.Position;
+        Point petCenter = _petPanel.PointToScreen(new Point(
+            (int)System.Math.Round(_petX) + (PetFrameWidth / 2),
+            _petGroundY + (PetFrameHeight / 2)));
+        int deltaX = cursor.X - petCenter.X;
+        int deltaY = cursor.Y - petCenter.Y;
+        long distanceSquared = ((long)deltaX * deltaX) + ((long)deltaY * deltaY);
+        int previousLookIndex = _petLookIndex;
+
+        if (distanceSquared > PetLookDeadzoneRadius * PetLookDeadzoneRadius)
+        {
+            _petLookIndex = GetPetLookIndex(deltaX, deltaY);
+        }
+
+        bool cursorInside = WindowState != FormWindowState.Minimized
+            && RectangleToScreen(ClientRectangle).Contains(cursor);
+
+        if (cursorInside && !_petTrackingCursor)
+        {
+            StartPetCursorTracking();
+        }
+        else if (!cursorInside && _petTrackingCursor)
+        {
+            StopPetCursorTracking();
+        }
+        else if (_petTrackingCursor && _petLookIndex != previousLookIndex)
+        {
+            ApplyPetLookFrame();
+        }
+    }
+
+    private void StartPetCursorTracking()
+    {
+        _petTrackingCursor = true;
+        _petTimer.Stop();
+        _petMovementTimer.Stop();
+        _petJumpTimer.Stop();
+        _petJumpSequence = null;
+        _petJumpIndex = 0;
+        _petJumpPending = false;
+        _petMoveElapsedMs = 0;
+        _petIdleElapsedMs = 0;
+        _petWaveLoopsRemaining = 0;
+        ApplyPetLookFrame();
+    }
+
+    private void StopPetCursorTracking()
+    {
+        _petTrackingCursor = false;
+        _petRow = PetIdleRow;
+        _petFrame = 0;
+        _petIdleElapsedMs = 0;
+        _petTimer.Interval = PetFrameDurationsByRow[PetIdleRow][0];
+        _petTimer.Start();
+        ScheduleNextPetMovement();
+        ScheduleNextPetJump();
+        _petPanel.Invalidate();
+    }
+
+    private void ApplyPetLookFrame()
+    {
+        _petRow = PetLookFirstRow + (_petLookIndex / 8);
+        _petFrame = _petLookIndex % 8;
+        _petPanel.Invalidate();
+    }
+
+    private static int GetPetLookIndex(float deltaX, float deltaY)
+    {
+        double degrees = System.Math.Atan2(deltaX, -deltaY) * 180d / System.Math.PI;
+
+        if (degrees < 0)
+        {
+            degrees += 360d;
+        }
+
+        return (int)System.Math.Round(degrees / 22.5d, System.MidpointRounding.AwayFromZero) % 16;
     }
 
     private void ClampPetPosition()
@@ -407,16 +686,13 @@ public partial class Main
 
         ClampPetPosition();
         float jumpLift = _petJumpSequence?[_petJumpIndex].Lift * _petJumpPeak ?? 0f;
+        Point offset = GetPetFrameOffset(_petRow, _petFrame);
         var destination = new Rectangle(
-            (int)System.Math.Round(_petX),
-            _petGroundY - (int)System.Math.Round(jumpLift),
-            PetFrameWidth,
-            PetFrameHeight);
-        var source = new Rectangle(
-            _petFrame * PetFrameWidth,
-            _petRow * PetFrameHeight,
-            PetFrameWidth,
-            PetFrameHeight);
+            (int)System.Math.Round(_petX) + offset.X,
+            _petGroundY + offset.Y - (int)System.Math.Round(jumpLift),
+            PetCellWidth,
+            PetCellHeight);
+        Rectangle source = GetPetSourceRectangle(_petRow, _petFrame);
 
         e.Graphics.DrawImage(_petAtlas, destination, source, GraphicsUnit.Pixel);
     }
