@@ -70,9 +70,12 @@ public partial class Main : Form
             _petTimer.Start();
             ScheduleNextPetMovement();
             ScheduleNextPetJump();
+            _petCursorTimer.Start();
+            UpdatePetCursorTracking();
+            _petSpeechTimer?.Start();
         };
         FormClosing += (_, __) => PersistState();
-        FormClosed += (_, __) => _petAtlas?.Dispose();
+        FormClosed += (_, __) => DisposePet();
     }
 
     #endregion
