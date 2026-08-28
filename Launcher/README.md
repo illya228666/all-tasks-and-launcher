@@ -17,10 +17,23 @@
 2. Выбрать проект запуска: `Launcher`.
 3. Выполнить Build (`Ctrl+Shift+B`) и Run (`F5`).
 
+Версия целевой платформы выбирается автоматически через корневой
+`Directory.Build.props`:
+- с .NET 10 SDK проекты собираются для `net10.0`;
+- с .NET 7 SDK проекты собираются для `net7.0`.
+
+Файл `global.json` намеренно не используется, поэтому один и тот же commit
+можно собирать на обоих компьютерах без локальных изменений файлов проекта.
+
 ## DE: Schnellstart
 1. `zahlen.sln` in Visual Studio oeffnen.
 2. `Launcher` als Startprojekt waehlen.
 3. Build (`Ctrl+Shift+B`) und Run (`F5`) ausfuehren.
+
+Das Zielframework wird in der zentralen `Directory.Build.props` automatisch
+gewaehlt: .NET 10 SDK verwendet `net10.0`, .NET 7 SDK verwendet `net7.0`.
+Eine `global.json` wird absichtlich nicht verwendet, damit derselbe Commit auf
+beiden Rechnern ohne lokale Projektdatei-Aenderungen gebaut werden kann.
 
 ## Структура проекта / Projektstruktur
 - `Domain/` — RU: модели данных; DE: Datenmodelle.

@@ -1,4 +1,19 @@
 <Project>
+  <!--
+    Use the newest project generation supported by the installed SDK:
+    - .NET 10 SDK (or newer) -> net10.0
+    - .NET 7/8/9 SDK         -> net7.0
+
+    Keeping this choice in the repository allows the same commit to build on
+    school PCs with .NET 7 and newer development PCs with .NET 10.
+  -->
+  <PropertyGroup>
+    <RepositoryTargetFramework>net7.0</RepositoryTargetFramework>
+    <RepositoryTargetFramework Condition="$([MSBuild]::VersionGreaterThanOrEquals('$(MSBuildVersion)', '18.0.0'))">net10.0</RepositoryTargetFramework>
+    <TargetFramework>$(RepositoryTargetFramework)</TargetFramework>
+    <TargetFramework Condition="'$(MSBuildProjectName)' == 'Launcher'">$(RepositoryTargetFramework)-windows</TargetFramework>
+  </PropertyGroup>
+
   <PropertyGroup Condition="'$(PublishProfile)' == 'Windows-x64'">
     <Configuration>Release</Configuration>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
