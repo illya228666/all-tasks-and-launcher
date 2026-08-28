@@ -27,6 +27,10 @@ public partial class Main
     // оказывается на y=203; внутренний подъём в кадрах прыжка не выравниваем.
     private const int PetAtlasTopOffset = 3;
 
+    // Захват шляпы: верхние 90 пикселей видимой фигуры, только непрозрачные точки.
+    // Увеличение высоты расширяет область захвата вниз, в сторону шеи и корпуса.
+    private const int PetHeadHitHeight = 90;
+
     // X середины таза относительно левого края каждой новой ячейки, в пикселях.
     // Все точки совмещаются с x=96 логической зоны; плащ, оружие и руки не учитываются.
     // Первый индекс — строка, второй — кадр с нуля. Здесь только 74 заполненных кадра.
@@ -153,6 +157,10 @@ public partial class Main
     };
 
     private Bitmap? _petAtlas;
+    private Bitmap? _petAtlasWithoutHat;
+    private Bitmap? _petHatSprite;
+    private HatWindow? _petHatWindow;
+    private bool _petHatRemoved;
     private Panel _petPanel = null!;
     private System.Windows.Forms.Timer _petTimer = null!;
     private System.Windows.Forms.Timer _petMovementTimer = null!;
@@ -235,16 +243,22 @@ public partial class Main
 
     private void InitializePet()
     {
-        string atlasPath = Path.Combine(AppContext.BaseDirectory, "Resources", "spritesheet_sumrak_hat.png");
-        using var source = new Bitmap(atlasPath);
-
-        if (source.Width != PetAtlasColumns * PetCellWidth || source.Height != PetAtlasRows * PetCellHeight)
+        try
         {
-            throw new InvalidDataException($"Unerwartete Sumrak-Atlasgroesse: {source.Width}x{source.Height}.");
+            _petAtlas = LoadPetAtlas("spritesheet_sumrak_hat.png");
+            _petAtlasWithoutHat = LoadPetAtlas("spritesheet_sumrak_no_hat.png");
+            using var hat = new Bitmap(Path.Combine(AppContext.BaseDirectory, "Resources", "hat_small.png"));
+            if (hat.Width != 109 || hat.Height != 64)
+                throw new InvalidDataException($"Unerwartete Hutgroesse: {hat.Width}x{hat.Height}.");
+            _petHatSprite = new Bitmap(hat);
+        }
+        catch
+        {
+            DisposePet();
+            throw;
         }
 
-        ValidatePetAtlas(source);
-        _petAtlas = new Bitmap(source);
+        ValidatePetAtlas(_petAtlas);
         _petPanel = new Panel
         {
             Height = PetFrameHeight,
@@ -252,6 +266,7 @@ public partial class Main
             BackColor = Color.Transparent
         };
         _petPanel.Paint += PetPanel_Paint;
+        _petPanel.MouseDown += PetPanel_MouseDown;
         EnableDoubleBuffer(_petPanel);
 
         _petTimer = new System.Windows.Forms.Timer(components)
@@ -283,6 +298,22 @@ public partial class Main
         System.Diagnostics.Debug.Assert(GetPetLookIndex(1, -1) == 2);
         System.Diagnostics.Debug.Assert(GetPetLookIndex(-1, -2.4142135f) == 15);
         System.Diagnostics.Debug.Assert(GetPetLookIndex(-0.1f, -1) == 0);
+    }
+
+    private static Bitmap LoadPetAtlas(string fileName)
+    {
+        using var source = new Bitmap(Path.Combine(AppContext.BaseDirectory, "Resources", fileName));
+        if (source.Width != PetAtlasColumns * PetCellWidth || source.Height != PetAtlasRows * PetCellHeight)
+            throw new InvalidDataException($"Unerwartete Sumrak-Atlasgroesse ({fileName}): {source.Width}x{source.Height}.");
+        return new Bitmap(source);
+    }
+
+    private void DisposePet()
+    {
+        _petHatWindow?.Dispose();
+        _petHatSprite?.Dispose();
+        _petAtlasWithoutHat?.Dispose();
+        _petAtlas?.Dispose();
     }
 
     private static Rectangle GetPetSourceRectangle(int row, int frame) =>
@@ -669,6 +700,87 @@ public partial class Main
             : System.Math.Clamp(_petX, minX, maxX);
     }
 
+    // Общая геометрия для отрисовки и попадания мышью: включая внутренние смещения
+    // кадра, положение питомца в панели и дополнительный программный подъём.
+    private Rectangle GetPetDestinationRectangle()
+    {
+        ClampPetPosition();
+        float jumpLift = _petJumpSequence?[_petJumpIndex].Lift * _petJumpPeak ?? 0f;
+        Point offset = GetPetFrameOffset(_petRow, _petFrame);
+        return new Rectangle(
+            (int)System.Math.Round(_petX) + offset.X,
+            _petGroundY + offset.Y - (int)System.Math.Round(jumpLift),
+            PetCellWidth,
+            PetCellHeight);
+    }
+
+    private bool IsPetHeadAt(Point point)
+    {
+        Rectangle destination = GetPetDestinationRectangle();
+        Bitmap? atlas = _petHatRemoved ? _petAtlasWithoutHat : _petAtlas;
+        if (atlas is null || !destination.Contains(point))
+            return false;
+
+        Rectangle source = GetPetSourceRectangle(_petRow, _petFrame);
+        int localX = point.X - destination.X;
+        int localY = point.Y - destination.Y;
+        if (atlas.GetPixel(source.X + localX, source.Y + localY).A == 0)
+            return false;
+
+        // Верх фигуры ищется в текущем кадре, поэтому приседание и прыжок
+        // не оставляют область захвата на прежней высоте. Обход — только при
+        // снятии или возврате шляпы, по тому атласу, который сейчас виден.
+        for (int y = 0; y <= localY; y++)
+            for (int x = 0; x < PetCellWidth; x++)
+                if (atlas.GetPixel(source.X + x, source.Y + y).A != 0)
+                    return localY - y < PetHeadHitHeight;
+        return false;
+    }
+
+    private void PetPanel_MouseDown(object? sender, MouseEventArgs e)
+    {
+        if (e.Button != MouseButtons.Left || _petHatRemoved || _petHatSprite is null || !IsPetHeadAt(e.Location))
+            return;
+
+        var hatWindow = new HatWindow(_petHatSprite);
+        hatWindow.Dropped += PetHat_Dropped;
+        try
+        {
+            hatWindow.BeginDrag(Cursor.Position);
+            _petHatWindow = hatWindow;
+            _petHatRemoved = true;
+            _petPanel.Invalidate();
+        }
+        catch (System.Runtime.InteropServices.ExternalException ex)
+        {
+            hatWindow.Dispose();
+            ShowHint($"Der Hut konnte nicht abgenommen werden: {ex.Message}");
+        }
+    }
+
+    private void PetHat_Dropped(Point screenPoint)
+    {
+        if (!_petHatRemoved || _petHatWindow is null || WindowState == FormWindowState.Minimized
+            || !_petPanel.IsHandleCreated)
+            return;
+
+        // Голова должна находиться в видимой части панели, а не за границей
+        // прокрутки или под карточкой. Координаты шляпы всегда экранные.
+        for (Control? control = _petPanel; control is not null; control = control.Parent)
+            if (!control.Visible || !control.RectangleToScreen(control.ClientRectangle).Contains(screenPoint))
+                return;
+
+        Point panelPoint = _petPanel.PointToClient(screenPoint);
+        if (_petPanel.GetChildAtPoint(panelPoint, GetChildAtPointSkip.Invisible) is not null
+            || !IsPetHeadAt(panelPoint))
+            return;
+
+        _petHatRemoved = false;
+        _petHatWindow.Dispose();
+        _petHatWindow = null;
+        _petPanel.Invalidate();
+    }
+
     private void PetPanel_Paint(object? sender, PaintEventArgs e)
     {
         e.Graphics.Clear(SurfaceAlt);
@@ -679,22 +791,16 @@ public partial class Main
             e.Graphics.DrawRectangle(pen, zone);
         }
 
-        if (_petAtlas is null)
+        Bitmap? atlas = _petHatRemoved ? _petAtlasWithoutHat : _petAtlas;
+        if (atlas is null)
         {
             return;
         }
 
-        ClampPetPosition();
-        float jumpLift = _petJumpSequence?[_petJumpIndex].Lift * _petJumpPeak ?? 0f;
-        Point offset = GetPetFrameOffset(_petRow, _petFrame);
-        var destination = new Rectangle(
-            (int)System.Math.Round(_petX) + offset.X,
-            _petGroundY + offset.Y - (int)System.Math.Round(jumpLift),
-            PetCellWidth,
-            PetCellHeight);
+        Rectangle destination = GetPetDestinationRectangle();
         Rectangle source = GetPetSourceRectangle(_petRow, _petFrame);
 
-        e.Graphics.DrawImage(_petAtlas, destination, source, GraphicsUnit.Pixel);
+        e.Graphics.DrawImage(atlas, destination, source, GraphicsUnit.Pixel);
     }
 
     private Control CreateSection(string title, List<AppEntry> apps, bool includePetZone)
@@ -775,9 +881,12 @@ public partial class Main
 
     private void SetPetHost(Panel panel, int groundY)
     {
+        _petPanel.Paint -= PetPanel_Paint;
+        _petPanel.MouseDown -= PetPanel_MouseDown;
         _petPanel = panel;
         _petGroundY = groundY;
         _petPanel.Paint += PetPanel_Paint;
+        _petPanel.MouseDown += PetPanel_MouseDown;
         EnableDoubleBuffer(_petPanel);
         ClampPetPosition();
     }
