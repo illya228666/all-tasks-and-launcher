@@ -72,6 +72,7 @@ public partial class Main : Form
             ScheduleNextPetJump();
             _petCursorTimer.Start();
             UpdatePetCursorTracking();
+            _petSpeechTimer?.Start();
         };
         FormClosing += (_, __) => PersistState();
         FormClosed += (_, __) => DisposePet();

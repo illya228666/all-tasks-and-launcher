@@ -73,8 +73,8 @@ public partial class Main
 
     // Случайная пауза перед следующим бегом, в миллисекундах. Обе границы включены.
     // Новый интервал назначается после завершения бега и после выхода курсора из окна.
-    private const int PetMovementMinDelayMs = 5000;
-    private const int PetMovementMaxDelayMs = 17000;
+    private const int PetMovementMinDelayMs = 10000;
+    private const int PetMovementMaxDelayMs = 20000;
 
     // Независимая случайная пауза перед попыткой прыжка, также с включёнными границами.
     // Если в этот момент идёт бег, попытка пропускается и назначается новая пауза.
@@ -179,7 +179,9 @@ public partial class Main
     private (int Row, int Frame, float Lift)[]? _petJumpSequence;
     private int _petJumpIndex;
     private float _petJumpPeak;
+    // Во время речи запоминаем не больше одного прыжка и одного бега.
     private bool _petJumpPending;
+    private bool _petMovementPending;
     private bool _petTrackingCursor;
     private int _petLookIndex;
 
@@ -189,52 +191,64 @@ public partial class Main
     /// RU: Перерисовывает центральную область со списком приложений.
     /// DE: Rendert den zentralen Bereich mit der Anwendungsliste neu.
     /// </summary>
-    private void Render()
+    private void Render(bool preservePetSpeech = false)
     {
         if (!IsHandleCreated)
         {
             return;
         }
 
+        if (!preservePetSpeech)
+            ResetPetSpeech();
         List<AppEntry> visibleApps = BuildVisibleApps();
+        Point scrollPosition = flpApps.AutoScrollPosition;
+        _petHostChanging = true;
 
         flpApps.SuspendLayout();
-        flpApps.Controls.Clear();
-
-        if (visibleApps.Count == 0)
+        try
         {
-            flpApps.Controls.Add(CreateEmptyState());
-            flpApps.Controls.Add(CreatePetOnlyPanel());
-        }
-        else
-        {
-            bool groupedByCategory = GetSelectedSortMode() == SortMode.ByCategory
-                && string.Equals(_cbCategory.SelectedItem as string, LauncherConstants.AllCategories, System.StringComparison.Ordinal);
-
-            if (groupedByCategory)
+            flpApps.Controls.Clear();
+            if (visibleApps.Count == 0)
             {
-                var groups = visibleApps
-                    .GroupBy(app => app.Category)
-                    .OrderBy(group => group.Key)
-                    .Select(group => (group.Key, Apps: group.ToList()))
-                    .ToList();
-
-                for (int index = 0; index < groups.Count; index++)
-                {
-                    flpApps.Controls.Add(CreateSection(
-                        groups[index].Key,
-                        groups[index].Apps,
-                        includePetZone: index == groups.Count - 1));
-                }
+                flpApps.Controls.Add(CreateEmptyState());
+                flpApps.Controls.Add(CreatePetOnlyPanel());
             }
             else
             {
-                flpApps.Controls.Add(CreateSection($"Ergebnisse ({visibleApps.Count})", visibleApps, includePetZone: true));
+                bool groupedByCategory = GetSelectedSortMode() == SortMode.ByCategory
+                    && string.Equals(_cbCategory.SelectedItem as string, LauncherConstants.AllCategories, System.StringComparison.Ordinal);
+
+                if (groupedByCategory)
+                {
+                    var groups = visibleApps
+                        .GroupBy(app => app.Category)
+                        .OrderBy(group => group.Key)
+                        .Select(group => (group.Key, Apps: group.ToList()))
+                        .ToList();
+
+                    for (int index = 0; index < groups.Count; index++)
+                    {
+                        flpApps.Controls.Add(CreateSection(
+                            groups[index].Key,
+                            groups[index].Apps,
+                            includePetZone: index == groups.Count - 1));
+                    }
+                }
+                else
+                {
+                    flpApps.Controls.Add(CreateSection($"Ergebnisse ({visibleApps.Count})", visibleApps, includePetZone: true));
+                }
             }
         }
-
-        flpApps.ResumeLayout();
+        finally
+        {
+            flpApps.ResumeLayout();
+            if (preservePetSpeech)
+                flpApps.AutoScrollPosition = new Point(-scrollPosition.X, -scrollPosition.Y);
+            _petHostChanging = false;
+        }
         UpdateStats(visibleApps);
+        UpdatePetSpeechPlacement();
     }
 
     #endregion
@@ -286,6 +300,7 @@ public partial class Main
             Interval = PetCursorPollIntervalMs
         };
         _petCursorTimer.Tick += PetCursorTimer_Tick;
+        InitializePetSpeech();
 
         System.Diagnostics.Debug.Assert(!IsPetInsideCardSpan(99, 100, 400));
         System.Diagnostics.Debug.Assert(IsPetInsideCardSpan(100, 100, 400));
@@ -310,6 +325,10 @@ public partial class Main
 
     private void DisposePet()
     {
+        _petSpeaking = false;
+        _petSpeechTimer?.Dispose();
+        _petSpeechWindow?.Dispose();
+        _petSpeechWindow = null;
         _petHatWindow?.Dispose();
         _petHatSprite?.Dispose();
         _petAtlasWithoutHat?.Dispose();
@@ -423,11 +442,8 @@ public partial class Main
             ScheduleNextPetMovement();
         }
 
-        if (_petRow == PetIdleRow && _petJumpPending)
-        {
-            StartPetJump();
+        if (TryStartPendingPetAction())
             return;
-        }
 
         if (_petRow == PetIdleRow && _petIdleElapsedMs >= PetWaveIntervalMs)
         {
@@ -448,6 +464,12 @@ public partial class Main
 
         if (_petTrackingCursor)
         {
+            return;
+        }
+
+        if (_petSpeaking)
+        {
+            _petJumpPending = true;
             return;
         }
 
@@ -491,6 +513,7 @@ public partial class Main
             _petIdleElapsedMs = 0;
             _petTimer.Interval = PetFrameDurationsByRow[PetIdleRow][0];
             ScheduleNextPetJump();
+            TryStartPendingPetAction();
             _petPanel.Invalidate();
             return;
         }
@@ -549,12 +572,26 @@ public partial class Main
             return;
         }
 
+        if (_petSpeaking || _petJumpPending || _petMovementPending)
+        {
+            _petMovementPending = true;
+            TryStartPendingPetAction();
+            return;
+        }
+
         if (_petRow != PetIdleRow)
         {
             ScheduleNextPetMovement();
             return;
         }
 
+        StartPetMovement();
+    }
+
+    private bool StartPetMovement()
+    {
+        _petMovementPending = false;
+        _petMovementTimer.Stop();
         ClampPetPosition();
 
         float minX = PetEdgePadding;
@@ -568,7 +605,7 @@ public partial class Main
         if (!canMoveLeft && !canMoveRight)
         {
             ScheduleNextPetMovement();
-            return;
+            return false;
         }
 
         bool moveRight = canMoveRight && (!canMoveLeft || _random.Next(2) == 0);
@@ -588,6 +625,7 @@ public partial class Main
         System.Diagnostics.Debug.Assert(distance >= minDistance && distance <= available);
         _petTimer.Interval = PetFrameDurationsByRow[_petRow][0];
         _petPanel.Invalidate();
+        return true;
     }
 
     private void ScheduleNextPetMovement()
@@ -647,12 +685,14 @@ public partial class Main
     private void StartPetCursorTracking()
     {
         _petTrackingCursor = true;
+        ResetPetSpeech();
         _petTimer.Stop();
         _petMovementTimer.Stop();
         _petJumpTimer.Stop();
         _petJumpSequence = null;
         _petJumpIndex = 0;
         _petJumpPending = false;
+        _petMovementPending = false;
         _petMoveElapsedMs = 0;
         _petIdleElapsedMs = 0;
         _petWaveLoopsRemaining = 0;
@@ -662,6 +702,7 @@ public partial class Main
     private void StopPetCursorTracking()
     {
         _petTrackingCursor = false;
+        ResetPetSpeech();
         _petRow = PetIdleRow;
         _petFrame = 0;
         _petIdleElapsedMs = 0;
@@ -742,10 +783,11 @@ public partial class Main
         if (e.Button != MouseButtons.Left || _petHatRemoved || _petHatSprite is null || !IsPetHeadAt(e.Location))
             return;
 
-        var hatWindow = new HatWindow(_petHatSprite);
-        hatWindow.Dropped += PetHat_Dropped;
+        HatWindow? hatWindow = null;
         try
         {
+            hatWindow = new HatWindow(_petHatSprite);
+            hatWindow.Dropped += PetHat_Dropped;
             hatWindow.BeginDrag(Cursor.Position);
             _petHatWindow = hatWindow;
             _petHatRemoved = true;
@@ -753,7 +795,7 @@ public partial class Main
         }
         catch (System.Runtime.InteropServices.ExternalException ex)
         {
-            hatWindow.Dispose();
+            hatWindow?.Dispose();
             ShowHint($"Der Hut konnte nicht abgenommen werden: {ex.Message}");
         }
     }

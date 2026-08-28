@@ -52,7 +52,8 @@ public partial class Main
 
         _btnTheme.Text = _isDarkTheme ? "Theme: Dark" : "Theme: Light";
         _header.Invalidate();
-        Render();
+        // Перекраска не начинает реплику заново и сохраняет прокрутку к питомцу.
+        Render(preservePetSpeech: true);
     }
 
     #endregion
