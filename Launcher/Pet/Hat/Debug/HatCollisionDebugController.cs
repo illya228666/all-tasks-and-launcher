@@ -90,7 +90,8 @@ internal sealed class HatCollisionDebugController : IDisposable
             surfaces,
             hatLocation,
             hatSize,
-            _collisionProfile.Segments);
+            _collisionProfile.Segments,
+            _collisionProfile.Connectors);
     }
 
     public void Dispose()

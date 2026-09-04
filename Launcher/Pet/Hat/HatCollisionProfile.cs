@@ -14,10 +14,17 @@ internal readonly record struct HatCollisionSegment(
     float Right,
     float ContactY);
 
+internal readonly record struct HatCollisionConnector(
+    float X,
+    float Top,
+    float Bottom,
+    HatCollisionSegment ResolveSegment);
+
 /// <summary>
 /// Нижний профиль столкновения шляпы. Боковые поля находятся ниже центральной
 /// выемки: узкая поверхность может войти в центр шляпы глубже, а широкая
-/// поверхность первой зацепит одно из полей.
+/// поверхность зацепит один из вертикальных соединителей и будет вытолкнута
+/// на соответствующее боковое поле.
 /// </summary>
 internal sealed class HatCollisionProfile
 {
@@ -26,8 +33,10 @@ internal sealed class HatCollisionProfile
     private const float CenterRecessDepth = 16f;
 
     private readonly HatCollisionSegment[] _segments;
+    private readonly HatCollisionConnector[] _connectors;
 
     internal IReadOnlyList<HatCollisionSegment> Segments => _segments;
+    internal IReadOnlyList<HatCollisionConnector> Connectors => _connectors;
 
     internal HatCollisionProfile(Size hatSize)
     {
@@ -40,6 +49,20 @@ internal sealed class HatCollisionProfile
             new HatCollisionSegment(0f, sideWidth, brimContactY),
             new HatCollisionSegment(sideWidth, hatSize.Width - sideWidth, centerContactY),
             new HatCollisionSegment(hatSize.Width - sideWidth, hatSize.Width, brimContactY)
+        };
+
+        _connectors = new[]
+        {
+            new HatCollisionConnector(
+                sideWidth,
+                centerContactY,
+                brimContactY,
+                _segments[0]),
+            new HatCollisionConnector(
+                hatSize.Width - sideWidth,
+                centerContactY,
+                brimContactY,
+                _segments[2])
         };
     }
 
@@ -56,14 +79,10 @@ internal sealed class HatCollisionProfile
 
         foreach (DesktopSurface surface in surfaces)
         {
-            HatCollisionSegment? supportSegment = null;
             foreach (HatCollisionSegment segment in _segments)
             {
                 if (!HorizontallyOverlaps(surface.Bounds, currentHatBounds.Left, segment))
                     continue;
-
-                if (supportSegment is null || segment.ContactY > supportSegment.Value.ContactY)
-                    supportSegment = segment;
 
                 float previousContactY = previousHatBounds.Top + segment.ContactY;
                 float currentContactY = currentHatBounds.Top + segment.ContactY;
@@ -78,38 +97,45 @@ internal sealed class HatCollisionProfile
                 firstCollision = new HatCollision(surface, segment);
             }
 
-            // Начальное проникновение разрешается одинаково для всех источников.
-            // Нижний из перекрывающихся сегментов освобождает весь профиль,
-            // а между поверхностями выбирается наименьшее поднятие.
-            if (!resolveInitialOverlap || supportSegment is null
-                || !IsColliderOverlappingSurface(
-                    surface.Bounds,
-                    previousHatBounds,
-                    supportSegment.Value))
+            if (!resolveInitialOverlap)
                 continue;
 
-            float lift = previousHatBounds.Top + supportSegment.Value.ContactY - surface.Bounds.Top;
+            HatCollisionSegment? connectorCollision =
+                FindConnectorCollision(surface.Bounds, previousHatBounds);
+            if (connectorCollision is null)
+                continue;
+
+            float lift =
+                previousHatBounds.Top + connectorCollision.Value.ContactY - surface.Bounds.Top;
             if (lift < 0f || lift >= smallestLift)
                 continue;
+
             smallestLift = lift;
-            overlapCollision = new HatCollision(surface, supportSegment.Value);
+            overlapCollision = new HatCollision(surface, connectorCollision.Value);
         }
 
         return overlapCollision ?? firstCollision;
     }
 
-    private static bool IsColliderOverlappingSurface(
-    Rectangle surfaceBounds,
-    RectangleF hatBounds,
-    HatCollisionSegment segment)
+    private HatCollisionSegment? FindConnectorCollision(
+        Rectangle surfaceBounds,
+        RectangleF hatBounds)
     {
-        if (!HorizontallyOverlaps(surfaceBounds, hatBounds.Left, segment))
-            return false;
+        foreach (HatCollisionConnector connector in _connectors)
+        {
+            float connectorX = hatBounds.Left + connector.X;
+            if (surfaceBounds.Left >= connectorX || surfaceBounds.Right <= connectorX)
+                continue;
 
-        float contactY = hatBounds.Top + segment.ContactY;
+            float connectorTop = hatBounds.Top + connector.Top;
+            float connectorBottom = hatBounds.Top + connector.Bottom;
+            if (surfaceBounds.Top < connectorTop || surfaceBounds.Top > connectorBottom)
+                continue;
 
-        return contactY >= surfaceBounds.Top
-            && hatBounds.Top < surfaceBounds.Bottom;
+            return connector.ResolveSegment;
+        }
+
+        return null;
     }
 
     internal static bool HorizontallyOverlaps(

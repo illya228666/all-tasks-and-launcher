@@ -13,6 +13,7 @@ internal sealed class HatCollisionDebugWindow : Form
 
     private DesktopSurface[] _surfaces = Array.Empty<DesktopSurface>();
     private HatCollisionSegment[] _hatSegments = Array.Empty<HatCollisionSegment>();
+    private HatCollisionConnector[] _hatConnectors = Array.Empty<HatCollisionConnector>();
     private Point? _hatLocation;
     private Size _hatSize;
 
@@ -46,12 +47,14 @@ internal sealed class HatCollisionDebugWindow : Form
         IReadOnlyList<DesktopSurface> surfaces,
         Point? hatLocation,
         Size hatSize,
-        IReadOnlyList<HatCollisionSegment> hatSegments)
+        IReadOnlyList<HatCollisionSegment> hatSegments,
+        IReadOnlyList<HatCollisionConnector> hatConnectors)
     {
         _surfaces = surfaces.ToArray();
         _hatLocation = hatLocation;
         _hatSize = hatSize;
         _hatSegments = hatSegments.ToArray();
+        _hatConnectors = hatConnectors.ToArray();
 
         Rectangle virtualScreen = SystemInformation.VirtualScreen;
         if (Bounds != virtualScreen)
@@ -113,9 +116,8 @@ internal sealed class HatCollisionDebugWindow : Form
         float originX = _hatLocation.Value.X - Bounds.Left;
         float originY = _hatLocation.Value.Y - Bounds.Top;
 
-        for (int index = 0; index < _hatSegments.Length; index++)
+        foreach (HatCollisionSegment segment in _hatSegments)
         {
-            HatCollisionSegment segment = _hatSegments[index];
             float y = originY + segment.ContactY;
             graphics.DrawLine(
                 pen,
@@ -123,18 +125,17 @@ internal sealed class HatCollisionDebugWindow : Form
                 y,
                 originX + segment.Right,
                 y);
+        }
 
-            if (index == 0)
-                continue;
-
-            HatCollisionSegment previous = _hatSegments[index - 1];
-            float x = originX + segment.Left;
+        foreach (HatCollisionConnector connector in _hatConnectors)
+        {
+            float x = originX + connector.X;
             graphics.DrawLine(
                 pen,
                 x,
-                originY + previous.ContactY,
+                originY + connector.Top,
                 x,
-                originY + segment.ContactY);
+                originY + connector.Bottom);
         }
 
         using var boundsPen = new Pen(HatColor, 1f) { DashStyle = DashStyle.Dot };
