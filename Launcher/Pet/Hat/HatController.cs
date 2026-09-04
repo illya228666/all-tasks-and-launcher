@@ -7,12 +7,10 @@ namespace Launcher.Pet.Hat;
 
 internal sealed class HatController : IDisposable
 {
-    private const int UpdateIntervalMs = 16;
-
     private readonly HatState _state = new();
     private readonly HatPhysics _physics = new();
     private readonly DesktopSurfaceProvider _surfaceProvider = new();
-    private readonly System.Windows.Forms.Timer _updateTimer = new() { Interval = UpdateIntervalMs };
+    private readonly System.Windows.Forms.Timer _updateTimer = new() { Interval = HatTiming.RuntimeTickIntervalMs };
     private readonly Func<Point, bool> _isHeadAtScreenPoint;
     private readonly Action<bool> _setHatAttached;
     private readonly Action<string> _hintRequested;
@@ -73,7 +71,7 @@ internal sealed class HatController : IDisposable
     {
         _window?.SetInteractionEnabled(_running && !_disposed);
         _updateTimer.Enabled = _running && !_disposed && _window is not null
-            && _state.Mode is HatMode.Falling or HatMode.Resting;
+            && _state.Mode is HatMode.Dragging or HatMode.Falling or HatMode.Resting;
     }
 
     internal void DetachAndBeginDrag(Point cursorPosition)
@@ -144,7 +142,9 @@ internal sealed class HatController : IDisposable
         _updating = true;
         try
         {
-            if (_state.Mode == HatMode.Falling)
+            if (_state.Mode == HatMode.Dragging)
+                UpdateDragging();
+            else if (_state.Mode == HatMode.Falling)
                 UpdateFalling();
             else if (_state.Mode == HatMode.Resting)
                 UpdateResting();
@@ -161,6 +161,8 @@ internal sealed class HatController : IDisposable
             _updating = false;
         }
     }
+
+    private void UpdateDragging() => _window!.UpdateDrag();
 
     private void UpdateFalling()
     {
