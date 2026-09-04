@@ -43,6 +43,9 @@ public partial class Main
         };
 
         _btnSurprise.Click += (_, __) => LaunchRandom();
+        _btnD1On.Click += (_, __) => BeginEspOperation(true);
+        _btnD1Off.Click += (_, __) => BeginEspOperation(false);
+        _espPollTimer.Tick += (_, __) => BeginEspOperation();
         _btnRoot.Click += (_, __) => OpenFolder(_solutionRoot ?? _baseDirectory);
         _btnTheme.Click += (_, __) =>
         {
@@ -109,6 +112,9 @@ public partial class Main
     private void Main_Shown(object sender, EventArgs e)
     {
         LoadAppCatalog();
+        _pet.Start();
+        _espPollTimer.Start();
+        BeginEspOperation();
     }
 
     #endregion

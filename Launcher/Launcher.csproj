@@ -8,6 +8,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="System.IO.Ports" Version="7.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\04_Dateiverarbeitung\01_leicht\Dateiverarbeitung_Grundlagen\Dateiverarbeitung_Grundlagen.csproj" />
     <ProjectReference Include="..\04_Dateiverarbeitung\01_leicht\Hotelprotokoll\Hotelprotokoll.csproj" />
     <ProjectReference Include="..\04_Dateiverarbeitung\02_mittel\Funktion_Schreiben_Lesen\Funktion_Schreiben_Lesen.csproj" />

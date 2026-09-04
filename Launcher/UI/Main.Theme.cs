@@ -50,6 +50,8 @@ public partial class Main
         StyleButton(_btnSurprise, true);
         StyleButton(_btnRoot, false);
         StyleButton(_btnTheme, false);
+        StyleButton(_btnD1On, false);
+        StyleButton(_btnD1Off, false);
 
         _btnTheme.Text = _isDarkTheme ? "Theme: Dark" : "Theme: Light";
         _header.Invalidate();
