@@ -7,7 +7,6 @@ namespace Launcher.Pet.Hat;
 internal sealed class HatController : IDisposable
 {
     private const int UpdateIntervalMs = 16;
-    private const int SurfaceOverlap = 8;
 
     private readonly HatState _state = new();
     private readonly HatPhysics _physics = new();
@@ -17,6 +16,7 @@ internal sealed class HatController : IDisposable
     private readonly Action<bool> _setHatAttached;
     private readonly Action<string> _hintRequested;
     private readonly Bitmap _sprite;
+    private readonly HatCollisionProfile _collisionProfile;
     private HatWindow? _window;
     private long _lastTick;
     private bool _running;
@@ -34,6 +34,7 @@ internal sealed class HatController : IDisposable
         if (sprite.Width != 109 || sprite.Height != 64)
             throw new InvalidDataException($"Unerwartete Hutgroesse: {sprite.Width}x{sprite.Height}.");
         _sprite = new Bitmap(sprite);
+        _collisionProfile = new HatCollisionProfile(_sprite.Size);
         _updateTimer.Tick += UpdateTimer_Tick;
     }
 
@@ -117,11 +118,14 @@ internal sealed class HatController : IDisposable
         DesktopSurface taskbar = _surfaceProvider.GetTaskbarSurface(new Point(
             _window.Left + _window.Width / 2,
             _window.Top + _window.Height / 2));
-        if (_window.Bottom >= taskbar.Bounds.Top)
+        float? taskbarContactY = _collisionProfile.GetSupportContactY(taskbar.Bounds, _state.Position.X);
+        if (taskbarContactY.HasValue
+            && _state.Position.Y + taskbarContactY.Value >= taskbar.Bounds.Top)
         {
-            LandOn(taskbar);
+            LandOn(new HatCollision(taskbar, taskbarContactY.Value));
             return;
         }
+
         if (_running)
             _updateTimer.Start();
     }
@@ -156,8 +160,11 @@ internal sealed class HatController : IDisposable
         RectangleF previousBounds = new(_state.Position, size);
         _physics.Advance(_state, elapsedSeconds);
         RectangleF currentBounds = new(_state.Position, size);
-        DesktopSurface? collision = _surfaceProvider.FindCollision(
-            previousBounds, currentBounds, _window.WindowHandle);
+        HatCollision? collision = _surfaceProvider.FindCollision(
+            previousBounds,
+            currentBounds,
+            _window.WindowHandle,
+            _collisionProfile);
         if (collision is not null)
         {
             LandOn(collision.Value);
@@ -166,11 +173,12 @@ internal sealed class HatController : IDisposable
         ApplyVisualState();
     }
 
-    private void LandOn(DesktopSurface surface)
+    private void LandOn(HatCollision collision)
     {
+        DesktopSurface surface = collision.Surface;
         _state.Position = new(
             _state.Position.X,
-            surface.Bounds.Top - _window!.Height + SurfaceOverlap);
+            surface.Bounds.Top - collision.ContactY);
         _state.VelocityY = 0f;
         _state.RestingWindowHandle = surface.WindowHandle;
         _state.RelativeX = _state.Position.X - surface.Bounds.Left;
@@ -183,13 +191,9 @@ internal sealed class HatController : IDisposable
         ApplyVisualState();
 
         if (_state.Mode == HatMode.RestingOnWindow && _running)
-        {
             _updateTimer.Start();
-        }
         else
-        {
             _updateTimer.Stop();
-        }
     }
 
     private void UpdateRestingWindow()
@@ -200,9 +204,17 @@ internal sealed class HatController : IDisposable
             return;
         }
 
+        float newX = surface.Bounds.Left + _state.RelativeX;
+        float? contactY = _collisionProfile.GetSupportContactY(surface.Bounds, newX);
+        if (!contactY.HasValue)
+        {
+            BeginFalling();
+            return;
+        }
+
         _state.Position = new(
-            surface.Bounds.Left + _state.RelativeX,
-            surface.Bounds.Top - _window!.Height + SurfaceOverlap);
+            newX,
+            surface.Bounds.Top - contactY.Value);
         ApplyVisualState();
     }
 

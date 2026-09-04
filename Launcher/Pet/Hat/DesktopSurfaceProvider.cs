@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -14,12 +13,11 @@ internal sealed class DesktopSurfaceProvider
 
     private readonly DesktopIconSurfaceProvider _desktopIconProvider = new();
 
-    internal DesktopSurfaceProvider() => ValidateCollisionSelection();
-
-    internal DesktopSurface? FindCollision(
+    internal HatCollision? FindCollision(
         RectangleF previousHatBounds,
         RectangleF currentHatBounds,
-        IntPtr excludedWindow)
+        IntPtr excludedWindow,
+        HatCollisionProfile collisionProfile)
     {
         List<DesktopSurface> windows = EnumerateWindows(excludedWindow);
         var surfaces = new List<DesktopSurface>(windows);
@@ -40,7 +38,8 @@ internal sealed class DesktopSurfaceProvider
             Rectangle.FromLTRB(workingArea.Left, workingArea.Bottom, workingArea.Right, workingArea.Bottom + 1),
             IntPtr.Zero,
             DesktopSurfaceType.Taskbar));
-        return SelectFirstCrossedSurface(surfaces, previousHatBounds, currentHatBounds);
+
+        return collisionProfile.FindFirstCollision(surfaces, previousHatBounds, currentHatBounds);
     }
 
     internal DesktopSurface GetTaskbarSurface(Point hatCenter)
@@ -100,34 +99,6 @@ internal sealed class DesktopSurfaceProvider
 
         bounds = Rectangle.FromLTRB(rect.Left, rect.Top, rect.Right, rect.Bottom);
         return bounds.Width > 0 && bounds.Height > 0;
-    }
-
-    private static DesktopSurface? SelectFirstCrossedSurface(
-        IEnumerable<DesktopSurface> surfaces,
-        RectangleF previousHatBounds,
-        RectangleF currentHatBounds) =>
-        surfaces
-            .Where(surface => currentHatBounds.Right > surface.Bounds.Left
-                && currentHatBounds.Left < surface.Bounds.Right
-                && previousHatBounds.Bottom < surface.Bounds.Top
-                && currentHatBounds.Bottom >= surface.Bounds.Top)
-            .OrderBy(surface => surface.Bounds.Top)
-            .Select(surface => (DesktopSurface?)surface)
-            .FirstOrDefault();
-
-    [Conditional("DEBUG")]
-    private static void ValidateCollisionSelection()
-    {
-        var surfaces = new[]
-        {
-            new DesktopSurface(new Rectangle(0, 300, 500, 100), new IntPtr(1), DesktopSurfaceType.Window),
-            new DesktopSurface(new Rectangle(0, 200, 500, 100), new IntPtr(2), DesktopSurfaceType.Window)
-        };
-        DesktopSurface? hit = SelectFirstCrossedSurface(
-            surfaces, new RectangleF(20, 100, 50, 50), new RectangleF(20, 260, 50, 50));
-        Debug.Assert(hit?.WindowHandle == new IntPtr(2));
-        Debug.Assert(SelectFirstCrossedSurface(
-            surfaces, new RectangleF(600, 100, 50, 50), new RectangleF(600, 260, 50, 50)) is null);
     }
 
     private static string GetClassName(IntPtr handle)
