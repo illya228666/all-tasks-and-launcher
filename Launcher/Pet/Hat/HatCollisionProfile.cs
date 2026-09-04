@@ -24,6 +24,8 @@ internal sealed class HatCollisionProfile
 
     private readonly HatCollisionSegment[] _segments;
 
+    internal IReadOnlyList<HatCollisionSegment> Segments => _segments;
+
     internal HatCollisionProfile(Size hatSize)
     {
         float sideWidth = hatSize.Width * SideWidthRatio;
