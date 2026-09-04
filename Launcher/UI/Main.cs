@@ -20,6 +20,8 @@ public partial class Main : Form
     #region [RU] Поля | [DE] Felder
 
     private readonly LauncherFacade _launcherFacade;
+    private readonly IEspBoardController _espBoard;
+    private readonly System.Windows.Forms.Timer _espPollTimer;
     private readonly PetController _pet;
     private readonly List<AppEntry> _allApps = new();
     private readonly HashSet<string> _favoriteKeys = new(StringComparer.OrdinalIgnoreCase);
@@ -46,6 +48,9 @@ public partial class Main : Form
     {
         InitializeComponent();
 
+        _espBoard = new SerialEspBoardController();
+        _espPollTimer = new System.Windows.Forms.Timer(components!) { Interval = EspPollIntervalMs };
+
         _launcherFacade = new LauncherFacade(
             new ProjectReferenceDiscoveryService(),
             new JsonStateStorageService(),
@@ -67,12 +72,7 @@ public partial class Main : Form
         ApplyTheme();
 
         Resize += (_, __) => Render();
-        Shown += (_, __) => _pet.Start();
-        FormClosing += (_, __) =>
-        {
-            _pet.Stop();
-            PersistState();
-        };
+        FormClosing += Main_FormClosing;
         FormClosed += (_, __) => _pet.Dispose();
     }
 

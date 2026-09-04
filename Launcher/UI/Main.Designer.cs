@@ -15,7 +15,9 @@
         {
             if (disposing && (components != null))
             {
+                DisposeEsp();
                 components.Dispose();
+                components = null;
             }
             base.Dispose(disposing);
         }
@@ -43,6 +45,9 @@
             this._btnRoot = new System.Windows.Forms.Button();
             this._btnTheme = new System.Windows.Forms.Button();
             this.panelHeaderText = new System.Windows.Forms.Panel();
+            this.panelEsp = new System.Windows.Forms.FlowLayoutPanel();
+            this._btnD1On = new System.Windows.Forms.Button();
+            this._btnD1Off = new System.Windows.Forms.Button();
             this._lblSub = new System.Windows.Forms.Label();
             this._lblTitle = new System.Windows.Forms.Label();
             this.panelStats = new System.Windows.Forms.TableLayoutPanel();
@@ -54,6 +59,7 @@
             this._header.SuspendLayout();
             this.panelControlRow.SuspendLayout();
             this.panelHeaderText.SuspendLayout();
+            this.panelEsp.SuspendLayout();
             this.panelStats.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -207,6 +213,7 @@
             // panelHeaderText
             // 
             this.panelHeaderText.BackColor = System.Drawing.Color.Transparent;
+            this.panelHeaderText.Controls.Add(this.panelEsp);
             this.panelHeaderText.Controls.Add(this._lblSub);
             this.panelHeaderText.Controls.Add(this._lblTitle);
             this.panelHeaderText.Dock = System.Windows.Forms.DockStyle.Top;
@@ -215,6 +222,35 @@
             this.panelHeaderText.Name = "panelHeaderText";
             this.panelHeaderText.Size = new System.Drawing.Size(1068, 66);
             this.panelHeaderText.TabIndex = 0;
+            //
+            // panelEsp
+            //
+            this.panelEsp.BackColor = System.Drawing.Color.Transparent;
+            this.panelEsp.Controls.Add(this._btnD1On);
+            this.panelEsp.Controls.Add(this._btnD1Off);
+            this.panelEsp.Dock = System.Windows.Forms.DockStyle.Right;
+            this.panelEsp.Name = "panelEsp";
+            this.panelEsp.Size = new System.Drawing.Size(200, 66);
+            this.panelEsp.TabIndex = 2;
+            this.panelEsp.WrapContents = false;
+            //
+            // _btnD1On
+            //
+            this._btnD1On.Enabled = false;
+            this._btnD1On.Name = "_btnD1On";
+            this._btnD1On.Size = new System.Drawing.Size(88, 32);
+            this._btnD1On.TabIndex = 0;
+            this._btnD1On.Text = "D1 ON";
+            this._btnD1On.UseVisualStyleBackColor = true;
+            //
+            // _btnD1Off
+            //
+            this._btnD1Off.Enabled = false;
+            this._btnD1Off.Name = "_btnD1Off";
+            this._btnD1Off.Size = new System.Drawing.Size(88, 32);
+            this._btnD1Off.TabIndex = 1;
+            this._btnD1Off.Text = "D1 OFF";
+            this._btnD1Off.UseVisualStyleBackColor = true;
             // 
             // _lblSub
             // 
@@ -307,6 +343,7 @@
             this.panelControlRow.PerformLayout();
             this.panelHeaderText.ResumeLayout(false);
             this.panelHeaderText.PerformLayout();
+            this.panelEsp.ResumeLayout(false);
             this.panelStats.ResumeLayout(false);
             this.ResumeLayout(false);
 
@@ -327,6 +364,9 @@
         private Button _btnRoot;
         private Button _btnTheme;
         private Panel panelHeaderText;
+        private FlowLayoutPanel panelEsp;
+        private Button _btnD1On;
+        private Button _btnD1Off;
         private Label _lblSub;
         private Label _lblTitle;
         private TableLayoutPanel panelStats;
