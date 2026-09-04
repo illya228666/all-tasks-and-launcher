@@ -174,9 +174,12 @@ internal sealed class HatController : IDisposable
         _state.VelocityY = 0f;
         _state.RestingWindowHandle = surface.WindowHandle;
         _state.RelativeX = _state.Position.X - surface.Bounds.Left;
-        _state.Mode = surface.Type == DesktopSurfaceType.Window
-            ? HatMode.RestingOnWindow
-            : HatMode.RestingOnTaskbar;
+        _state.Mode = surface.Type switch
+        {
+            DesktopSurfaceType.Window => HatMode.RestingOnWindow,
+            DesktopSurfaceType.DesktopIcon => HatMode.RestingOnDesktopIcon,
+            _ => HatMode.RestingOnTaskbar
+        };
         ApplyVisualState();
 
         if (_state.Mode == HatMode.RestingOnWindow && _running)

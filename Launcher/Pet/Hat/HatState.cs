@@ -8,6 +8,7 @@ internal enum HatMode
     Dragging,
     Falling,
     RestingOnWindow,
+    RestingOnDesktopIcon,
     RestingOnTaskbar
 }
 

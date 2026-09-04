@@ -12,6 +12,8 @@ internal sealed class DesktopSurfaceProvider
     private const int ExtendedFrameBoundsAttribute = 9;
     private const int CloakedAttribute = 14;
 
+    private readonly DesktopIconSurfaceProvider _desktopIconProvider = new();
+
     internal DesktopSurfaceProvider() => ValidateCollisionSelection();
 
     internal DesktopSurface? FindCollision(
@@ -19,7 +21,17 @@ internal sealed class DesktopSurfaceProvider
         RectangleF currentHatBounds,
         IntPtr excludedWindow)
     {
-        List<DesktopSurface> surfaces = EnumerateWindows(excludedWindow);
+        List<DesktopSurface> windows = EnumerateWindows(excludedWindow);
+        var surfaces = new List<DesktopSurface>(windows);
+
+        foreach (DesktopSurface icon in _desktopIconProvider.GetSurfaces())
+        {
+            // Иконки находятся на самом нижнем слое рабочего стола. Если обычное
+            // окно перекрывает конкретную иконку, она не является доступной платформой.
+            if (!windows.Any(window => window.Bounds.IntersectsWith(icon.Bounds)))
+                surfaces.Add(icon);
+        }
+
         Point center = new(
             (int)Math.Round(currentHatBounds.Left + currentHatBounds.Width / 2f),
             (int)Math.Round(currentHatBounds.Top + currentHatBounds.Height / 2f));

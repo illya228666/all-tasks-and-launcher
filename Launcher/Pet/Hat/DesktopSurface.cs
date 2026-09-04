@@ -5,6 +5,7 @@ namespace Launcher.Pet.Hat;
 internal enum DesktopSurfaceType
 {
     Window,
+    DesktopIcon,
     Taskbar
 }
 
