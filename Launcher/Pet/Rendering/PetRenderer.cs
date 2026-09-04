@@ -1,6 +1,5 @@
 using System.Drawing;
 using Launcher.Pet.Animation;
-using Launcher.Pet.UI;
 using Launcher.UI.Controls;
 
 namespace Launcher.Pet.Rendering;
@@ -9,31 +8,23 @@ internal sealed class PetRenderer : IDisposable
 {
     private readonly Form _window;
     private readonly PetState _state;
-    private readonly Action<string> _hintRequested;
     private readonly Bitmap _atlas;
     private readonly Bitmap _atlasWithoutHat;
-    private readonly Bitmap _hatSprite;
     private Panel? _panel;
-    private HatWindow? _hatWindow;
     private PetTheme _theme;
     private int _groundY;
-    private bool _hatRemoved;
+    private bool _hatAttached = true;
     private bool _disposed;
 
-    internal PetRenderer(Form window, PetState state, Action<string> hintRequested)
+    internal PetRenderer(Form window, PetState state)
     {
         _window = window;
         _state = state;
-        _hintRequested = hintRequested;
 
         try
         {
             _atlas = LoadAtlas("spritesheet_sumrak_hat.png");
             _atlasWithoutHat = LoadAtlas("spritesheet_sumrak_no_hat.png");
-            using var hat = new Bitmap(Path.Combine(AppContext.BaseDirectory, "Resources", "hat_small.png"));
-            if (hat.Width != 109 || hat.Height != 64)
-                throw new InvalidDataException($"Unerwartete Hutgroesse: {hat.Width}x{hat.Height}.");
-            _hatSprite = new Bitmap(hat);
         }
         catch
         {
@@ -44,10 +35,18 @@ internal sealed class PetRenderer : IDisposable
         PetAnimationCatalog.Validate(_atlas);
     }
 
+    internal event Action? HatRemovalRequested;
+
     internal int RequiredHostWidth => PetAnimationCatalog.FrameWidth;
     internal int RequiredHostHeight => PetAnimationCatalog.FrameHeight;
     internal int ClientWidth => _panel?.ClientSize.Width ?? 0;
     internal bool IsReady => _panel is { IsDisposed: false, IsHandleCreated: true };
+
+    internal void SetHatAttached(bool attached)
+    {
+        _hatAttached = attached;
+        _panel?.Invalidate();
+    }
 
     internal void ApplyTheme(PetTheme theme)
     {
@@ -115,6 +114,19 @@ internal sealed class PetRenderer : IDisposable
         return head;
     }
 
+    internal bool IsHeadAtScreenPoint(Point screenPoint)
+    {
+        if (_window.WindowState == FormWindowState.Minimized || !IsReady)
+            return false;
+        for (Control? control = _panel; control is not null; control = control.Parent)
+            if (!control.Visible || !control.RectangleToScreen(control.ClientRectangle).Contains(screenPoint))
+                return false;
+
+        Point panelPoint = _panel!.PointToClient(screenPoint);
+        return _panel.GetChildAtPoint(panelPoint, GetChildAtPointSkip.Invisible) is null
+            && IsHeadAt(panelPoint);
+    }
+
     internal bool IsBelowBottomCardRow()
     {
         if (_panel is null)
@@ -159,7 +171,7 @@ internal sealed class PetRenderer : IDisposable
     private bool IsHeadAt(Point point)
     {
         Rectangle destination = GetDestinationRectangle();
-        Bitmap atlas = _hatRemoved ? _atlasWithoutHat : _atlas;
+        Bitmap atlas = _hatAttached ? _atlas : _atlasWithoutHat;
         if (!destination.Contains(point))
             return false;
 
@@ -180,46 +192,9 @@ internal sealed class PetRenderer : IDisposable
 
     private void Panel_MouseDown(object? sender, MouseEventArgs e)
     {
-        if (e.Button != MouseButtons.Left || _hatRemoved || !IsHeadAt(e.Location))
+        if (e.Button != MouseButtons.Left || !_hatAttached || !IsHeadAt(e.Location))
             return;
-
-        HatWindow? hatWindow = null;
-        try
-        {
-            hatWindow = new HatWindow(_hatSprite);
-            hatWindow.Dropped += Hat_Dropped;
-            hatWindow.BeginDrag(Cursor.Position);
-            _hatWindow = hatWindow;
-            _hatRemoved = true;
-            _panel!.Invalidate();
-        }
-        catch (System.Runtime.InteropServices.ExternalException exception)
-        {
-            hatWindow?.Dispose();
-            _hintRequested($"Der Hut konnte nicht abgenommen werden: {exception.Message}");
-        }
-    }
-
-    private void Hat_Dropped(Point screenPoint)
-    {
-        if (!_hatRemoved || _hatWindow is null || _window.WindowState == FormWindowState.Minimized || !IsReady)
-            return;
-
-        // Голова должна находиться в видимой части панели, а не за границей
-        // прокрутки или под карточкой. Координаты шляпы всегда экранные.
-        for (Control? control = _panel; control is not null; control = control.Parent)
-            if (!control.Visible || !control.RectangleToScreen(control.ClientRectangle).Contains(screenPoint))
-                return;
-
-        Point panelPoint = _panel!.PointToClient(screenPoint);
-        if (_panel.GetChildAtPoint(panelPoint, GetChildAtPointSkip.Invisible) is not null || !IsHeadAt(panelPoint))
-            return;
-
-        _hatRemoved = false;
-        _hatWindow.Dropped -= Hat_Dropped;
-        _hatWindow.Dispose();
-        _hatWindow = null;
-        _panel.Invalidate();
+        HatRemovalRequested?.Invoke();
     }
 
     private void Panel_Paint(object? sender, PaintEventArgs e)
@@ -234,7 +209,7 @@ internal sealed class PetRenderer : IDisposable
 
         Rectangle destination = GetDestinationRectangle();
         Rectangle source = PetAnimationCatalog.GetSourceRectangle(_state.Row, _state.Frame);
-        e.Graphics.DrawImage(_hatRemoved ? _atlasWithoutHat : _atlas,
+        e.Graphics.DrawImage(_hatAttached ? _atlas : _atlasWithoutHat,
             destination, source, GraphicsUnit.Pixel);
     }
 
@@ -257,13 +232,8 @@ internal sealed class PetRenderer : IDisposable
             _panel.Paint -= Panel_Paint;
             _panel.MouseDown -= Panel_MouseDown;
         }
-        if (_hatWindow is not null)
-        {
-            _hatWindow.Dropped -= Hat_Dropped;
-            _hatWindow.Dispose();
-        }
-        _hatSprite?.Dispose();
         _atlasWithoutHat?.Dispose();
         _atlas?.Dispose();
+        HatRemovalRequested = null;
     }
 }

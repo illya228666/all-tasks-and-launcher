@@ -1,5 +1,6 @@
 using System.Drawing;
 using Launcher.Pet.Animation;
+using Launcher.Pet.Hat;
 using Launcher.Pet.Rendering;
 using Launcher.Pet.Speech;
 
@@ -12,6 +13,7 @@ internal sealed class PetController : IDisposable
     private readonly Random _random = new();
     private readonly PetState _state = new();
     private readonly PetRenderer _renderer;
+    private readonly HatController _hat;
     private readonly PetSpeechController _speech;
     private readonly System.Windows.Forms.Timer _animationTimer;
     private readonly System.Windows.Forms.Timer _movementTimer = new();
@@ -24,7 +26,20 @@ internal sealed class PetController : IDisposable
     {
         _window = window;
         _viewport = viewport;
-        _renderer = new PetRenderer(window, _state, hintRequested);
+        _renderer = new PetRenderer(window, _state);
+        try
+        {
+            _hat = new HatController(
+                _renderer.IsHeadAtScreenPoint,
+                _renderer.SetHatAttached,
+                hintRequested);
+        }
+        catch
+        {
+            _renderer.Dispose();
+            throw;
+        }
+        _renderer.HatRemovalRequested += Renderer_HatRemovalRequested;
         _animationTimer = new System.Windows.Forms.Timer
         {
             Interval = PetAnimationCatalog.FrameDurationsByRow[PetAnimationCatalog.IdleRow][0]
@@ -71,6 +86,7 @@ internal sealed class PetController : IDisposable
             return;
         _started = true;
 
+        _hat.Start();
         _animationTimer.Start();
         ScheduleNextJump();
         ScheduleNextMovement();
@@ -85,6 +101,7 @@ internal sealed class PetController : IDisposable
             return;
         _started = false;
 
+        _hat.Stop();
         _animationTimer.Stop();
         _movementTimer.Stop();
         _jumpTimer.Stop();
@@ -384,6 +401,8 @@ internal sealed class PetController : IDisposable
 
     private void Viewport_Scroll(object? sender, ScrollEventArgs e) => _speech.UpdatePlacement();
 
+    private void Renderer_HatRemovalRequested() => _hat.DetachAndBeginDrag(Cursor.Position);
+
     private void Window_Disposed(object? sender, EventArgs e) => Dispose();
 
     public void Dispose()
@@ -401,11 +420,13 @@ internal sealed class PetController : IDisposable
         _movementTimer.Tick -= MovementTimer_Tick;
         _jumpTimer.Tick -= JumpTimer_Tick;
         _cursorTimer.Tick -= CursorTimer_Tick;
+        _renderer.HatRemovalRequested -= Renderer_HatRemovalRequested;
         _animationTimer.Dispose();
         _movementTimer.Dispose();
         _jumpTimer.Dispose();
         _cursorTimer.Dispose();
         _speech.Dispose();
+        _hat.Dispose();
         _renderer.Dispose();
     }
 }
