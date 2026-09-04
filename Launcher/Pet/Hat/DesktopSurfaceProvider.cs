@@ -78,8 +78,14 @@ internal sealed class DesktopSurfaceProvider
         }
     }
 
-    private static bool IsIconAvailable(DesktopSurface icon, IReadOnlyCollection<DesktopSurface> windows) =>
-        !windows.Any(window => window.Bounds.IntersectsWith(icon.Bounds));
+    private static bool IsIconAvailable(
+        DesktopSurface icon,
+        IReadOnlyCollection<DesktopSurface> windows) =>
+        !windows.Any(window =>
+            window.Bounds.Right > icon.Bounds.Left &&
+            window.Bounds.Left < icon.Bounds.Right &&
+            window.Bounds.Top <= icon.Bounds.Top &&
+            window.Bounds.Bottom > icon.Bounds.Top);
 
     private static List<DesktopSurface> EnumerateWindows(IntPtr excludedWindow)
     {

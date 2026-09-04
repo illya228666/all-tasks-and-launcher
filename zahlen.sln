@@ -75,27 +75,33 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "05_Array", "05_Array", "{45
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "01_leicht", "01_leicht", "{4D52A984-ED4C-33DD-980F-094469699841}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Array_Zimmervermietung", "05_Array\01_leicht\Array_Zimmervermietung\Array_Zimmervermietung.csproj", "{09A4E0FC-6DB7-4115-B699-CBCDC954D35B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Array_Zimmervermietung", "05_Array\01_leicht\Array_Zimmervermietung\Array_Zimmervermietung.csproj", "{09A4E0FC-6DB7-4115-B699-CBCDC954D35B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Array_Grundlagen", "05_Array\01_leicht\Array_Grundlagen\Array_Grundlagen.csproj", "{89C1E2BF-3D52-4AFD-BB8A-66E1E63B7107}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Array_Grundlagen", "05_Array\01_leicht\Array_Grundlagen\Array_Grundlagen.csproj", "{89C1E2BF-3D52-4AFD-BB8A-66E1E63B7107}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Array_Einfuehrung", "05_Array\01_leicht\Array_Einfuehrung\Array_Einfuehrung.csproj", "{4541859D-60AA-4912-ADC3-C9932BABDC33}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Array_Einfuehrung", "05_Array\01_leicht\Array_Einfuehrung\Array_Einfuehrung.csproj", "{4541859D-60AA-4912-ADC3-C9932BABDC33}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "02_mittel", "02_mittel", "{923814E8-E49C-EE58-4D6B-0E66B9062343}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GTIN_Pruefziffer", "05_Array\02_mittel\GTIN_Pruefziffer\GTIN_Pruefziffer.csproj", "{09AA7523-1206-482A-B073-F3E5FF2D1741}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GTIN_Pruefziffer", "05_Array\02_mittel\GTIN_Pruefziffer\GTIN_Pruefziffer.csproj", "{09AA7523-1206-482A-B073-F3E5FF2D1741}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ISBN_Pruefziffer", "05_Array\02_mittel\ISBN_Pruefziffer\ISBN_Pruefziffer.csproj", "{5235B2FD-E550-4390-AAEC-50B8412E9C5D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ISBN_Pruefziffer", "05_Array\02_mittel\ISBN_Pruefziffer\ISBN_Pruefziffer.csproj", "{5235B2FD-E550-4390-AAEC-50B8412E9C5D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Luhn_Pruefung", "05_Array\02_mittel\Luhn_Pruefung\Luhn_Pruefung.csproj", "{B6DBA183-D77A-4525-B9EA-F5195CF338C2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Luhn_Pruefung", "05_Array\02_mittel\Luhn_Pruefung\Luhn_Pruefung.csproj", "{B6DBA183-D77A-4525-B9EA-F5195CF338C2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Wuerfel_Haeufigkeit", "05_Array\02_mittel\Wuerfel_Haeufigkeit\Wuerfel_Haeufigkeit.csproj", "{7A24706A-E401-4E5C-B554-BB148D1EAC7F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wuerfel_Haeufigkeit", "05_Array\02_mittel\Wuerfel_Haeufigkeit\Wuerfel_Haeufigkeit.csproj", "{7A24706A-E401-4E5C-B554-BB148D1EAC7F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Zahlen_Rueckwaerts", "05_Array\02_mittel\Zahlen_Rueckwaerts\Zahlen_Rueckwaerts.csproj", "{D3C25C5A-59B4-4CE0-A33F-981549D06F7E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Zahlen_Rueckwaerts", "05_Array\02_mittel\Zahlen_Rueckwaerts\Zahlen_Rueckwaerts.csproj", "{D3C25C5A-59B4-4CE0-A33F-981549D06F7E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MinMaxMittelwert", "05_Array\02_mittel\MinMaxMittelwert\MinMaxMittelwert.csproj", "{94A8EEE0-DB06-4B5D-8474-1B2FC74FAF36}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MinMaxMittelwert", "05_Array\02_mittel\MinMaxMittelwert\MinMaxMittelwert.csproj", "{94A8EEE0-DB06-4B5D-8474-1B2FC74FAF36}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Schwer_Zahlensysteme", "Zahlensysteme\Schwer_Zahlensysteme.csproj", "{9EF85AA8-29A2-43CF-B0AE-93B70E75FC43}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Schwer_Zahlensysteme", "Zahlensysteme\Schwer_Zahlensysteme.csproj", "{9EF85AA8-29A2-43CF-B0AE-93B70E75FC43}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "06_Commentaren", "06_Commentaren", "{C6FBE67D-5919-42D4-8287-38CFFF06D75D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "01_leicht", "01_leicht", "{FF53B1F4-E64D-4E7E-911F-317E100686CA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Commentared_Code", "06_Commentaren\01_leicht\Commentared_Code\Commentared_Code.csproj", "{8AAD654C-1534-448F-9885-46F484384E9C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -491,6 +497,18 @@ Global
 		{9EF85AA8-29A2-43CF-B0AE-93B70E75FC43}.Release|x64.Build.0 = Release|Any CPU
 		{9EF85AA8-29A2-43CF-B0AE-93B70E75FC43}.Release|x86.ActiveCfg = Release|Any CPU
 		{9EF85AA8-29A2-43CF-B0AE-93B70E75FC43}.Release|x86.Build.0 = Release|Any CPU
+		{8AAD654C-1534-448F-9885-46F484384E9C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8AAD654C-1534-448F-9885-46F484384E9C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8AAD654C-1534-448F-9885-46F484384E9C}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{8AAD654C-1534-448F-9885-46F484384E9C}.Debug|x64.Build.0 = Debug|Any CPU
+		{8AAD654C-1534-448F-9885-46F484384E9C}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{8AAD654C-1534-448F-9885-46F484384E9C}.Debug|x86.Build.0 = Debug|Any CPU
+		{8AAD654C-1534-448F-9885-46F484384E9C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8AAD654C-1534-448F-9885-46F484384E9C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8AAD654C-1534-448F-9885-46F484384E9C}.Release|x64.ActiveCfg = Release|Any CPU
+		{8AAD654C-1534-448F-9885-46F484384E9C}.Release|x64.Build.0 = Release|Any CPU
+		{8AAD654C-1534-448F-9885-46F484384E9C}.Release|x86.ActiveCfg = Release|Any CPU
+		{8AAD654C-1534-448F-9885-46F484384E9C}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -535,6 +553,8 @@ Global
 		{7A24706A-E401-4E5C-B554-BB148D1EAC7F} = {923814E8-E49C-EE58-4D6B-0E66B9062343}
 		{D3C25C5A-59B4-4CE0-A33F-981549D06F7E} = {923814E8-E49C-EE58-4D6B-0E66B9062343}
 		{94A8EEE0-DB06-4B5D-8474-1B2FC74FAF36} = {923814E8-E49C-EE58-4D6B-0E66B9062343}
+		{FF53B1F4-E64D-4E7E-911F-317E100686CA} = {C6FBE67D-5919-42D4-8287-38CFFF06D75D}
+		{8AAD654C-1534-448F-9885-46F484384E9C} = {FF53B1F4-E64D-4E7E-911F-317E100686CA}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {E0383A95-AB93-4921-8CB1-1061BF080195}
