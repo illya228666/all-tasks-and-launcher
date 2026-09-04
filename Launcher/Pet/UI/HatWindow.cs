@@ -14,6 +14,7 @@ internal sealed class HatWindow : TransparentOverlayWindow
     private readonly System.Windows.Forms.Timer _dragTimer = new() { Interval = DragIntervalMs };
     private readonly Bitmap[] _angleFrames;
     private int _angleFrame = -1;
+    private bool _interactionEnabled = true;
 
     internal event Action? DragStarted;
     internal event Action<Point>? Dropped;
@@ -29,10 +30,21 @@ internal sealed class HatWindow : TransparentOverlayWindow
 
     internal void BeginDrag(Point cursorPosition)
     {
+        if (!_interactionEnabled)
+            return;
         SetAngle(0f);
         ShowAt(GetLocationAtCursor(cursorPosition));
         DragStarted?.Invoke();
         _dragTimer.Start();
+    }
+
+    internal void CancelDrag() => _dragTimer.Stop();
+
+    internal void SetInteractionEnabled(bool enabled)
+    {
+        _interactionEnabled = enabled;
+        if (!enabled)
+            CancelDrag();
     }
 
     internal void MoveTo(Point location) => ShowAt(location);
@@ -113,7 +125,7 @@ internal sealed class HatWindow : TransparentOverlayWindow
     protected override void OnMouseDown(MouseEventArgs e)
     {
         base.OnMouseDown(e);
-        if (e.Button == MouseButtons.Left && !_dragTimer.Enabled)
+        if (_interactionEnabled && e.Button == MouseButtons.Left && !_dragTimer.Enabled)
             BeginDrag(Cursor.Position);
     }
 
@@ -128,6 +140,8 @@ internal sealed class HatWindow : TransparentOverlayWindow
     {
         if (disposing)
         {
+            _dragTimer.Stop();
+            _dragTimer.Tick -= DragTimer_Tick;
             _dragTimer.Dispose();
             foreach (Bitmap frame in _angleFrames)
                 frame.Dispose();

@@ -23,6 +23,8 @@ internal sealed class HatController : IDisposable
     private long _lastTick;
     private bool _running;
     private bool _disposed;
+    private bool _updating;
+    private int _stateVersion;
 
     internal HatController(
         Func<Point, bool> isHeadAtScreenPoint,
@@ -52,23 +54,31 @@ internal sealed class HatController : IDisposable
             return;
         _running = true;
         _collisionDebug.Start();
-        if (_state.Mode is HatMode.Falling or HatMode.RestingOnWindow)
-        {
-            _lastTick = Environment.TickCount64;
-            _updateTimer.Start();
-        }
+        _lastTick = Environment.TickCount64;
+        UpdateActivity();
     }
 
     internal void Stop()
     {
+        _stateVersion++;
         _running = false;
-        _updateTimer.Stop();
         _collisionDebug.Stop();
+        _window?.CancelDrag();
+        if (_state.Mode == HatMode.Dragging)
+            BeginFalling();
+        UpdateActivity();
+    }
+
+    private void UpdateActivity()
+    {
+        _window?.SetInteractionEnabled(_running && !_disposed);
+        _updateTimer.Enabled = _running && !_disposed && _window is not null
+            && _state.Mode is HatMode.Falling or HatMode.Resting;
     }
 
     internal void DetachAndBeginDrag(Point cursorPosition)
     {
-        if (_disposed || _state.Mode != HatMode.Attached)
+        if (_disposed || !_running || _state.Mode != HatMode.Attached)
             return;
 
         try
@@ -77,26 +87,24 @@ internal sealed class HatController : IDisposable
             _window.DragStarted += Window_DragStarted;
             _window.Dropped += Window_Dropped;
             _window.BeginDrag(cursorPosition);
-            _state.Mode = HatMode.Dragging;
-            _setHatAttached(false);
         }
         catch (ExternalException exception)
         {
-            DisposeWindow();
-            _state.Mode = HatMode.Attached;
-            _setHatAttached(true);
+            AttachToPet();
             _hintRequested($"Der Hut konnte nicht abgenommen werden: {exception.Message}");
         }
     }
 
     private void Window_DragStarted()
     {
-        _updateTimer.Stop();
+        _stateVersion++;
         _state.Mode = HatMode.Dragging;
-        _state.RestingWindowHandle = IntPtr.Zero;
+        _state.Support = null;
+        _state.ResolveInitialOverlap = false;
         _state.VelocityY = 0f;
         _state.Angle = 0f;
         _setHatAttached(false);
+        UpdateActivity();
     }
 
     private void Window_Dropped(Point screenPoint)
@@ -116,48 +124,41 @@ internal sealed class HatController : IDisposable
         if (_window is null)
             return;
 
+        _stateVersion++;
         _state.Mode = HatMode.Falling;
         _state.Position = _window.Location;
         _state.VelocityY = 0f;
         _state.Angle = 0f;
         _state.FallTimeSeconds = 0f;
-        _state.RestingWindowHandle = IntPtr.Zero;
+        _state.Support = null;
+        _state.ResolveInitialOverlap = true;
         _lastTick = Environment.TickCount64;
-        _window.SetAngle(0f);
-
-        DesktopSurface taskbar = _surfaceProvider.GetTaskbarSurface(new Point(
-            _window.Left + _window.Width / 2,
-            _window.Top + _window.Height / 2));
-        float? taskbarContactY = _collisionProfile.GetSupportContactY(taskbar.Bounds, _state.Position.X);
-        if (taskbarContactY.HasValue
-            && _state.Position.Y + taskbarContactY.Value >= taskbar.Bounds.Top)
-        {
-            LandOn(new HatCollision(taskbar, taskbarContactY.Value));
-            return;
-        }
-
-        if (_running)
-            _updateTimer.Start();
+        UpdateActivity();
     }
 
     private void UpdateTimer_Tick(object? sender, EventArgs e)
     {
-        if (_window is null)
+        if (!_running || _disposed || _window is null || _updating)
             return;
 
+        _updating = true;
         try
         {
             if (_state.Mode == HatMode.Falling)
                 UpdateFalling();
-            else if (_state.Mode == HatMode.RestingOnWindow)
-                UpdateRestingWindow();
+            else if (_state.Mode == HatMode.Resting)
+                UpdateResting();
             else
-                _updateTimer.Stop();
+                UpdateActivity();
         }
         catch (ExternalException exception)
         {
             AttachToPet();
             _hintRequested($"Der Hut konnte nicht angezeigt werden: {exception.Message}");
+        }
+        finally
+        {
+            _updating = false;
         }
     }
 
@@ -170,11 +171,18 @@ internal sealed class HatController : IDisposable
         RectangleF previousBounds = new(_state.Position, size);
         _physics.Advance(_state, elapsedSeconds);
         RectangleF currentBounds = new(_state.Position, size);
-        HatCollision? collision = _surfaceProvider.FindCollision(
+        int version = _stateVersion;
+        IReadOnlyList<DesktopSurface> surfaces = _surfaceProvider.GetSurfaces(_window.WindowHandle);
+        // Shell COM может пропустить drag/stop/dispose через цикл сообщений.
+        // Результат старого tick не должен отменять более новый переход.
+        if (!_running || _disposed || version != _stateVersion)
+            return;
+        HatCollision? collision = _collisionProfile.FindFirstCollision(
+            surfaces,
             previousBounds,
             currentBounds,
-            _window.WindowHandle,
-            _collisionProfile);
+            _state.ResolveInitialOverlap);
+        _state.ResolveInitialOverlap = false;
         if (collision is not null)
         {
             LandOn(collision.Value);
@@ -185,38 +193,39 @@ internal sealed class HatController : IDisposable
 
     private void LandOn(HatCollision collision)
     {
+        _stateVersion++;
         DesktopSurface surface = collision.Surface;
         _state.Position = new(
             _state.Position.X,
             surface.Bounds.Top - collision.ContactY);
         _state.VelocityY = 0f;
-        _state.RestingWindowHandle = surface.WindowHandle;
-        _state.RelativeX = _state.Position.X - surface.Bounds.Left;
-        _state.Mode = surface.Type switch
-        {
-            DesktopSurfaceType.Window => HatMode.RestingOnWindow,
-            DesktopSurfaceType.DesktopIcon => HatMode.RestingOnDesktopIcon,
-            _ => HatMode.RestingOnTaskbar
-        };
+        _state.Support = new HatSupport(
+            surface.Identity, _state.Position.X - surface.Bounds.Left, collision.Segment);
+        _state.Mode = HatMode.Resting;
         ApplyVisualState();
-
-        if (_state.Mode == HatMode.RestingOnWindow && _running)
-            _updateTimer.Start();
-        else
-            _updateTimer.Stop();
+        UpdateActivity();
     }
 
-    private void UpdateRestingWindow()
+    private void UpdateResting()
     {
-        if (!_surfaceProvider.TryGetWindowSurface(_state.RestingWindowHandle, out DesktopSurface surface))
+        if (_state.Support is not HatSupport support)
         {
             BeginFalling();
             return;
         }
 
-        float newX = surface.Bounds.Left + _state.RelativeX;
-        float? contactY = _collisionProfile.GetSupportContactY(surface.Bounds, newX);
-        if (!contactY.HasValue)
+        int version = _stateVersion;
+        bool valid = _surfaceProvider.TryRefresh(support.Identity, _window!.WindowHandle, out DesktopSurface surface);
+        if (!_running || _disposed || version != _stateVersion)
+            return;
+        if (!valid)
+        {
+            BeginFalling();
+            return;
+        }
+
+        float newX = surface.Bounds.Left + support.RelativeX;
+        if (!HatCollisionProfile.HorizontallyOverlaps(surface.Bounds, newX, support.Segment))
         {
             BeginFalling();
             return;
@@ -224,7 +233,7 @@ internal sealed class HatController : IDisposable
 
         _state.Position = new(
             newX,
-            surface.Bounds.Top - contactY.Value);
+            surface.Bounds.Top - support.Segment.ContactY);
         ApplyVisualState();
     }
 
@@ -238,13 +247,15 @@ internal sealed class HatController : IDisposable
 
     private void AttachToPet()
     {
-        _updateTimer.Stop();
+        _stateVersion++;
         DisposeWindow();
         _state.Mode = HatMode.Attached;
-        _state.RestingWindowHandle = IntPtr.Zero;
+        _state.Support = null;
+        _state.ResolveInitialOverlap = false;
         _state.VelocityY = 0f;
         _state.Angle = 0f;
         _setHatAttached(true);
+        UpdateActivity();
     }
 
     private void DisposeWindow()
@@ -266,6 +277,7 @@ internal sealed class HatController : IDisposable
         _updateTimer.Tick -= UpdateTimer_Tick;
         _updateTimer.Dispose();
         _collisionDebug.Dispose();
+        _state.Support = null;
         DisposeWindow();
         _sprite.Dispose();
     }

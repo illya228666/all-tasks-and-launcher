@@ -5,7 +5,7 @@ namespace Launcher.Pet.Hat;
 
 // Получает реальные позиции значков рабочего стола из Explorer ListView.
 // Геометрия кэшируется ненадолго, чтобы не читать память Explorer каждый physics tick.
-internal sealed class DesktopIconSurfaceProvider
+internal sealed partial class DesktopIconSurfaceProvider
 {
     private const long CacheDurationMs = 500;
 
@@ -22,39 +22,90 @@ internal sealed class DesktopIconSurfaceProvider
     private const uint MemRelease = 0x8000;
     private const uint PageReadWrite = 0x04;
 
-    private readonly List<DesktopSurface> _cachedSurfaces = new();
+    private IReadOnlyList<DesktopSurface> _cachedSurfaces = Array.Empty<DesktopSurface>();
     private long _lastRefresh;
+    private IntPtr _listView;
+    private uint _processId;
+    private bool _refreshing;
 
     internal IReadOnlyList<DesktopSurface> GetSurfaces()
     {
         long now = Environment.TickCount64;
-        if (_lastRefresh != 0 && now - _lastRefresh < CacheDurationMs)
+        if (_refreshing || (_lastRefresh != 0 && now - _lastRefresh < CacheDurationMs))
+        {
+            if (!IsWindowVisible(_listView)
+                || GetWindowThreadProcessId(_listView, out uint processId) == 0
+                || processId != _processId)
+                _cachedSurfaces = Array.Empty<DesktopSurface>();
             return _cachedSurfaces;
+        }
 
         _lastRefresh = now;
-        _cachedSurfaces.Clear();
-        Refresh(_cachedSurfaces);
+        IntPtr listView = FindDesktopListView();
+        if (listView != _listView)
+            _cachedSurfaces = Array.Empty<DesktopSurface>();
+        _listView = listView;
+        if (_listView == IntPtr.Zero || !IsWindowVisible(_listView)
+            || GetWindowThreadProcessId(_listView, out uint currentProcessId) == 0 || currentProcessId == 0)
+            return _cachedSurfaces = Array.Empty<DesktopSurface>();
+        if (_processId != currentProcessId)
+            _cachedSurfaces = Array.Empty<DesktopSurface>();
+        _processId = currentProcessId;
+
+        _refreshing = true;
+        try
+        {
+            var surfaces = new List<DesktopSurface>();
+            Refresh(surfaces, _listView, _processId);
+            // Не угадываем соответствие, если Shell вернул неоднозначные identity.
+            var duplicates = surfaces.GroupBy(surface => surface.Identity)
+                .Where(group => group.Count() > 1).Select(group => group.Key).ToHashSet();
+            surfaces.RemoveAll(surface => duplicates.Contains(surface.Identity));
+            // COM может обрабатывать сообщения UI во время вызова. Публикуем
+            // только целый снимок, чтобы повторный вход не увидел половину списка.
+            _cachedSurfaces = surfaces;
+        }
+        catch (Exception exception) when (exception is COMException or InvalidCastException)
+        {
+            // Explorer может исчезнуть между получением view и чтением PIDL.
+            _cachedSurfaces = Array.Empty<DesktopSurface>();
+        }
+        finally
+        {
+            _refreshing = false;
+        }
         return _cachedSurfaces;
     }
 
-    private static void Refresh(List<DesktopSurface> target)
+    internal bool TryRefresh(DesktopSurfaceIdentity identity, out DesktopSurface surface)
     {
-        IntPtr listView = FindDesktopListView();
-        if (listView == IntPtr.Zero
-            || GetWindowThreadProcessId(listView, out uint processId) == 0
-            || processId == 0)
+        foreach (DesktopSurface candidate in GetSurfaces())
+        {
+            if (candidate.Identity != identity)
+                continue;
+            surface = candidate;
+            return true;
+        }
+        surface = default;
+        return false;
+    }
+
+    private static void Refresh(List<DesktopSurface> target, IntPtr listView, uint processId)
+    {
+        IFolderView? view = GetDesktopFolderView(listView);
+        if (view is null)
             return;
 
-        IntPtr process = OpenProcess(
-            ProcessVmOperation | ProcessVmRead | ProcessVmWrite,
-            false,
-            processId);
-        if (process == IntPtr.Zero)
-            return;
-
+        IntPtr process = IntPtr.Zero;
         IntPtr remoteRect = IntPtr.Zero;
         try
         {
+            process = OpenProcess(
+                ProcessVmOperation | ProcessVmRead | ProcessVmWrite,
+                false,
+                processId);
+            if (process == IntPtr.Zero)
+                return;
             nuint rectSize = (nuint)Marshal.SizeOf<NativeRect>();
             remoteRect = VirtualAllocEx(
                 process,
@@ -73,6 +124,10 @@ internal sealed class DesktopIconSurfaceProvider
 
             for (int itemIndex = 0; itemIndex < itemCount; itemIndex++)
             {
+                string? itemKey = GetItemKey(view, itemIndex);
+                if (itemKey is null)
+                    continue;
+
                 var rect = new NativeRect { Left = ListViewIconBounds };
                 if (!WriteProcessMemory(process, remoteRect, ref rect, rectSize, out _)
                     || SendMessage(listView, ListViewGetItemRect, new IntPtr(itemIndex), remoteRect) == IntPtr.Zero
@@ -92,17 +147,24 @@ internal sealed class DesktopIconSurfaceProvider
                 if (bounds.Width <= 0 || bounds.Height <= 0)
                     continue;
 
+                // Индекс служит только адресом чтения. Если view перестроился
+                // во время чтения геометрии, результат не становится опорой.
+                if (itemKey != GetItemKey(view, itemIndex))
+                    continue;
+
                 target.Add(new DesktopSurface(
                     bounds,
-                    listView,
-                    DesktopSurfaceType.DesktopIcon));
+                    new DesktopSurfaceIdentity(
+                        DesktopSurfaceType.DesktopIcon, listView, $"{processId}:{itemKey}")));
             }
         }
         finally
         {
             if (remoteRect != IntPtr.Zero)
                 VirtualFreeEx(process, remoteRect, 0, MemRelease);
-            CloseHandle(process);
+            if (process != IntPtr.Zero)
+                CloseHandle(process);
+            Marshal.ReleaseComObject(view);
         }
     }
 
@@ -165,6 +227,10 @@ internal sealed class DesktopIconSurfaceProvider
 
     [DllImport("user32.dll")]
     private static extern uint GetWindowThreadProcessId(IntPtr window, out uint processId);
+
+    [DllImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool IsWindowVisible(IntPtr window);
 
     [DllImport("user32.dll")]
     private static extern IntPtr SendMessage(

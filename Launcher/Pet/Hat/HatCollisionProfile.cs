@@ -4,7 +4,10 @@ namespace Launcher.Pet.Hat;
 
 internal readonly record struct HatCollision(
     DesktopSurface Surface,
-    float ContactY);
+    HatCollisionSegment Segment)
+{
+    internal float ContactY => Segment.ContactY;
+}
 
 internal readonly record struct HatCollisionSegment(
     float Left,
@@ -43,21 +46,28 @@ internal sealed class HatCollisionProfile
     internal HatCollision? FindFirstCollision(
         IEnumerable<DesktopSurface> surfaces,
         RectangleF previousHatBounds,
-        RectangleF currentHatBounds)
+        RectangleF currentHatBounds,
+        bool resolveInitialOverlap)
     {
         HatCollision? firstCollision = null;
         float firstLandingTop = float.PositiveInfinity;
+        HatCollision? overlapCollision = null;
+        float smallestLift = float.PositiveInfinity;
 
         foreach (DesktopSurface surface in surfaces)
         {
+            HatCollisionSegment? supportSegment = null;
             foreach (HatCollisionSegment segment in _segments)
             {
                 if (!HorizontallyOverlaps(surface.Bounds, currentHatBounds.Left, segment))
                     continue;
 
+                if (supportSegment is null || segment.ContactY > supportSegment.Value.ContactY)
+                    supportSegment = segment;
+
                 float previousContactY = previousHatBounds.Top + segment.ContactY;
                 float currentContactY = currentHatBounds.Top + segment.ContactY;
-                if (previousContactY >= surface.Bounds.Top || currentContactY < surface.Bounds.Top)
+                if (previousContactY > surface.Bounds.Top || currentContactY < surface.Bounds.Top)
                     continue;
 
                 float landingTop = surface.Bounds.Top - segment.ContactY;
@@ -65,32 +75,27 @@ internal sealed class HatCollisionProfile
                     continue;
 
                 firstLandingTop = landingTop;
-                firstCollision = new HatCollision(surface, segment.ContactY);
+                firstCollision = new HatCollision(surface, segment);
             }
-        }
 
-        return firstCollision;
-    }
-
-    internal float? GetSupportContactY(Rectangle surfaceBounds, float hatLeft)
-    {
-        float? contactY = null;
-        foreach (HatCollisionSegment segment in _segments)
-        {
-            if (!HorizontallyOverlaps(surfaceBounds, hatLeft, segment))
+            // Начальное проникновение разрешается одинаково для всех источников.
+            // Нижний из перекрывающихся сегментов освобождает весь профиль,
+            // а между поверхностями выбирается наименьшее поднятие.
+            if (!resolveInitialOverlap || supportSegment is null
+                || !previousHatBounds.IntersectsWith(surface.Bounds))
                 continue;
 
-            // Если поверхность одновременно попадает под поле и под центральную
-            // выемку, более низкое поле касается её раньше.
-            contactY = contactY.HasValue
-                ? Math.Max(contactY.Value, segment.ContactY)
-                : segment.ContactY;
+            float lift = previousHatBounds.Top + supportSegment.Value.ContactY - surface.Bounds.Top;
+            if (lift < 0f || lift >= smallestLift)
+                continue;
+            smallestLift = lift;
+            overlapCollision = new HatCollision(surface, supportSegment.Value);
         }
 
-        return contactY;
+        return overlapCollision ?? firstCollision;
     }
 
-    private static bool HorizontallyOverlaps(
+    internal static bool HorizontallyOverlaps(
         Rectangle surfaceBounds,
         float hatLeft,
         HatCollisionSegment segment)

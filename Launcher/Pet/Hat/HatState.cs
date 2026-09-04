@@ -7,10 +7,13 @@ internal enum HatMode
     Attached,
     Dragging,
     Falling,
-    RestingOnWindow,
-    RestingOnDesktopIcon,
-    RestingOnTaskbar
+    Resting
 }
+
+internal readonly record struct HatSupport(
+    DesktopSurfaceIdentity Identity,
+    float RelativeX,
+    HatCollisionSegment Segment);
 
 internal sealed class HatState
 {
@@ -19,6 +22,6 @@ internal sealed class HatState
     internal float VelocityY { get; set; }
     internal float Angle { get; set; }
     internal float FallTimeSeconds { get; set; }
-    internal IntPtr RestingWindowHandle { get; set; }
-    internal float RelativeX { get; set; }
+    internal HatSupport? Support { get; set; }
+    internal bool ResolveInitialOverlap { get; set; }
 }

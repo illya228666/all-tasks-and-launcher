@@ -84,7 +84,7 @@ internal sealed class HatCollisionDebugController : IDisposable
             : Size.Empty;
 
         IReadOnlyList<DesktopSurface> surfaces =
-            _surfaceProvider.GetDebugSurfaces(excludedWindow);
+            _surfaceProvider.GetSurfaces(excludedWindow);
 
         _window!.UpdateDebug(
             surfaces,

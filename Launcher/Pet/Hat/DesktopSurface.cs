@@ -9,7 +9,14 @@ internal enum DesktopSurfaceType
     Taskbar
 }
 
+internal readonly record struct DesktopSurfaceIdentity(
+    DesktopSurfaceType Type,
+    IntPtr WindowHandle,
+    string? ItemKey = null);
+
 internal readonly record struct DesktopSurface(
     Rectangle Bounds,
-    IntPtr WindowHandle,
-    DesktopSurfaceType Type);
+    DesktopSurfaceIdentity Identity)
+{
+    internal DesktopSurfaceType Type => Identity.Type;
+}

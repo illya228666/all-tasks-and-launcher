@@ -13,69 +13,55 @@ internal sealed class DesktopSurfaceProvider
 
     private readonly DesktopIconSurfaceProvider _desktopIconProvider = new();
 
-    internal HatCollision? FindCollision(
-        RectangleF previousHatBounds,
-        RectangleF currentHatBounds,
-        IntPtr excludedWindow,
-        HatCollisionProfile collisionProfile)
-    {
-        List<DesktopSurface> windows = EnumerateWindows(excludedWindow);
-        var surfaces = new List<DesktopSurface>(windows);
-
-        AddAvailableDesktopIcons(surfaces, windows);
-
-        Point center = new(
-            (int)Math.Round(currentHatBounds.Left + currentHatBounds.Width / 2f),
-            (int)Math.Round(currentHatBounds.Top + currentHatBounds.Height / 2f));
-        Rectangle workingArea = Screen.FromPoint(center).WorkingArea;
-        surfaces.Add(new DesktopSurface(
-            Rectangle.FromLTRB(workingArea.Left, workingArea.Bottom, workingArea.Right, workingArea.Bottom + 1),
-            IntPtr.Zero,
-            DesktopSurfaceType.Taskbar));
-
-        return collisionProfile.FindFirstCollision(surfaces, previousHatBounds, currentHatBounds);
-    }
-
-    internal DesktopSurface GetTaskbarSurface(Point hatCenter)
-    {
-        Rectangle workingArea = Screen.FromPoint(hatCenter).WorkingArea;
-        return new DesktopSurface(
-            Rectangle.FromLTRB(workingArea.Left, workingArea.Bottom, workingArea.Right, workingArea.Bottom + 1),
-            IntPtr.Zero,
-            DesktopSurfaceType.Taskbar);
-    }
-
-    internal IReadOnlyList<DesktopSurface> GetDebugSurfaces(IntPtr excludedWindow)
+    internal IReadOnlyList<DesktopSurface> GetSurfaces(IntPtr excludedWindow)
     {
         List<DesktopSurface> windows = EnumerateWindows(excludedWindow);
         var surfaces = new List<DesktopSurface>(windows);
         AddAvailableDesktopIcons(surfaces, windows);
-
         foreach (Screen screen in Screen.AllScreens)
-        {
-            Rectangle workingArea = screen.WorkingArea;
-            if (workingArea.Bottom >= screen.Bounds.Bottom)
-                continue;
-
-            surfaces.Add(new DesktopSurface(
-                Rectangle.FromLTRB(
-                    workingArea.Left,
-                    workingArea.Bottom,
-                    workingArea.Right,
-                    workingArea.Bottom + 1),
-                IntPtr.Zero,
-                DesktopSurfaceType.Taskbar));
-        }
-
+            surfaces.Add(GetTaskbarSurface(screen));
         return surfaces;
     }
 
-    internal bool TryGetWindowSurface(IntPtr handle, out DesktopSurface surface)
+    internal bool TryRefresh(
+        DesktopSurfaceIdentity identity,
+        IntPtr excludedWindow,
+        out DesktopSurface surface)
     {
         surface = default;
-        if (!IsUsableWindow(handle, IntPtr.Zero) || !TryGetBounds(handle, out Rectangle bounds))
+        switch (identity.Type)
+        {
+            case DesktopSurfaceType.Window:
+                return TryGetWindowSurface(identity.WindowHandle, excludedWindow, out surface);
+            case DesktopSurfaceType.DesktopIcon:
+                if (!_desktopIconProvider.TryRefresh(identity, out surface))
+                    return false;
+                return IsIconAvailable(surface, EnumerateWindows(excludedWindow));
+            case DesktopSurfaceType.Taskbar:
+                Screen? screen = Screen.AllScreens.FirstOrDefault(item => item.DeviceName == identity.ItemKey);
+                if (screen is null)
+                    return false;
+                surface = GetTaskbarSurface(screen);
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    private static DesktopSurface GetTaskbarSurface(Screen screen)
+    {
+        Rectangle area = screen.WorkingArea;
+        return new DesktopSurface(
+            Rectangle.FromLTRB(area.Left, area.Bottom, area.Right, area.Bottom + 1),
+            new DesktopSurfaceIdentity(DesktopSurfaceType.Taskbar, IntPtr.Zero, screen.DeviceName));
+    }
+
+    private static bool TryGetWindowSurface(IntPtr handle, IntPtr excludedWindow, out DesktopSurface surface)
+    {
+        surface = default;
+        if (!IsUsableWindow(handle, excludedWindow) || !TryGetBounds(handle, out Rectangle bounds))
             return false;
-        surface = new DesktopSurface(bounds, handle, DesktopSurfaceType.Window);
+        surface = new DesktopSurface(bounds, new DesktopSurfaceIdentity(DesktopSurfaceType.Window, handle));
         return true;
     }
 
@@ -87,18 +73,21 @@ internal sealed class DesktopSurfaceProvider
         {
             // Иконки находятся на самом нижнем слое рабочего стола. Если обычное
             // окно перекрывает конкретную иконку, она не является доступной платформой.
-            if (!windows.Any(window => window.Bounds.IntersectsWith(icon.Bounds)))
+            if (IsIconAvailable(icon, windows))
                 surfaces.Add(icon);
         }
     }
+
+    private static bool IsIconAvailable(DesktopSurface icon, IReadOnlyCollection<DesktopSurface> windows) =>
+        !windows.Any(window => window.Bounds.IntersectsWith(icon.Bounds));
 
     private static List<DesktopSurface> EnumerateWindows(IntPtr excludedWindow)
     {
         var surfaces = new List<DesktopSurface>();
         EnumWindows((handle, _) =>
         {
-            if (IsUsableWindow(handle, excludedWindow) && TryGetBounds(handle, out Rectangle bounds))
-                surfaces.Add(new DesktopSurface(bounds, handle, DesktopSurfaceType.Window));
+            if (TryGetWindowSurface(handle, excludedWindow, out DesktopSurface surface))
+                surfaces.Add(surface);
             return true;
         }, IntPtr.Zero);
         return surfaces;
