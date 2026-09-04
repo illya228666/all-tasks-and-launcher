@@ -17,7 +17,7 @@ internal sealed class DesktopSurfaceProvider
     {
         List<DesktopSurface> windows = EnumerateWindows(excludedWindow);
         var surfaces = new List<DesktopSurface>(windows);
-        AddAvailableDesktopIcons(surfaces, windows);
+        AddDesktopIcons(surfaces, windows);
         foreach (Screen screen in Screen.AllScreens)
             surfaces.Add(GetTaskbarSurface(screen));
         return surfaces;
@@ -63,7 +63,7 @@ internal sealed class DesktopSurfaceProvider
         return true;
     }
 
-    private void AddAvailableDesktopIcons(
+    private void AddDesktopIcons(
         List<DesktopSurface> surfaces,
         IReadOnlyCollection<DesktopSurface> windows)
     {
@@ -71,13 +71,9 @@ internal sealed class DesktopSurfaceProvider
         {
             // Иконки находятся на самом нижнем слое рабочего стола. Если обычное
             // окно перекрывает конкретную иконку, она не является доступной платформой.
-            if (IsIconAvailable(icon, windows))
-                surfaces.Add(icon);
+            surfaces.Add(icon);
         }
     }
-
-    private static bool IsIconAvailable(DesktopSurface icon, IReadOnlyCollection<DesktopSurface> windows) =>
-        !windows.Any(window => window.Bounds.IntersectsWith(icon.Bounds));
 
     private static List<DesktopSurface> EnumerateWindows(IntPtr excludedWindow)
     {
