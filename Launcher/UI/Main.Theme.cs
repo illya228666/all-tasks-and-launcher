@@ -53,7 +53,7 @@ public partial class Main
 
         _btnTheme.Text = _isDarkTheme ? "Theme: Dark" : "Theme: Light";
         _header.Invalidate();
-        _pet.ApplyTheme(new PetTheme(SurfaceAlt, Surface, TextPrimary, BorderColor));
+        _pet.ApplyTheme(new PetTheme(SurfaceAlt, Surface, TextPrimary, BorderColor, _isDarkTheme));
         // Перекраска не начинает реплику заново и сохраняет прокрутку к питомцу.
         Render(preservePetSpeech: true);
     }

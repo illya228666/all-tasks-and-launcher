@@ -1,5 +1,6 @@
 using System.Drawing;
 using System.Runtime.InteropServices;
+using Launcher.Pet.Hat.Debug;
 using Launcher.Pet.UI;
 
 namespace Launcher.Pet.Hat;
@@ -17,6 +18,7 @@ internal sealed class HatController : IDisposable
     private readonly Action<string> _hintRequested;
     private readonly Bitmap _sprite;
     private readonly HatCollisionProfile _collisionProfile;
+    private readonly HatCollisionDebugController _collisionDebug;
     private HatWindow? _window;
     private long _lastTick;
     private bool _running;
@@ -35,14 +37,21 @@ internal sealed class HatController : IDisposable
             throw new InvalidDataException($"Unerwartete Hutgroesse: {sprite.Width}x{sprite.Height}.");
         _sprite = new Bitmap(sprite);
         _collisionProfile = new HatCollisionProfile(_sprite.Size);
+        _collisionDebug = new HatCollisionDebugController(
+            _surfaceProvider,
+            _collisionProfile,
+            () => _window);
         _updateTimer.Tick += UpdateTimer_Tick;
     }
+
+    internal void SetCollisionDebug(bool enabled) => _collisionDebug.SetEnabled(enabled);
 
     internal void Start()
     {
         if (_disposed)
             return;
         _running = true;
+        _collisionDebug.Start();
         if (_state.Mode is HatMode.Falling or HatMode.RestingOnWindow)
         {
             _lastTick = Environment.TickCount64;
@@ -54,6 +63,7 @@ internal sealed class HatController : IDisposable
     {
         _running = false;
         _updateTimer.Stop();
+        _collisionDebug.Stop();
     }
 
     internal void DetachAndBeginDrag(Point cursorPosition)
@@ -255,6 +265,7 @@ internal sealed class HatController : IDisposable
         Stop();
         _updateTimer.Tick -= UpdateTimer_Tick;
         _updateTimer.Dispose();
+        _collisionDebug.Dispose();
         DisposeWindow();
         _sprite.Dispose();
     }

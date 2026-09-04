@@ -78,6 +78,7 @@ internal sealed class PetController : IDisposable
     {
         _renderer.ApplyTheme(theme);
         _speech.ApplyTheme(theme);
+        _hat.SetCollisionDebug(theme.ShowCollisions);
     }
 
     internal void Start()
