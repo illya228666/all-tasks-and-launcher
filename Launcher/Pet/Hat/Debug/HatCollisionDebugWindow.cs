@@ -1,4 +1,5 @@
 using System.Drawing.Drawing2D;
+using System.Runtime.InteropServices;
 
 namespace Launcher.Pet.Hat.Debug;
 
@@ -58,6 +59,17 @@ internal sealed class HatCollisionDebugWindow : Form
 
         if (!Visible)
             Show();
+
+        // И HatWindow, и debug overlay являются TopMost. Принудительно поднимаем
+        // debug-окно на вершину topmost-группы, чтобы профиль шляпы рисовался поверх неё.
+        SetWindowPos(
+            Handle,
+            HwndTopMost,
+            0,
+            0,
+            0,
+            0,
+            SwpNoSize | SwpNoMove | SwpNoActivate);
         Invalidate();
     }
 
@@ -160,4 +172,20 @@ internal sealed class HatCollisionDebugWindow : Form
             screenRectangle.Top - Bounds.Top,
             screenRectangle.Width,
             screenRectangle.Height);
+
+    private static readonly IntPtr HwndTopMost = new(-1);
+    private const uint SwpNoSize = 0x0001;
+    private const uint SwpNoMove = 0x0002;
+    private const uint SwpNoActivate = 0x0010;
+
+    [DllImport("user32.dll", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool SetWindowPos(
+        IntPtr window,
+        IntPtr insertAfter,
+        int x,
+        int y,
+        int width,
+        int height,
+        uint flags);
 }
