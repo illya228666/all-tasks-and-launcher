@@ -82,7 +82,10 @@ internal sealed class HatCollisionProfile
             // Нижний из перекрывающихся сегментов освобождает весь профиль,
             // а между поверхностями выбирается наименьшее поднятие.
             if (!resolveInitialOverlap || supportSegment is null
-                || !previousHatBounds.IntersectsWith(surface.Bounds))
+                || !IsColliderOverlappingSurface(
+                    surface.Bounds,
+                    previousHatBounds,
+                    supportSegment.Value))
                 continue;
 
             float lift = previousHatBounds.Top + supportSegment.Value.ContactY - surface.Bounds.Top;
@@ -93,6 +96,20 @@ internal sealed class HatCollisionProfile
         }
 
         return overlapCollision ?? firstCollision;
+    }
+
+    private static bool IsColliderOverlappingSurface(
+    Rectangle surfaceBounds,
+    RectangleF hatBounds,
+    HatCollisionSegment segment)
+    {
+        if (!HorizontallyOverlaps(surfaceBounds, hatBounds.Left, segment))
+            return false;
+
+        float contactY = hatBounds.Top + segment.ContactY;
+
+        return contactY >= surfaceBounds.Top
+            && hatBounds.Top < surfaceBounds.Bottom;
     }
 
     internal static bool HorizontallyOverlaps(
