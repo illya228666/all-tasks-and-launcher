@@ -34,9 +34,7 @@ internal sealed class DesktopSurfaceProvider
             case DesktopSurfaceType.Window:
                 return TryGetWindowSurface(identity.WindowHandle, excludedWindow, out surface);
             case DesktopSurfaceType.DesktopIcon:
-                if (!_desktopIconProvider.TryRefresh(identity, out surface))
-                    return false;
-                return IsIconAvailable(surface, EnumerateWindows(excludedWindow));
+                return _desktopIconProvider.TryRefresh(identity, out surface);
             case DesktopSurfaceType.Taskbar:
                 Screen? screen = Screen.AllScreens.FirstOrDefault(item => item.DeviceName == identity.ItemKey);
                 if (screen is null)
@@ -78,14 +76,8 @@ internal sealed class DesktopSurfaceProvider
         }
     }
 
-    private static bool IsIconAvailable(
-        DesktopSurface icon,
-        IReadOnlyCollection<DesktopSurface> windows) =>
-        !windows.Any(window =>
-            window.Bounds.Right > icon.Bounds.Left &&
-            window.Bounds.Left < icon.Bounds.Right &&
-            window.Bounds.Top <= icon.Bounds.Top &&
-            window.Bounds.Bottom > icon.Bounds.Top);
+    private static bool IsIconAvailable(DesktopSurface icon, IReadOnlyCollection<DesktopSurface> windows) =>
+        !windows.Any(window => window.Bounds.IntersectsWith(icon.Bounds));
 
     private static List<DesktopSurface> EnumerateWindows(IntPtr excludedWindow)
     {

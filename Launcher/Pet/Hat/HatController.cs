@@ -215,7 +215,26 @@ internal sealed class HatController : IDisposable
         }
 
         int version = _stateVersion;
-        bool valid = _surfaceProvider.TryRefresh(support.Identity, _window!.WindowHandle, out DesktopSurface surface);
+        IReadOnlyList<DesktopSurface> surfaces = _surfaceProvider.GetSurfaces(_window!.WindowHandle);
+        if (!_running || _disposed || version != _stateVersion)
+            return;
+
+        RectangleF restingBounds = new(_state.Position, _window.ClientSize);
+        HatCollision? takeover = _collisionProfile.FindFirstCollision(
+            surfaces.Where(surface => surface.Identity != support.Identity),
+            restingBounds,
+            restingBounds,
+            resolveInitialOverlap: true);
+        if (takeover is not null)
+        {
+            LandOn(takeover.Value);
+            return;
+        }
+
+        bool valid = _surfaceProvider.TryRefresh(
+            support.Identity,
+            _window.WindowHandle,
+            out DesktopSurface surface);
         if (!_running || _disposed || version != _stateVersion)
             return;
         if (!valid)
