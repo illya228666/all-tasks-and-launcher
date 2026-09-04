@@ -4,7 +4,7 @@ using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
-namespace Launcher.UI.Controls;
+namespace Launcher.Pet.UI;
 
 // Общая прозрачная поверхность. Окна независимы и не имеют владельца Launcher.
 internal class TransparentOverlayWindow : Form

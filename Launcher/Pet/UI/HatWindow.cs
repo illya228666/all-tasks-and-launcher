@@ -2,16 +2,16 @@ using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
-namespace Launcher.UI.Controls;
+namespace Launcher.Pet.UI;
 
-// Отдельное окно без владельца: шляпа остаётся на рабочем столе при сворачивании Main.
+// Отдельное окно без владельца: шляпа остаётся на рабочем столе при сворачивании Launcher.
 internal sealed class HatWindow : TransparentOverlayWindow
 {
     // Интервал переноса в миллисекундах: примерно 60 обновлений в секунду.
     private const int DragIntervalMs = 16;
     private readonly System.Windows.Forms.Timer _dragTimer = new() { Interval = DragIntervalMs };
 
-    // Координаты курсора при отпускании; Main решает, попала ли шляпа на голову.
+    // Координаты курсора при отпускании; renderer решает, попала ли шляпа на голову.
     internal event Action<Point>? Dropped;
 
     internal HatWindow(Bitmap sprite) : base(clickThrough: false)

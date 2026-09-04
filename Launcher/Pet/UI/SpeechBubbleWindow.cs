@@ -6,7 +6,7 @@ using System.Drawing.Text;
 using System.Globalization;
 using System.Windows.Forms;
 
-namespace Launcher.UI.Controls;
+namespace Launcher.Pet.UI;
 
 internal sealed class SpeechBubbleWindow : TransparentOverlayWindow
 {

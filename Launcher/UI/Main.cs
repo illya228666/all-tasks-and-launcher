@@ -7,6 +7,7 @@ using System.Windows.Forms;
 using Launcher.Application;
 using Launcher.Domain;
 using Launcher.Infrastructure;
+using Launcher.Pet;
 
 namespace Launcher.UI;
 
@@ -19,6 +20,7 @@ public partial class Main : Form
     #region [RU] Поля | [DE] Felder
 
     private readonly LauncherFacade _launcherFacade;
+    private readonly PetController _pet;
     private readonly List<AppEntry> _allApps = new();
     private readonly HashSet<string> _favoriteKeys = new(StringComparer.OrdinalIgnoreCase);
     private readonly Random _random = new();
@@ -57,7 +59,7 @@ public partial class Main : Form
             LauncherConstants.StateFolderName,
             LauncherConstants.StateFileName);
 
-        InitializePet();
+        _pet = new PetController(this, flpApps, ShowHint);
         EnableDoubleBuffer(flpApps);
 
         BindEvents();
@@ -65,17 +67,13 @@ public partial class Main : Form
         ApplyTheme();
 
         Resize += (_, __) => Render();
-        Shown += (_, __) =>
+        Shown += (_, __) => _pet.Start();
+        FormClosing += (_, __) =>
         {
-            _petTimer.Start();
-            ScheduleNextPetMovement();
-            ScheduleNextPetJump();
-            _petCursorTimer.Start();
-            UpdatePetCursorTracking();
-            _petSpeechTimer?.Start();
+            _pet.Stop();
+            PersistState();
         };
-        FormClosing += (_, __) => PersistState();
-        FormClosed += (_, __) => DisposePet();
+        FormClosed += (_, __) => _pet.Dispose();
     }
 
     #endregion
