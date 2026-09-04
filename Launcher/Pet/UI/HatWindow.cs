@@ -2,19 +2,17 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
+using Launcher.Pet.Hat;
 
 namespace Launcher.Pet.UI;
 
-// Визуальное окно шляпы: drag и выбор заранее отрисованного угла, без физики.
+// Визуальное окно шляпы: drag/input и выбор заранее отрисованного угла, без физики и scheduler.
 internal sealed class HatWindow : TransparentOverlayWindow
 {
-    private const int DragIntervalMs = 16;
-    private static readonly float[] FrameAngles = { -7f, -3.5f, 0f, 3.5f, 7f };
-
-    private readonly System.Windows.Forms.Timer _dragTimer = new() { Interval = DragIntervalMs };
     private readonly Bitmap[] _angleFrames;
     private int _angleFrame = -1;
     private bool _interactionEnabled = true;
+    private bool _dragging;
 
     internal event Action? DragStarted;
     internal event Action<Point>? Dropped;
@@ -22,7 +20,6 @@ internal sealed class HatWindow : TransparentOverlayWindow
     internal HatWindow(Bitmap sprite) : base(clickThrough: false)
     {
         _angleFrames = CreateAngleFrames(sprite);
-        _dragTimer.Tick += DragTimer_Tick;
         SetAngle(0f);
     }
 
@@ -30,15 +27,28 @@ internal sealed class HatWindow : TransparentOverlayWindow
 
     internal void BeginDrag(Point cursorPosition)
     {
-        if (!_interactionEnabled)
+        if (!_interactionEnabled || _dragging)
             return;
+
         SetAngle(0f);
         ShowAt(GetLocationAtCursor(cursorPosition));
+        _dragging = true;
         DragStarted?.Invoke();
-        _dragTimer.Start();
     }
 
-    internal void CancelDrag() => _dragTimer.Stop();
+    internal void UpdateDrag()
+    {
+        if (!_dragging)
+            return;
+
+        // Физическое состояние ЛКМ не требует фокуса, захвата мыши или хуков.
+        if ((GetAsyncKeyState(0x01) & 0x8000) == 0)
+            EndDrag();
+        else
+            MoveToCursor(Cursor.Position);
+    }
+
+    internal void CancelDrag() => _dragging = false;
 
     internal void SetInteractionEnabled(bool enabled)
     {
@@ -51,21 +61,22 @@ internal sealed class HatWindow : TransparentOverlayWindow
 
     internal void SetAngle(float angle)
     {
-        int frame = Enumerable.Range(0, FrameAngles.Length)
-            .MinBy(index => Math.Abs(FrameAngles[index] - angle));
+        int frame = HatRotationProfile.GetNearestFrameIndex(angle);
         if (frame == _angleFrame)
             return;
+
         _angleFrame = frame;
         SetImage(_angleFrames[frame]);
     }
 
     private static Bitmap[] CreateAngleFrames(Bitmap sprite)
     {
-        var frames = new List<Bitmap>(FrameAngles.Length);
+        var frames = new List<Bitmap>(HatRotationProfile.FrameCount);
         try
         {
-            foreach (float angle in FrameAngles)
+            for (int frameIndex = 0; frameIndex < HatRotationProfile.FrameCount; frameIndex++)
             {
+                float angle = HatRotationProfile.GetFrameAngle(frameIndex);
                 if (angle == 0f)
                 {
                     frames.Add(new Bitmap(sprite));
@@ -84,6 +95,7 @@ internal sealed class HatWindow : TransparentOverlayWindow
                 graphics.DrawImageUnscaled(sprite, 0, 0);
                 frames.Add(frame);
             }
+
             return frames.ToArray();
         }
         catch
@@ -101,31 +113,19 @@ internal sealed class HatWindow : TransparentOverlayWindow
 
     private void EndDrag()
     {
-        if (!_dragTimer.Enabled)
+        if (!_dragging)
             return;
 
-        _dragTimer.Stop();
+        _dragging = false;
         Point dropPosition = Cursor.Position;
         MoveToCursor(dropPosition);
         Dropped?.Invoke(dropPosition);
     }
 
-    private void DragTimer_Tick(object? sender, EventArgs e)
-    {
-        if (!_dragTimer.Enabled)
-            return;
-
-        // Физическое состояние ЛКМ не требует фокуса, захвата мыши или хуков.
-        if ((GetAsyncKeyState(0x01) & 0x8000) == 0)
-            EndDrag();
-        else
-            MoveToCursor(Cursor.Position);
-    }
-
     protected override void OnMouseDown(MouseEventArgs e)
     {
         base.OnMouseDown(e);
-        if (_interactionEnabled && e.Button == MouseButtons.Left && !_dragTimer.Enabled)
+        if (_interactionEnabled && e.Button == MouseButtons.Left && !_dragging)
             BeginDrag(Cursor.Position);
     }
 
@@ -140,12 +140,11 @@ internal sealed class HatWindow : TransparentOverlayWindow
     {
         if (disposing)
         {
-            _dragTimer.Stop();
-            _dragTimer.Tick -= DragTimer_Tick;
-            _dragTimer.Dispose();
+            _dragging = false;
             foreach (Bitmap frame in _angleFrames)
                 frame.Dispose();
         }
+
         base.Dispose(disposing);
     }
 
