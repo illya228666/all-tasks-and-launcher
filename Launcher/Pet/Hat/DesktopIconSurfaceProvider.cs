@@ -9,8 +9,6 @@ internal sealed partial class DesktopIconSurfaceProvider
 {
     private const float IconCollisionWidthRatio = 0.35f;
 
-    private const long CacheDurationMs = 500;
-
     private const uint ListViewFirst = 0x1000;
     private const uint ListViewGetItemCount = ListViewFirst + 4;
     private const uint ListViewGetItemRect = ListViewFirst + 14;
@@ -33,7 +31,7 @@ internal sealed partial class DesktopIconSurfaceProvider
     internal IReadOnlyList<DesktopSurface> GetSurfaces()
     {
         long now = Environment.TickCount64;
-        if (_refreshing || (_lastRefresh != 0 && now - _lastRefresh < CacheDurationMs))
+        if (_refreshing || (_lastRefresh != 0 && now - _lastRefresh < HatTiming.DesktopIconSnapshotLifetimeMs))
         {
             if (!IsWindowVisible(_listView)
                 || GetWindowThreadProcessId(_listView, out uint processId) == 0
