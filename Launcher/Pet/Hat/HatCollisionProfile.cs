@@ -21,8 +21,8 @@ internal readonly record struct HatCollisionSegment(
 /// </summary>
 internal sealed class HatCollisionProfile
 {
-    private const float SideWidthRatio = 0.24f;
-    private const float SurfaceOverlap = 8f;
+    private const float SideWidthRatio = 0.1f;
+    private const float SurfaceOverlap = 25f;
     private const float CenterRecessDepth = 16f;
 
     private readonly HatCollisionSegment[] _segments;

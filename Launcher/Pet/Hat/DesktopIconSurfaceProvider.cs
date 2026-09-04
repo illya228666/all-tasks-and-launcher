@@ -7,6 +7,8 @@ namespace Launcher.Pet.Hat;
 // Геометрия кэшируется ненадолго, чтобы не читать память Explorer каждый physics tick.
 internal sealed partial class DesktopIconSurfaceProvider
 {
+    private const float IconCollisionWidthRatio = 0.35f;
+
     private const long CacheDurationMs = 500;
 
     private const uint ListViewFirst = 0x1000;
@@ -147,13 +149,21 @@ internal sealed partial class DesktopIconSurfaceProvider
                 if (bounds.Width <= 0 || bounds.Height <= 0)
                     continue;
 
+                int horizontalInset = (int)Math.Round(bounds.Width * (1f - IconCollisionWidthRatio) / 2f);
+
+                Rectangle collisionBounds = Rectangle.FromLTRB(
+                    bounds.Left + horizontalInset,
+                    bounds.Top,
+                    bounds.Right - horizontalInset,
+                    bounds.Bottom);
+
                 // Индекс служит только адресом чтения. Если view перестроился
                 // во время чтения геометрии, результат не становится опорой.
                 if (itemKey != GetItemKey(view, itemIndex))
                     continue;
 
                 target.Add(new DesktopSurface(
-                    bounds,
+                    collisionBounds,
                     new DesktopSurfaceIdentity(
                         DesktopSurfaceType.DesktopIcon, listView, $"{processId}:{itemKey}")));
             }
