@@ -4,8 +4,6 @@ internal sealed class HatPhysics
 {
     private const float Gravity = 1050f;
     private const float MaxSpeed = 1000f;
-    private const float MaxAngle = 7f;
-    private const float SwingRadiansPerSecond = 5f;
 
     internal void Advance(HatState state, float elapsedSeconds)
     {
@@ -14,6 +12,7 @@ internal sealed class HatPhysics
         state.VelocityY = Math.Min(MaxSpeed, state.VelocityY + Gravity * dt);
         state.Position = new(state.Position.X, state.Position.Y + state.VelocityY * dt);
         state.FallTimeSeconds += dt;
-        state.Angle = MaxAngle * MathF.Sin(state.FallTimeSeconds * SwingRadiansPerSecond);
+        state.Angle = HatRotationProfile.MaxAngleDegrees
+            * MathF.Sin(state.FallTimeSeconds * HatRotationProfile.SwingRadiansPerSecond);
     }
 }
