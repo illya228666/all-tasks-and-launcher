@@ -1,6 +1,7 @@
 ﻿using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Windows.Forms;
+using Launcher.Pet;
 
 namespace Launcher.UI;
 
@@ -49,9 +50,12 @@ public partial class Main
         StyleButton(_btnSurprise, true);
         StyleButton(_btnRoot, false);
         StyleButton(_btnTheme, false);
+        StyleButton(_btnD1On, false);
+        StyleButton(_btnD1Off, false);
 
         _btnTheme.Text = _isDarkTheme ? "Theme: Dark" : "Theme: Light";
         _header.Invalidate();
+        _pet.ApplyTheme(new PetTheme(SurfaceAlt, Surface, TextPrimary, BorderColor, _isDarkTheme));
         // Перекраска не начинает реплику заново и сохраняет прокрутку к питомцу.
         Render(preservePetSpeech: true);
     }
