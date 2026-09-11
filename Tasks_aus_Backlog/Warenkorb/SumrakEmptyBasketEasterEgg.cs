@@ -31,6 +31,7 @@ namespace Warenkorb
             SetStyle(ControlStyles.AllPaintingInWmPaint |
                      ControlStyles.OptimizedDoubleBuffer |
                      ControlStyles.ResizeRedraw |
+                     ControlStyles.Selectable |
                      ControlStyles.UserPaint, true);
 
             BackColor = Color.White;
