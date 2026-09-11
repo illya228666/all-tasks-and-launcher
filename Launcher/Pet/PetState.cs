@@ -8,7 +8,8 @@ internal enum PetMode
     Jumping,
     TrackingCursor,
     RetrievingHat,
-    PuttingOnHat
+    PuttingOnHat,
+    Earthquake
 }
 
 internal sealed class PetState

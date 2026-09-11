@@ -58,6 +58,23 @@ internal static class PetAnimationCatalog
     internal const int CardProbeOffset = 2;
     internal const float PixelsPerMovementCycle = 120f;
 
+    // Землетрясение: время от начала в мс, существующие кадры потери равновесия и подъёма.
+    internal const int EarthquakeDurationMs = 5000;
+    internal const int EarthquakeTickMs = 16;
+    internal const float EarthquakeShakePixels = 8f;
+    internal static readonly (int UntilMs, int Row, int Frame)[] EarthquakeFrames =
+    {
+        (180, FailedRow, 0),
+        (360, FailedRow, 1),
+        (560, FailedRow, 2),
+        (800, FailedRow, 3),
+        (3400, FailedRow, 4),
+        (3900, FailedRow, 3),
+        (4300, FailedRow, 5),
+        (4650, FailedRow, 6),
+        (EarthquakeDurationMs, FailedRow, 7)
+    };
+
     // Прототип: быстрый подход, приседание, выпрямление и жест рукой у шляпы.
     internal const int HatRunFrameMs = 80;
     internal const float HatRunSpeed = 220f;

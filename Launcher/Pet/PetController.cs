@@ -6,7 +6,7 @@ using Launcher.Pet.Speech;
 
 namespace Launcher.Pet;
 
-internal sealed class PetController : IDisposable
+internal sealed partial class PetController : IDisposable
 {
     private readonly Form _window;
     private readonly ScrollableControl _viewport;
@@ -72,7 +72,11 @@ internal sealed class PetController : IDisposable
 
     internal void AttachHost(Panel panel, int groundY) => _renderer.AttachHost(panel, groundY);
 
-    internal void BeginHostChange(bool preserveSpeech) => _speech.BeginHostChange(preserveSpeech);
+    internal void BeginHostChange(bool preserveSpeech)
+    {
+        EndEarthquake();
+        _speech.BeginHostChange(preserveSpeech);
+    }
 
     internal void EndHostChange() => _speech.EndHostChange();
 
@@ -103,6 +107,7 @@ internal sealed class PetController : IDisposable
         if (!_started)
             return;
         _started = false;
+        EndEarthquake();
 
         _hat.Stop();
         _animationTimer.Stop();
@@ -114,6 +119,11 @@ internal sealed class PetController : IDisposable
 
     private void AnimationTimer_Tick(object? sender, EventArgs e)
     {
+        if (_state.Mode == PetMode.Earthquake)
+        {
+            AdvanceEarthquake();
+            return;
+        }
         if (IsPickingUpHat)
         {
             AdvanceHatPickup();
@@ -182,7 +192,7 @@ internal sealed class PetController : IDisposable
     private void JumpTimer_Tick(object? sender, EventArgs e)
     {
         _jumpTimer.Stop();
-        if (IsPickingUpHat)
+        if (IsPickingUpHat || _state.Mode == PetMode.Earthquake)
             return;
         if (_state.Mode == PetMode.TrackingCursor)
             return;
@@ -252,7 +262,7 @@ internal sealed class PetController : IDisposable
     {
         _state.JumpPending = false;
         _jumpTimer.Stop();
-        if (_state.Mode == PetMode.TrackingCursor || IsPickingUpHat)
+        if (_state.Mode is PetMode.TrackingCursor or PetMode.Earthquake || IsPickingUpHat)
             return;
         _jumpTimer.Interval = _random.Next(
             PetAnimationCatalog.JumpMinDelayMs, PetAnimationCatalog.JumpMaxDelayMs + 1);
@@ -262,7 +272,7 @@ internal sealed class PetController : IDisposable
     private void MovementTimer_Tick(object? sender, EventArgs e)
     {
         _movementTimer.Stop();
-        if (IsPickingUpHat)
+        if (IsPickingUpHat || _state.Mode == PetMode.Earthquake)
             return;
         if (_state.Mode == PetMode.TrackingCursor)
             return;
@@ -324,7 +334,7 @@ internal sealed class PetController : IDisposable
     private void ScheduleNextMovement()
     {
         _movementTimer.Stop();
-        if (_state.Mode == PetMode.TrackingCursor || IsPickingUpHat)
+        if (_state.Mode is PetMode.TrackingCursor or PetMode.Earthquake || IsPickingUpHat)
             return;
         _movementTimer.Interval = _random.Next(
             PetAnimationCatalog.MovementMinDelayMs, PetAnimationCatalog.MovementMaxDelayMs + 1);
@@ -335,7 +345,7 @@ internal sealed class PetController : IDisposable
 
     private void UpdateCursorTracking()
     {
-        if (!_window.IsHandleCreated || !_renderer.IsReady)
+        if (_state.Mode == PetMode.Earthquake || !_window.IsHandleCreated || !_renderer.IsReady)
             return;
         // Ожидающая шляпа защищает текущий прыжок и имеет приоритет над курсором.
         if (IsPickingUpHat || TryStartHatPickup()
@@ -421,7 +431,7 @@ internal sealed class PetController : IDisposable
 
     private bool TryStartHatPickup()
     {
-        if (!_started || _disposed || IsPickingUpHat || _state.Mode == PetMode.Jumping
+        if (!_started || _disposed || IsPickingUpHat || _state.Mode is PetMode.Jumping or PetMode.Earthquake
             || _hat.GetPickupPoint() is not Point target || !_renderer.IsReady)
             return false;
 
