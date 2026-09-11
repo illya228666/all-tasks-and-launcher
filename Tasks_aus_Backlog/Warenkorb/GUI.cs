@@ -71,7 +71,7 @@ namespace Warenkorb
             RefreshBasket("Letzten Artikel entfernt.");
         }
 
-        private readonly Warenkorb basket = new Warenkorb(228);
+        private readonly Warenkorb basket = new Warenkorb(10);
         private void RenderCatalog()
         {
             catalog.SuspendLayout();

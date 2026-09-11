@@ -172,7 +172,7 @@ namespace Warenkorb
         /// Das vorhandene Array wird weiterverwendet; seine Länge bleibt unverändert.
         /// Laufzeit im ungünstigsten Fall: O(n²); zusätzlicher Speicherbedarf: O(1).
         /// </remarks>
-        public bool Sort()
+        public void Sort()
         {
             int count = 0;
             for (int i = 0; i < Content.Length; i++)
@@ -192,7 +192,6 @@ namespace Warenkorb
                 }
                 Content[j + 1] = product;
             }
-            return true;
         }
 
         /// <summary>
