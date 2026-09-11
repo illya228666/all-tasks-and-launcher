@@ -32,6 +32,7 @@ internal sealed class PetController : IDisposable
             _hat = new HatController(
                 _renderer.IsHeadAtScreenPoint,
                 _renderer.SetHatAttached,
+                _renderer.GetGroundScreenBounds,
                 hintRequested);
         }
         catch
@@ -40,6 +41,7 @@ internal sealed class PetController : IDisposable
             throw;
         }
         _renderer.HatRemovalRequested += Renderer_HatRemovalRequested;
+        _hat.LandedOnPetGround += Hat_LandedOnPetGround;
         _animationTimer = new System.Windows.Forms.Timer
         {
             Interval = PetAnimationCatalog.FrameDurationsByRow[PetAnimationCatalog.IdleRow][0]
@@ -112,6 +114,11 @@ internal sealed class PetController : IDisposable
 
     private void AnimationTimer_Tick(object? sender, EventArgs e)
     {
+        if (IsPickingUpHat)
+        {
+            AdvanceHatPickup();
+            return;
+        }
         if (_state.Mode == PetMode.TrackingCursor)
             return;
         if (_state.Mode == PetMode.Jumping)
@@ -175,6 +182,8 @@ internal sealed class PetController : IDisposable
     private void JumpTimer_Tick(object? sender, EventArgs e)
     {
         _jumpTimer.Stop();
+        if (IsPickingUpHat)
+            return;
         if (_state.Mode == PetMode.TrackingCursor)
             return;
         if (_speech.IsSpeaking)
@@ -243,7 +252,7 @@ internal sealed class PetController : IDisposable
     {
         _state.JumpPending = false;
         _jumpTimer.Stop();
-        if (_state.Mode == PetMode.TrackingCursor)
+        if (_state.Mode == PetMode.TrackingCursor || IsPickingUpHat)
             return;
         _jumpTimer.Interval = _random.Next(
             PetAnimationCatalog.JumpMinDelayMs, PetAnimationCatalog.JumpMaxDelayMs + 1);
@@ -253,6 +262,8 @@ internal sealed class PetController : IDisposable
     private void MovementTimer_Tick(object? sender, EventArgs e)
     {
         _movementTimer.Stop();
+        if (IsPickingUpHat)
+            return;
         if (_state.Mode == PetMode.TrackingCursor)
             return;
         if (_speech.IsSpeaking || _state.JumpPending || _state.MovementPending)
@@ -313,7 +324,7 @@ internal sealed class PetController : IDisposable
     private void ScheduleNextMovement()
     {
         _movementTimer.Stop();
-        if (_state.Mode == PetMode.TrackingCursor)
+        if (_state.Mode == PetMode.TrackingCursor || IsPickingUpHat)
             return;
         _movementTimer.Interval = _random.Next(
             PetAnimationCatalog.MovementMinDelayMs, PetAnimationCatalog.MovementMaxDelayMs + 1);
@@ -325,6 +336,10 @@ internal sealed class PetController : IDisposable
     private void UpdateCursorTracking()
     {
         if (!_window.IsHandleCreated || !_renderer.IsReady)
+            return;
+        // Ожидающая шляпа защищает текущий прыжок и имеет приоритет над курсором.
+        if (IsPickingUpHat || TryStartHatPickup()
+            || (_state.Mode == PetMode.Jumping && _hat.GetPickupPoint() is not null))
             return;
 
         Point? center = _renderer.GetCenterScreen();
@@ -343,7 +358,7 @@ internal sealed class PetController : IDisposable
         if (cursorInside && _state.Mode != PetMode.TrackingCursor)
             StartCursorTracking();
         else if (!cursorInside && _state.Mode == PetMode.TrackingCursor)
-            StopCursorTracking();
+            ReturnToIdle();
         else if (_state.Mode == PetMode.TrackingCursor && _state.LookIndex != previousLookIndex)
             ApplyLookFrame();
     }
@@ -365,7 +380,7 @@ internal sealed class PetController : IDisposable
         ApplyLookFrame();
     }
 
-    private void StopCursorTracking()
+    private void ReturnToIdle()
     {
         _speech.Reset();
         _state.Mode = PetMode.Idle;
@@ -388,6 +403,8 @@ internal sealed class PetController : IDisposable
 
     private bool TryStartPendingAction()
     {
+        if (TryStartHatPickup())
+            return true;
         if (_speech.IsSpeaking || _state.Mode != PetMode.Idle)
             return false;
         if (_state.JumpPending)
@@ -396,6 +413,112 @@ internal sealed class PetController : IDisposable
             return true;
         }
         return _state.MovementPending && StartMovement();
+    }
+
+    private bool IsPickingUpHat => _state.Mode is PetMode.RetrievingHat or PetMode.PuttingOnHat;
+
+    private void Hat_LandedOnPetGround() => TryStartHatPickup();
+
+    private bool TryStartHatPickup()
+    {
+        if (!_started || _disposed || IsPickingUpHat || _state.Mode == PetMode.Jumping
+            || _hat.GetPickupPoint() is not Point target || !_renderer.IsReady)
+            return false;
+
+        _speech.Reset();
+        _movementTimer.Stop();
+        _jumpTimer.Stop();
+        _state.JumpPending = false;
+        _state.MovementPending = false;
+        _state.IdleElapsedMs = 0;
+        _state.WaveLoopsRemaining = 0;
+        _state.MoveElapsedMs = 0;
+        _renderer.ClampPosition();
+        _state.Mode = PetMode.RetrievingHat;
+        _state.Row = _renderer.GetPickupTargetX(target) >= _state.X
+            ? PetAnimationCatalog.MoveRightRow : PetAnimationCatalog.MoveLeftRow;
+        _state.Frame = 0;
+        _animationTimer.Interval = PetAnimationCatalog.HatRunFrameMs;
+        _animationTimer.Start();
+        _renderer.Invalidate();
+        return true;
+    }
+
+    private void AdvanceHatPickup()
+    {
+        if (_state.Mode == PetMode.RetrievingHat)
+        {
+            if (_hat.GetPickupPoint() is not Point target || !_renderer.IsReady)
+            {
+                FinishHatPickup();
+                return;
+            }
+
+            _renderer.ClampPosition();
+            float targetX = _renderer.GetPickupTargetX(target);
+            float distance = targetX - _state.X;
+            float step = PetAnimationCatalog.HatRunSpeed * PetAnimationCatalog.HatRunFrameMs / 1000f;
+            _state.X += Math.Clamp(distance, -step, step);
+            if (Math.Abs(distance) <= step)
+            {
+                _state.Mode = PetMode.PuttingOnHat;
+                _state.HatPickupIndex = 0;
+                ApplyHatPickupFrame();
+                return;
+            }
+
+            _state.Row = distance > 0 ? PetAnimationCatalog.MoveRightRow : PetAnimationCatalog.MoveLeftRow;
+            _state.Frame = (_state.Frame + 1) % PetAnimationCatalog.FrameDurationsByRow[_state.Row].Length;
+            _renderer.Invalidate();
+            return;
+        }
+
+        _state.HatPickupIndex++;
+        if (_state.HatPickupIndex >= PetAnimationCatalog.HatPickupFrames.Length)
+        {
+            FinishHatPickup();
+            return;
+        }
+        ApplyHatPickupFrame();
+    }
+
+    private void ApplyHatPickupFrame()
+    {
+        PetHatPickupFrame frame = PetAnimationCatalog.HatPickupFrames[_state.HatPickupIndex];
+        // До надевания шляпа остаётся доступной мыши: утащили — отменяем подбор.
+        bool alreadyPutOn = PetAnimationCatalog.HatPickupFrames
+            .Take(_state.HatPickupIndex).Any(item => item.PutOn);
+        if (!alreadyPutOn)
+        {
+            if (_hat.GetPickupPoint() is not Point target || !_renderer.IsReady)
+            {
+                FinishHatPickup();
+                return;
+            }
+            if (Math.Abs(_renderer.GetPickupTargetX(target) - _state.X) > 1f)
+            {
+                _state.Mode = PetMode.Idle;
+                TryStartHatPickup();
+                return;
+            }
+            if (frame.PutOn && !_hat.TryPutOn())
+            {
+                FinishHatPickup();
+                return;
+            }
+        }
+        _state.Row = frame.Row;
+        _state.Frame = frame.Frame;
+        _animationTimer.Interval = frame.DurationMs;
+        _renderer.Invalidate();
+    }
+
+    private void FinishHatPickup()
+    {
+        _state.HatPickupIndex = 0;
+        // Общий выход в idle уже восстанавливает таймеры и сбрасывает речь.
+        ReturnToIdle();
+        UpdateCursorTracking();
     }
 
     private void HostPlacementChanged(object? sender, EventArgs e) => _speech.UpdatePlacement();
@@ -422,6 +545,7 @@ internal sealed class PetController : IDisposable
         _jumpTimer.Tick -= JumpTimer_Tick;
         _cursorTimer.Tick -= CursorTimer_Tick;
         _renderer.HatRemovalRequested -= Renderer_HatRemovalRequested;
+        _hat.LandedOnPetGround -= Hat_LandedOnPetGround;
         _animationTimer.Dispose();
         _movementTimer.Dispose();
         _jumpTimer.Dispose();

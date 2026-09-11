@@ -6,7 +6,8 @@ internal enum DesktopSurfaceType
 {
     Window,
     DesktopIcon,
-    Taskbar
+    Taskbar,
+    PetGround
 }
 
 internal readonly record struct DesktopSurfaceIdentity(

@@ -4,6 +4,7 @@ using System.Drawing;
 namespace Launcher.Pet.Animation;
 
 internal readonly record struct PetJumpFrame(int Row, int Frame, float Lift);
+internal readonly record struct PetHatPickupFrame(int Row, int Frame, int DurationMs, bool PutOn = false);
 
 internal static class PetAnimationCatalog
 {
@@ -56,6 +57,19 @@ internal static class PetAnimationCatalog
     internal const int EdgePadding = 16;
     internal const int CardProbeOffset = 2;
     internal const float PixelsPerMovementCycle = 120f;
+
+    // Прототип: быстрый подход, приседание, выпрямление и жест рукой у шляпы.
+    internal const int HatRunFrameMs = 80;
+    internal const float HatRunSpeed = 220f;
+    internal static readonly PetHatPickupFrame[] HatPickupFrames =
+    {
+        new(JumpRow, 0, 180),
+        new(FailedRow, 5, 160),
+        new(FailedRow, 6, 160),
+        new(WaveRow, 0, 140, PutOn: true),
+        new(WaveRow, 1, 160),
+        new(IdleRow, 0, 180)
+    };
 
     // Длительности кадров в миллисекундах. Строки 9-10 отсутствуют: look-позу
     // выбирает курсор. Количество значений должно совпадать с числом кадров строки.

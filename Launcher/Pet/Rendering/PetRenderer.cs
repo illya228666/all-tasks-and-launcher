@@ -99,6 +99,31 @@ internal sealed class PetRenderer : IDisposable
             _groundY + PetAnimationCatalog.FrameHeight / 2));
     }
 
+    internal Rectangle? GetGroundScreenBounds()
+    {
+        if (!_window.Visible || _window.WindowState == FormWindowState.Minimized || !IsReady)
+            return null;
+
+        // Та же нижняя линия, что рисуется у логической зоны питомца; прыжок её не двигает.
+        Rectangle ground = _panel!.RectangleToScreen(new Rectangle(
+            0, _groundY + PetAnimationCatalog.FrameHeight - 1, _panel.ClientSize.Width, 1));
+        for (Control? control = _panel; control is not null; control = control.Parent)
+        {
+            if (!control.Visible)
+                return null;
+            ground = Rectangle.Intersect(ground, control.RectangleToScreen(control.ClientRectangle));
+        }
+        return ground.Width > 0 && ground.Height > 0 ? ground : null;
+    }
+
+    internal float GetPickupTargetX(Point screenPoint)
+    {
+        float maxX = Math.Max(PetAnimationCatalog.EdgePadding,
+            ClientWidth - PetAnimationCatalog.FrameWidth - PetAnimationCatalog.EdgePadding);
+        return Math.Clamp(_panel!.PointToClient(screenPoint).X - PetAnimationCatalog.FrameWidth / 2f,
+            PetAnimationCatalog.EdgePadding, maxX);
+    }
+
     internal Point? GetSpeechHead()
     {
         if (!_window.Visible || _window.WindowState == FormWindowState.Minimized || !IsReady || _panel!.Parent is null)

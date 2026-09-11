@@ -9,7 +9,7 @@ internal sealed class HatController : IDisposable
 {
     private readonly HatState _state = new();
     private readonly HatPhysics _physics = new();
-    private readonly DesktopSurfaceProvider _surfaceProvider = new();
+    private readonly DesktopSurfaceProvider _surfaceProvider;
     private readonly System.Windows.Forms.Timer _updateTimer = new() { Interval = HatTiming.RuntimeTickIntervalMs };
     private readonly Func<Point, bool> _isHeadAtScreenPoint;
     private readonly Action<bool> _setHatAttached;
@@ -27,8 +27,10 @@ internal sealed class HatController : IDisposable
     internal HatController(
         Func<Point, bool> isHeadAtScreenPoint,
         Action<bool> setHatAttached,
+        Func<Rectangle?> getPetGround,
         Action<string> hintRequested)
     {
+        _surfaceProvider = new DesktopSurfaceProvider(getPetGround);
         _isHeadAtScreenPoint = isHeadAtScreenPoint;
         _setHatAttached = setHatAttached;
         _hintRequested = hintRequested;
@@ -45,6 +47,30 @@ internal sealed class HatController : IDisposable
     }
 
     internal void SetCollisionDebug(bool enabled) => _collisionDebug.SetEnabled(enabled);
+
+    internal event Action? LandedOnPetGround;
+
+    internal Point? GetPickupPoint()
+    {
+        if (_disposed || _state.Mode != HatMode.Resting || _window is null
+            || _state.Support is not HatSupport support
+            || support.Identity.Type != DesktopSurfaceType.PetGround
+            || !_surfaceProvider.TryRefresh(support.Identity, _window.WindowHandle, out DesktopSurface ground))
+            return null;
+
+        float x = ground.Bounds.Left + support.RelativeX;
+        if (!HatCollisionProfile.HorizontallyOverlaps(ground.Bounds, x, support.Segment))
+            return null;
+        return new Point((int)Math.Round(x + _sprite.Width / 2f), ground.Bounds.Top);
+    }
+
+    internal bool TryPutOn()
+    {
+        if (GetPickupPoint() is null)
+            return false;
+        AttachToPet();
+        return true;
+    }
 
     internal void Start()
     {
@@ -206,6 +232,8 @@ internal sealed class HatController : IDisposable
         _state.Mode = HatMode.Resting;
         ApplyVisualState();
         UpdateActivity();
+        if (surface.Type == DesktopSurfaceType.PetGround)
+            LandedOnPetGround?.Invoke();
     }
 
     private void UpdateResting()

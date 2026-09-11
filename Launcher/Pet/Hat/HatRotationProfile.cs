@@ -3,8 +3,10 @@ namespace Launcher.Pet.Hat;
 internal static class HatRotationProfile
 {
     internal const float MaxAngleDegrees = 7f;
-    internal const int FrameCount = 5;
-    internal const float SwingRadiansPerSecond = 5f;
+    // 17 заранее отрисованных поз вместо 5: шаг 0,875°, включая нейтральный кадр.
+    internal const int FrameCount = 17;
+    // Полный цикл скольжения занимает примерно 2,5 секунды.
+    internal const float SwingRadiansPerSecond = 2.5f;
 
     internal static float GetFrameAngle(int frameIndex)
     {
