@@ -10,11 +10,13 @@ using System.Windows.Forms;
 
 namespace Warenkorb
 {
-    public partial class Form1 : Form
+    public partial class GUI : Form
     {
-        public Form1()
+        public GUI()
         {
             InitializeComponent();
+            Warenkorb warenkorb = new Warenkorb(10);
         }
+
     }
 }
