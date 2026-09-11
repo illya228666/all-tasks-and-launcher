@@ -7,7 +7,7 @@ internal sealed partial class PetController
 {
     private long _earthquakeStartedAt;
 
-    // Точка входа для следующего этапа. Пока ни UI, ни таймеры её не вызывают.
+    // Семантическая точка входа: источник события (кнопка, UI, другой контроллер) здесь не важен.
     internal bool TryStartEarthquake()
     {
         if (!_started || _disposed || _state.Mode == PetMode.Earthquake
