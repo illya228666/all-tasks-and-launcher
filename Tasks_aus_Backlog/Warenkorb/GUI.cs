@@ -10,7 +10,10 @@ namespace Warenkorb
         private static readonly Color Paper = Color.FromArgb(247, 245, 240);
         private static readonly Color Ink = Color.FromArgb(34, 40, 37);
         private static readonly Color Muted = Color.FromArgb(104, 111, 105);
-        private static readonly Color Accent = Color.FromArgb(211,  76,  34);
+        private static readonly Color Accent = Color.FromArgb(211, 76, 34);
+
+        private readonly Warenkorb basket = new Warenkorb(10);
+
         public GUI()
         {
             InitializeComponent();
@@ -71,7 +74,6 @@ namespace Warenkorb
             RefreshBasket("Letzten Artikel entfernt.");
         }
 
-        private readonly Warenkorb basket = new Warenkorb(10);
         private void RenderCatalog()
         {
             catalog.SuspendLayout();
@@ -81,13 +83,13 @@ namespace Warenkorb
             {
                 if ((product).IndexOf(query, StringComparison.CurrentCultureIgnoreCase) < 0) continue;
                 var card = new Panel { Size = new Size(198, 194), BackColor = Color.White, Margin = new Padding(0, 0, 12, 12) };
-                var artwork = new Panel { Bounds = new Rectangle(10, 10, 178,  80), BackColor = Color.FromArgb(236, 239, 226) };
+                var artwork = new Panel { Bounds = new Rectangle(10, 10, 178, 80), BackColor = Color.FromArgb(236, 239, 226) };
                 var initial = TextLabel(product.ToUpperInvariant(), 32, FontStyle.Bold, Ink, Rectangle.Empty);
                 initial.TextAlign = ContentAlignment.MiddleCenter;
                 artwork.Controls.Add(initial);
                 card.Controls.Add(artwork);
-                card.Controls.Add(TextLabel( product.ToUpperInvariant(), 12, FontStyle.Bold, Ink, new Rectangle(12, 96, 174, 26)));
-                var add = new Button { Bounds = new Rectangle(10, 139, 178,  40), AccessibleName = product + " hinzufügen" };
+                card.Controls.Add(TextLabel(product.ToUpperInvariant(), 12, FontStyle.Bold, Ink, new Rectangle(12, 96, 174, 26)));
+                var add = new Button { Bounds = new Rectangle(10, 139, 178, 40), AccessibleName = product + " hinzufügen" };
                 StyleButton(add, "+  Hinzufügen", Paper, Ink);
                 add.Click += (sender, args) =>
                 {
@@ -122,8 +124,10 @@ namespace Warenkorb
                 row.Controls.Add(delete);
                 basketRows.Controls.Add(row);
             }
+
             if (occupied == 0)
-                basketRows.Controls.Add(new Label { Text = "Noch ganz viel Platz.\nWähle links deinen ersten Artikel.", ForeColor = Muted, Height =  80, Margin = new Padding(0, 20, 0, 0) });
+                RenderEmptyBasketState();
+
             count.Text = occupied + " Artikel · deine Auswahl";
             capacity.Text = occupied + " von " + basket.Size + " Plätzen belegt";
             meter.Value = occupied;
@@ -134,11 +138,28 @@ namespace Warenkorb
             basketRows.ResumeLayout();
         }
 
+        /// <summary>
+        /// Baut den leeren Zustand ausschließlich aus Präsentationskomponenten auf.
+        /// Die Sumrak-Referenz bleibt damit vom Warenkorb-Modell vollständig getrennt.
+        /// </summary>
+        private void RenderEmptyBasketState()
+        {
+            var emptyState = new SumrakEmptyBasketEasterEgg();
+            emptyState.Discovered += SumrakEmptyState_Discovered;
+            basketRows.Controls.Add(emptyState);
+        }
+
+        private void SumrakEmptyState_Discovered(object sender, EventArgs e)
+        {
+            status.Text = "●  Besitzer zuletzt im Launcher gesehen.";
+        }
+
         private void ResizeBasketRows()
         {
             foreach (Control row in basketRows.Controls)
                 row.Width = Math.Max(100, basketRows.ClientSize.Width - SystemInformation.VerticalScrollBarWidth - 2);
         }
+
         private static Label TextLabel(string text, float size, FontStyle style, Color color, Rectangle bounds)
         {
             var label = new Label { Text = text, Font = new Font("Segoe UI", size, style), ForeColor = color, AutoEllipsis = true, TextAlign = ContentAlignment.MiddleLeft };
@@ -159,6 +180,5 @@ namespace Warenkorb
             button.Font = new Font("Segoe UI", 10, FontStyle.Bold);
             button.UseVisualStyleBackColor = false;
         }
-
     }
 }
