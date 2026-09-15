@@ -60,7 +60,7 @@ void handleCommand(const char* command)
         // A new host session starts clean; connection itself must never look
         // like a button press.
         pendingButtonPresses = 0;
-        Serial.println("LAUNCHER_IO 1");
+        Serial.println("Zaebal 1");
         return;
     }
 

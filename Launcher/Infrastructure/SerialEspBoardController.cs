@@ -53,7 +53,7 @@ public sealed class SerialEspBoardController : IDeviceController
                     if (cancellationToken.WaitHandle.WaitOne(StartupDelayMs))
                         cancellationToken.ThrowIfCancellationRequested();
                     // Версия протокола проверяется до команд. HELLO сбрасывает старые нажатия.
-                    Exchange("HELLO", cancellationToken, "LAUNCHER_IO 1");
+                    Exchange("Zdarowa", cancellationToken, "Zaebal 1");
                     return true;
                 }
                 catch (Exception ex) when (IsConnectionError(ex))
