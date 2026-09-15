@@ -71,6 +71,9 @@
     <EmbeddedResource Update="UI\Main.Rendering.resx">
       <ManifestResourceName>Launcher.UI.Main.Rendering</ManifestResourceName>
     </EmbeddedResource>
+    <EmbeddedResource Update="UI\Main.Esp.resx">
+      <ManifestResourceName>Launcher.UI.Main.Esp</ManifestResourceName>
+    </EmbeddedResource>
   </ItemGroup>
 
   <ItemGroup>
