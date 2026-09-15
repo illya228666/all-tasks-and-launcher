@@ -99,6 +99,7 @@ internal sealed class HatCollisionDebugWindow : Form
                 case DesktopSurfaceType.DesktopIcon:
                     DrawSurface(e.Graphics, rect, iconPen, iconTopPen);
                     break;
+                case DesktopSurfaceType.PetGround:
                 case DesktopSurfaceType.Taskbar:
                     e.Graphics.DrawLine(taskbarPen, rect.Left, rect.Top, rect.Right, rect.Top);
                     break;

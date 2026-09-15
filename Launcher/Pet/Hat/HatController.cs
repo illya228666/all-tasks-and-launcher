@@ -9,7 +9,7 @@ internal sealed class HatController : IDisposable
 {
     private readonly HatState _state = new();
     private readonly HatPhysics _physics = new();
-    private readonly DesktopSurfaceProvider _surfaceProvider = new();
+    private readonly DesktopSurfaceProvider _surfaceProvider;
     private readonly System.Windows.Forms.Timer _updateTimer = new() { Interval = HatTiming.RuntimeTickIntervalMs };
     private readonly Func<Point, bool> _isHeadAtScreenPoint;
     private readonly Action<bool> _setHatAttached;
@@ -22,13 +22,16 @@ internal sealed class HatController : IDisposable
     private bool _running;
     private bool _disposed;
     private bool _updating;
+    private bool _interactionBlocked;
     private int _stateVersion;
 
     internal HatController(
         Func<Point, bool> isHeadAtScreenPoint,
         Action<bool> setHatAttached,
+        Func<Rectangle?> getPetGround,
         Action<string> hintRequested)
     {
+        _surfaceProvider = new DesktopSurfaceProvider(getPetGround);
         _isHeadAtScreenPoint = isHeadAtScreenPoint;
         _setHatAttached = setHatAttached;
         _hintRequested = hintRequested;
@@ -45,6 +48,30 @@ internal sealed class HatController : IDisposable
     }
 
     internal void SetCollisionDebug(bool enabled) => _collisionDebug.SetEnabled(enabled);
+
+    internal event Action? LandedOnPetGround;
+
+    internal Point? GetPickupPoint()
+    {
+        if (_disposed || _state.Mode != HatMode.Resting || _window is null
+            || _state.Support is not HatSupport support
+            || support.Identity.Type != DesktopSurfaceType.PetGround
+            || !_surfaceProvider.TryRefresh(support.Identity, _window.WindowHandle, out DesktopSurface ground))
+            return null;
+
+        float x = ground.Bounds.Left + support.RelativeX;
+        if (!HatCollisionProfile.HorizontallyOverlaps(ground.Bounds, x, support.Segment))
+            return null;
+        return new Point((int)Math.Round(x + _sprite.Width / 2f), ground.Bounds.Top);
+    }
+
+    internal bool TryPutOn()
+    {
+        if (GetPickupPoint() is null)
+            return false;
+        AttachToPet();
+        return true;
+    }
 
     internal void Start()
     {
@@ -69,22 +96,20 @@ internal sealed class HatController : IDisposable
 
     private void UpdateActivity()
     {
-        _window?.SetInteractionEnabled(_running && !_disposed);
+        _window?.SetInteractionEnabled(_running && !_disposed && !_interactionBlocked);
         _updateTimer.Enabled = _running && !_disposed && _window is not null
             && _state.Mode is HatMode.Dragging or HatMode.Falling or HatMode.Resting;
     }
 
     internal void DetachAndBeginDrag(Point cursorPosition)
     {
-        if (_disposed || !_running || _state.Mode != HatMode.Attached)
+        if (_disposed || !_running || _interactionBlocked || _state.Mode != HatMode.Attached)
             return;
 
         try
         {
-            _window = new HatWindow(_sprite);
-            _window.DragStarted += Window_DragStarted;
-            _window.Dropped += Window_Dropped;
-            _window.BeginDrag(cursorPosition);
+            CreateWindow();
+            _window!.BeginDrag(cursorPosition);
         }
         catch (ExternalException exception)
         {
@@ -206,6 +231,52 @@ internal sealed class HatController : IDisposable
         _state.Mode = HatMode.Resting;
         ApplyVisualState();
         UpdateActivity();
+        if (surface.Type == DesktopSurfaceType.PetGround)
+            LandedOnPetGround?.Invoke();
+    }
+
+    private void CreateWindow()
+    {
+        _window = new HatWindow(_sprite);
+        _window.DragStarted += Window_DragStarted;
+        _window.Dropped += Window_Dropped;
+    }
+
+    internal void SetInteractionBlocked(bool blocked)
+    {
+        _interactionBlocked = blocked;
+        if (blocked && _state.Mode == HatMode.Dragging)
+        {
+            _window?.CancelDrag();
+            BeginFalling();
+        }
+        UpdateActivity();
+    }
+
+    internal void KnockOff(Point head)
+    {
+        if (_disposed || !_running)
+            return;
+        try
+        {
+            if (_state.Mode == HatMode.Attached)
+            {
+                CreateWindow();
+                _window!.MoveTo(new Point(head.X - _sprite.Width / 2, head.Y - _sprite.Height));
+                if (_disposed || !_running || _window is null)
+                    return;
+                _setHatAttached(false);
+            }
+            _window?.CancelDrag();
+            BeginFalling();
+            // Начальный толчок вверх; дальше работает обычное парение и столкновения.
+            _state.VelocityY = -180f;
+        }
+        catch (ExternalException exception)
+        {
+            AttachToPet();
+            _hintRequested($"Der Hut konnte nicht angezeigt werden: {exception.Message}");
+        }
     }
 
     private void UpdateResting()

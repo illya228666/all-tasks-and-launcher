@@ -1,41 +1,66 @@
+using Launcher.Application;
+
 namespace Launcher.UI;
 
 public partial class Main
 {
-    private const int EspPollIntervalMs = 2000; // Период проверки подключения ESP.
+    // Кнопочное событие хранится на контроллере до POLL, поэтому частый опрос даёт
+    // хорошую реакцию UI без зависимости приложения от электрического состояния входа.
+    private const int EspPollIntervalMs = 100;
     private readonly CancellationTokenSource _espLifetime = new();
     private Task _espOperation = Task.CompletedTask;
     private bool _closing;
     private bool _readyToClose;
 
-    private void BeginEspOperation(bool? enabled = null)
+    private void BeginEspOperation(bool? indicatorEnabled = null)
     {
-        // Tick и Click приходят в UI-поток: новый scan/command не запускается поверх текущего.
+        // Tick и Click приходят в UI-поток: новый poll/command не запускается поверх текущего.
         if (_closing || IsDisposed || !_espOperation.IsCompleted)
             return;
 
-        _espOperation = UpdateEspAsync(enabled);
+        _espOperation = UpdateEspAsync(indicatorEnabled);
     }
 
-    private async Task UpdateEspAsync(bool? enabled)
+    private async Task UpdateEspAsync(bool? indicatorEnabled)
     {
-        SetEspButtonsEnabled(false);
         try
         {
-            bool available = enabled.HasValue
-                ? await _espBoard.SetD1Async(enabled.Value, _espLifetime.Token)
-                : await _espBoard.CheckAvailabilityAsync(_espLifetime.Token);
+            if (indicatorEnabled.HasValue)
+            {
+                SetEspButtonsEnabled(false);
+                bool available = await _espBoard.SetIndicatorAsync(indicatorEnabled.Value, _espLifetime.Token);
 
+                if (_closing || IsDisposed)
+                    return;
+
+                SetEspButtonsEnabled(available);
+                ShowHint(available
+                    ? (indicatorEnabled.Value ? "LED eingeschaltet." : "LED ausgeschaltet.")
+                    : "Controller nicht erreichbar.");
+                return;
+            }
+
+            DevicePollResult pollResult = await _espBoard.PollAsync(_espLifetime.Token);
             if (_closing || IsDisposed)
                 return;
 
-            SetEspButtonsEnabled(available);
-            if (enabled.HasValue)
-                ShowHint(available ? (enabled.Value ? "D1 eingeschaltet." : "D1 ausgeschaltet.") : "ESP nicht erreichbar.");
+            SetEspButtonsEnabled(pollResult.IsConnected);
+            if (pollResult.Input is DeviceInputEvent input)
+                HandleDeviceInput(input);
         }
         catch (OperationCanceledException) when (_espLifetime.IsCancellationRequested)
         {
             // Закрытие формы отменяет текущую проверку/команду без сообщения пользователю.
+        }
+    }
+
+    private void HandleDeviceInput(DeviceInputEvent input)
+    {
+        switch (input)
+        {
+            case DeviceInputEvent.PrimaryButtonPressed:
+                _pet.TryStartEarthquake();
+                break;
         }
     }
 

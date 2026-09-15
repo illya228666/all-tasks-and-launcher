@@ -24,3 +24,11 @@
 - DE: Weniger "Magie" im Formular.
 - RU: Проще находить ошибки и тестировать.
 - DE: Fehler finden und testen wird einfacher.
+
+## Землетрясение Launcher / Launcher-Erdbeben
+- RU: `PetController.TryStartEarthquake()` — подготовленная точка входа без подключённого вызова. Режим `Earthquake` на 5000 мс прерывает обычные анимации, включая прыжок, речь и подбор шляпы. Использует существующий animation timer и абсолютное время.
+- DE: Vorbereiteter Einstieg ohne Ausloeser; unterbricht normale Animationen fuer 5000 ms, mit bestehendem Timer und absoluter Zeit.
+- RU: Кадры и длительность находятся в `PetAnimationCatalog`; `HatController` отвечает за слёт и обычную физику шляпы; `PetRenderer` — за дрожь питомца и перемещение только главной формы Launcher в оконном режиме. Развёрнутое окно не перемещается, окна других проектов не затрагиваются.
+- DE: Der Katalog liefert die Frames, der Hut-Controller die Hutphysik, der Renderer bewegt nur das normale Launcher-Fenster. Andere Projektfenster bleiben unveraendert.
+- RU: По завершении восстанавливаются положение формы и обычное поведение питомца, включая подбор упавшей шляпы. Stop/dispose или перекомпоновка завершают эффект досрочно; ручное перемещение формы не отменяется восстановлением старой позиции.
+- DE: Abschluss stellt Position und Normalbetrieb wieder her; Stop/dispose oder Layoutwechsel beenden den Effekt vorzeitig. Manuelles Verschieben wird nicht rueckgaengig gemacht.

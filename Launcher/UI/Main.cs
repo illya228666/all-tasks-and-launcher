@@ -20,7 +20,7 @@ public partial class Main : Form
     #region [RU] Поля | [DE] Felder
 
     private readonly LauncherFacade _launcherFacade;
-    private readonly IEspBoardController _espBoard;
+    private readonly IDeviceController _espBoard;
     private readonly System.Windows.Forms.Timer _espPollTimer;
     private readonly PetController _pet;
     private readonly List<AppEntry> _allApps = new();
@@ -50,6 +50,9 @@ public partial class Main : Form
 
         _espBoard = new SerialEspBoardController();
         _espPollTimer = new System.Windows.Forms.Timer(components!) { Interval = EspPollIntervalMs };
+        // Старые имена контролов оставлены ради минимального designer-diff; D1 теперь является входом кнопки.
+        _btnD1On.Text = "LED ON";
+        _btnD1Off.Text = "LED OFF";
 
         _launcherFacade = new LauncherFacade(
             new ProjectReferenceDiscoveryService(),
@@ -82,7 +85,7 @@ public partial class Main : Form
 
     /// <summary>
     /// RU: Загружает список приложений и обновляет фильтр категорий.
-    /// DE: Laedt die Anwendungsliste und aktualisiert den Kategorie-Filter.
+    /// DE: Laedt die Anwendungsliste und aktualisiert die Filterkategorien.
     /// </summary>
     private void LoadAppCatalog()
     {

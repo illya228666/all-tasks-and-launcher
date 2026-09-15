@@ -15,6 +15,9 @@ internal sealed class PetRenderer : IDisposable
     private int _groundY;
     private bool _hatAttached = true;
     private bool _disposed;
+    private Point _earthquakeOffset;
+    private Point? _shakeOrigin;
+    private Point _lastShakeLocation;
 
     internal PetRenderer(Form window, PetState state)
     {
@@ -75,6 +78,41 @@ internal sealed class PetRenderer : IDisposable
 
     internal void Invalidate() => _panel?.Invalidate();
 
+    internal void BeginEarthquake()
+    {
+        _shakeOrigin = _window.WindowState == FormWindowState.Normal ? _window.Location : null;
+        _lastShakeLocation = _window.Location;
+    }
+
+    internal void ApplyEarthquake(Point offset)
+    {
+        // Даже в maximized видна дрожь питомца, без изменения состояния главного окна.
+        _earthquakeOffset = new Point(-offset.X / 2, Math.Min(0, offset.Y / 2));
+        if (_shakeOrigin is Point origin)
+        {
+            // Ручное перемещение/смена состояния окна прекращает только тряску формы.
+            if (_window.WindowState != FormWindowState.Normal || _window.Location != _lastShakeLocation)
+                _shakeOrigin = null;
+            else
+            {
+                _lastShakeLocation = new Point(origin.X + offset.X, origin.Y + offset.Y);
+                _window.Location = _lastShakeLocation;
+            }
+        }
+        Invalidate();
+    }
+
+    internal void EndEarthquake()
+    {
+        Point? origin = _shakeOrigin;
+        _shakeOrigin = null;
+        _earthquakeOffset = Point.Empty;
+        if (origin.HasValue && !_window.IsDisposed && !_window.Disposing
+            && _window.WindowState == FormWindowState.Normal && _window.Location == _lastShakeLocation)
+            _window.Location = origin.Value;
+        Invalidate();
+    }
+
     internal void ClampPosition()
     {
         if (_panel is null)
@@ -97,6 +135,31 @@ internal sealed class PetRenderer : IDisposable
         return _panel!.PointToScreen(new Point(
             (int)Math.Round(_state.X) + PetAnimationCatalog.FrameWidth / 2,
             _groundY + PetAnimationCatalog.FrameHeight / 2));
+    }
+
+    internal Rectangle? GetGroundScreenBounds()
+    {
+        if (!_window.Visible || _window.WindowState == FormWindowState.Minimized || !IsReady)
+            return null;
+
+        // Та же нижняя линия, что рисуется у логической зоны питомца; прыжок её не двигает.
+        Rectangle ground = _panel!.RectangleToScreen(new Rectangle(
+            0, _groundY + PetAnimationCatalog.FrameHeight - 1, _panel.ClientSize.Width, 1));
+        for (Control? control = _panel; control is not null; control = control.Parent)
+        {
+            if (!control.Visible)
+                return null;
+            ground = Rectangle.Intersect(ground, control.RectangleToScreen(control.ClientRectangle));
+        }
+        return ground.Width > 0 && ground.Height > 0 ? ground : null;
+    }
+
+    internal float GetPickupTargetX(Point screenPoint)
+    {
+        float maxX = Math.Max(PetAnimationCatalog.EdgePadding,
+            ClientWidth - PetAnimationCatalog.FrameWidth - PetAnimationCatalog.EdgePadding);
+        return Math.Clamp(_panel!.PointToClient(screenPoint).X - PetAnimationCatalog.FrameWidth / 2f,
+            PetAnimationCatalog.EdgePadding, maxX);
     }
 
     internal Point? GetSpeechHead()
@@ -162,8 +225,8 @@ internal sealed class PetRenderer : IDisposable
             : 0f;
         Point offset = PetAnimationCatalog.GetFrameOffset(_state.Row, _state.Frame);
         return new Rectangle(
-            (int)Math.Round(_state.X) + offset.X,
-            _groundY + offset.Y - (int)Math.Round(jumpLift),
+            (int)Math.Round(_state.X) + offset.X + _earthquakeOffset.X,
+            _groundY + offset.Y - (int)Math.Round(jumpLift) + _earthquakeOffset.Y,
             PetAnimationCatalog.CellWidth,
             PetAnimationCatalog.CellHeight);
     }
@@ -225,6 +288,7 @@ internal sealed class PetRenderer : IDisposable
     {
         if (_disposed)
             return;
+        EndEarthquake();
         _disposed = true;
 
         if (_panel is not null)

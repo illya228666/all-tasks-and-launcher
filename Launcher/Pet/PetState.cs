@@ -6,7 +6,10 @@ internal enum PetMode
     Waving,
     Moving,
     Jumping,
-    TrackingCursor
+    TrackingCursor,
+    RetrievingHat,
+    PuttingOnHat,
+    Earthquake
 }
 
 internal sealed class PetState
@@ -27,4 +30,5 @@ internal sealed class PetState
     internal bool JumpPending { get; set; }
     internal bool MovementPending { get; set; }
     internal int LookIndex { get; set; }
+    internal int HatPickupIndex { get; set; }
 }

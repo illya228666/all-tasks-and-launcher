@@ -4,6 +4,7 @@ using System.Drawing;
 namespace Launcher.Pet.Animation;
 
 internal readonly record struct PetJumpFrame(int Row, int Frame, float Lift);
+internal readonly record struct PetHatPickupFrame(int Row, int Frame, int DurationMs, bool PutOn = false);
 
 internal static class PetAnimationCatalog
 {
@@ -56,6 +57,36 @@ internal static class PetAnimationCatalog
     internal const int EdgePadding = 16;
     internal const int CardProbeOffset = 2;
     internal const float PixelsPerMovementCycle = 120f;
+
+    // Землетрясение: время от начала в мс, существующие кадры потери равновесия и подъёма.
+    internal const int EarthquakeDurationMs = 5000;
+    internal const int EarthquakeTickMs = 16;
+    internal const float EarthquakeShakePixels = 8f;
+    internal static readonly (int UntilMs, int Row, int Frame)[] EarthquakeFrames =
+    {
+        (180, FailedRow, 0),
+        (360, FailedRow, 1),
+        (560, FailedRow, 2),
+        (800, FailedRow, 3),
+        (3400, FailedRow, 4),
+        (3900, FailedRow, 3),
+        (4300, FailedRow, 5),
+        (4650, FailedRow, 6),
+        (EarthquakeDurationMs, FailedRow, 7)
+    };
+
+    // Прототип: быстрый подход, приседание, выпрямление и жест рукой у шляпы.
+    internal const int HatRunFrameMs = 80;
+    internal const float HatRunSpeed = 220f;
+    internal static readonly PetHatPickupFrame[] HatPickupFrames =
+    {
+        new(JumpRow, 0, 180),
+        new(FailedRow, 5, 160),
+        new(FailedRow, 6, 160),
+        new(WaveRow, 0, 140, PutOn: true),
+        new(WaveRow, 1, 160),
+        new(IdleRow, 0, 180)
+    };
 
     // Длительности кадров в миллисекундах. Строки 9-10 отсутствуют: look-позу
     // выбирает курсор. Количество значений должно совпадать с числом кадров строки.
