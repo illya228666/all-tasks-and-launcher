@@ -9,7 +9,7 @@ namespace Launcher.Pet.Windows.Windows;
 // Визуальное окно шляпы: drag/input и выбор 3D-позы + программного Z-угла, без физики и scheduler.
 internal sealed class HatWindow : TransparentOverlayWindow
 {
-    private const float FallPoseDurationSeconds = 1.8f;
+    private const float FallPoseLegDurationSeconds = 1.8f;
     private const int SettlementBlendSteps = 16;
 
     private readonly Bitmap[] _angleFrames;
@@ -157,9 +157,15 @@ internal sealed class HatWindow : TransparentOverlayWindow
 
     private int GetFallFrame(float fallTimeSeconds)
     {
-        // 3D-ракурс развивается только вперёд и больше не кодирует left/right.
-        // После достижения последней позы она удерживается до приземления.
-        float progress = Math.Clamp(Math.Max(0f, fallTimeSeconds) / FallPoseDurationSeconds, 0f, 1f);
+        // 3D-ракурс живёт всё время падения и не кодирует left/right:
+        // 0 -> N -> 0 -> N ... без зеркалирования. Smoothstep на каждом плече
+        // делает разворот у крайних поз мягким, а не мгновенной сменой вектора.
+        float leg = Math.Max(0f, fallTimeSeconds) / FallPoseLegDurationSeconds;
+        int legIndex = (int)MathF.Floor(leg);
+        float progress = leg - legIndex;
+        if ((legIndex & 1) != 0)
+            progress = 1f - progress;
+
         float smooth = progress * progress * (3f - 2f * progress);
         return Math.Clamp(
             (int)MathF.Round(smooth * (_fallPoseFrames.Length - 1)),
