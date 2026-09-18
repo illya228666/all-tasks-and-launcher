@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <TargetFramework>$(RepositoryTargetFramework)-windows</TargetFramework>
+  </PropertyGroup>
+  <ItemGroup><ProjectReference Include="..\Launcher.Apps\Launcher.Apps.csproj" /></ItemGroup>
+</Project>
+

@@ -1,83 +1,53 @@
-﻿# Launcher (Учебный проект / Lernprojekt)
+# Launcher — карта проекта / Projektkarte
 
-## RU: Что это
-`Launcher` — учебный WinForms-проект для школьников (8-11 класс), который показывает:
-- как разделять UI, доменные модели, сервисы и инфраструктуру;
-- как делать читаемый и анализируемый код;
-- как сопровождать код двуязычной документацией (RU + DE).
+Launcher запускает учебные программы, показывает питомца и принимает события ESP8266.
+Launcher startet Lernprogramme, zeigt einen Begleiter und verarbeitet ESP8266-Eingaben.
 
-## DE: Was ist das
-`Launcher` ist ein WinForms-Lernprojekt fuer Schuelerinnen und Schueler (Klasse 8-11), das zeigt:
-- wie man UI, Domänenmodelle, Services und Infrastruktur trennt;
-- wie man lesbaren und analysierbaren Code schreibt;
-- wie man Code mit zweisprachiger Doku (RU + DE) begleitet.
+## Проекты / Projekte
 
-## RU: Быстрый старт
-1. Открыть `zahlen.sln` в Visual Studio.
-2. Выбрать проект запуска: `Launcher`.
-3. Выполнить Build (`Ctrl+Shift+B`) и Run (`F5`).
+| Проект / Projekt | Назначение / Aufgabe |
+| --- | --- |
+| Launcher | Запуск, окно, настройки, связи / Start, Fenster, Einstellungen, Verbindungen |
+| Launcher.Apps | Каталог и правила запуска / Programmliste und Startregeln |
+| Launcher.Apps.Windows | Проектные файлы, EXE, процессы / Projektdateien, EXE, Prozesse |
+| Launcher.Pet | Поведение, речь, шляпа / Verhalten, Sprache, Hut |
+| Launcher.Pet.Windows | Рисование и рабочий стол / Zeichnen und Desktop |
+| Launcher.Device | Порт, команды, прошивка / Port, Befehle, Firmware |
 
-Версия целевой платформы выбирается автоматически через корневой
-`Directory.Build.props`:
-- с .NET 10 SDK проекты собираются для `net10.0`;
-- с .NET 7 SDK проекты собираются для `net7.0`.
+Все шесть проектов находятся в папке решения `Launcher`. Библиотеки лежат рядом с запускаемым проектом в репозитории.
+Alle sechs Projekte stehen im Lösungsordner `Launcher`. Bibliotheken liegen neben dem Startprojekt im Repository.
 
-Файл `global.json` намеренно не используется, поэтому один и тот же commit
-можно собирать на обоих компьютерах без локальных изменений файлов проекта.
+## Порядок чтения / Lesereihenfolge
 
-## DE: Schnellstart
-1. `zahlen.sln` in Visual Studio oeffnen.
-2. `Launcher` als Startprojekt waehlen.
-3. Build (`Ctrl+Shift+B`) und Run (`F5`) ausfuehren.
+1. `Program` → `LauncherStartup` → `LauncherSession`: создание и время жизни / Aufbau und Lebensdauer.
+2. `AppListConnection` → `AppList`, `AppSearch`, `AppSort`: действия каталога / Listenaktionen.
+3. `ProjectAppSource` → `FolderAppSource`: источники программ / Programmquellen.
+4. `AppLaunch` → `AppProcess`: запуск и статистика / Start und Statistik.
+5. `PetWindowsSession` → `PetWorld` → `PetBehavior`: входные данные, решения, отображение / Eingaben, Entscheidungen, Anzeige.
+6. `DeviceConnection` → `DeviceProtocol` + `SerialExchange`: последовательный обмен / serieller Austausch.
+7. `DevicePetConnection`: кнопка платы вызывает землетрясение / Gerätetaste löst Erdbeben aus.
 
-Das Zielframework wird in der zentralen `Directory.Build.props` automatisch
-gewaehlt: .NET 10 SDK verwendet `net10.0`, .NET 7 SDK verwendet `net7.0`.
-Eine `global.json` wird absichtlich nicht verwendet, damit derselbe Commit auf
-beiden Rechnern ohne lokale Projektdatei-Aenderungen gebaut werden kann.
+## Настройки и ресурсы / Einstellungen und Ressourcen
 
-## Структура проекта / Projektstruktur
-- `Domain/` — RU: модели данных; DE: Datenmodelle.
-- `Application/` — RU: фасад и прикладная логика; DE: Fassade und Anwendungslogik.
-- `Infrastructure/` — RU: файловая/JSON-инфраструктура; DE: Datei-/JSON-Infrastruktur.
-- `UI/` — RU: форма и визуальная координация; DE: Formular und visuelle Koordination.
-- `UI/Controls/` — RU: пользовательские контролы; DE: User Controls.
-- `docs/` — RU+DE учебные материалы.
+- Новый файл: `%LOCALAPPDATA%/zahlen-launcher/launcher-settings.json`. Старый `launcher-state.json` не читается и не изменяется. / Neue Datei; alte Zustandsdatei bleibt unverändert.
+- Повреждённый JSON копируется в `.broken-*` до сброса. Если копирование или чтение невозможно, запись блокируется. / Beschädigte Daten werden gesichert; bei fehlendem sicheren Zugriff wird nicht überschrieben.
+- Тема и показ столкновений — независимые настройки. / Farbthema und Kollisionsanzeige sind unabhängig.
+- PNG принадлежат `Launcher.Pet.Windows`, копируются в `Resources` при сборке и публикации. / Bilder gehören der Windows-Begleiterbibliothek und werden mitgeliefert.
+- Прошивка: `Launcher.Device/Firmware/LauncherIoEsp8266`. После изменения протокола требуется соответствующая прошивка. / Die Firmware muss zum Protokoll passen.
 
-## RU: Маршрут анализа для школьника
-1. Начни с `Program.cs` (точка входа).
-2. Открой `UI/Main.cs` и найди поля/конструктор.
-3. Посмотри `BindEvents` в `UI/Main.Events.cs`.
-4. Проследи цепочку `LoadAppCatalog -> LauncherFacade.LoadApps`.
-5. Изучи `Infrastructure/ProjectReferenceDiscoveryService.cs`.
-6. Найди, как формируется state-файл (`LauncherConstants`).
-7. Проверь чтение/запись в `JsonStateStorageService`.
-8. Посмотри фильтрацию в `AppFilterService`.
-9. Посмотри сортировку в `AppSortService`.
-10. Вернись в `UI/Main.Rendering.cs` и свяжи данные с карточкой.
-11. Открой `UI/Controls/AppCardControl.cs`.
-12. Проследи, как событие кнопки карточки доходит до запуска EXE.
-13. Проверь, как обновляется статистика запусков.
-14. Переключи тему и найди код в `UI/Main.Theme.cs`.
-15. Повтори анализ, рисуя собственную схему потока данных.
+## Платформа / Plattform
 
-## DE: Analyse-Route fuer Schueler
-1. Starte mit `Program.cs` (Einstiegspunkt).
-2. Oeffne `UI/Main.cs` und finde Felder/Konstruktor.
-3. Sieh dir `BindEvents` in `UI/Main.Events.cs` an.
-4. Verfolge `LoadAppCatalog -> LauncherFacade.LoadApps`.
-5. Analysiere `Infrastructure/ProjectReferenceDiscoveryService.cs`.
-6. Finde, wie der State-Pfad gebaut wird (`LauncherConstants`).
-7. Pruefe Laden/Speichern in `JsonStateStorageService`.
-8. Verstehe die Filterlogik in `AppFilterService`.
-9. Verstehe die Sortierlogik in `AppSortService`.
-10. Gehe zu `UI/Main.Rendering.cs` und verbinde Daten mit Karte.
-11. Oeffne `UI/Controls/AppCardControl.cs`.
-12. Verfolge, wie ein Button-Event bis zum EXE-Start laeuft.
-13. Pruefe, wie die Start-Statistik aktualisiert wird.
-14. Wechsle das Theme und finde den Code in `UI/Main.Theme.cs`.
-15. Wiederhole die Analyse mit eigenem Datenfluss-Diagramm.
+Корневой `Directory.Build.props` выбирает .NET 7 либо .NET 10 по версии MSBuild. Windows-проекты явно добавляют `-windows`. WinForms используется только в `Launcher` и `Launcher.Pet.Windows`. `System.IO.Ports` принадлежит `Launcher.Device`.
+Die zentrale Datei wählt .NET 7 oder .NET 10 anhand der MSBuild-Version. Windows-Projekte ergänzen `-windows`; WinForms und SerialPort bleiben in ihren zuständigen Projekten.
 
-## Полезные документы / Weitere Dokumente
-- `docs/ARCHITECTURE_RU_DE.md`
-- `docs/GLOSSARY_RU_DE.md`
-- `docs/ANALYSIS_CHECKLIST_RU_DE.md`
+Профиль `Windows-x64` остаётся у Launcher и публикует автономное приложение в корневую папку `publish`.
+Das Profil `Windows-x64` bleibt im Startprojekt und erzeugt die eigenständige Ausgabe im Ordner `publish`.
+
+## Документация / Dokumentation
+
+- [Архитектура / Architektur](docs/ARCHITECTURE_RU_DE.md)
+- [Проверка и сценарии / Prüfung und Szenarien](docs/ANALYSIS_CHECKLIST_RU_DE.md)
+- [Термины / Begriffe](docs/GLOSSARY_RU_DE.md)
+
+Во время этого рефакторинга сборка, тесты, запуск и прошивка не выполнялись. Статический разбор не подтверждает работу интерфейса или оборудования.
+Während dieses Refactorings wurden Build, Tests, Programmstart und Firmware-Upload nicht ausgeführt. Statische Prüfung bestätigt weder Oberfläche noch Hardwarebetrieb.

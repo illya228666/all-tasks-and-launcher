@@ -1,17 +1,13 @@
-namespace Launcher
+using Launcher.Startup;
+
+namespace Launcher;
+internal static class Program
 {
-    internal static class Program
+    [STAThread]
+    private static void Main()
     {
-        /// <summary>
-        ///  The main entry point for the application.
-        /// </summary>
-        [STAThread]
-        static void Main()
-        {
-            // To customize application configuration such as set high DPI settings or default font,
-            // see https://aka.ms/applicationconfiguration.
-            ApplicationConfiguration.Initialize();
-            System.Windows.Forms.Application.Run(new UI.Main());
-        }
+        ApplicationConfiguration.Initialize();
+        using LauncherSession session = LauncherStartup.Create();
+        System.Windows.Forms.Application.Run(session.Window);
     }
 }

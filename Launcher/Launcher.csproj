@@ -1,16 +1,12 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
+    <TargetFramework>$(RepositoryTargetFramework)-windows</TargetFramework>
     <Nullable>enable</Nullable>
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
-
-  <ItemGroup>
-    <PackageReference Include="System.IO.Ports" Version="7.0.0" />
-  </ItemGroup>
-
+  <!-- Учебные программы / Lernprogramme -->
   <ItemGroup>
     <ProjectReference Include="..\04_Dateiverarbeitung\01_leicht\Dateiverarbeitung_Grundlagen\Dateiverarbeitung_Grundlagen.csproj" />
     <ProjectReference Include="..\04_Dateiverarbeitung\01_leicht\Hotelprotokoll\Hotelprotokoll.csproj" />
@@ -43,57 +39,17 @@
     <ProjectReference Include="..\05_Array\02_mittel\Zahlen_Rueckwaerts\Zahlen_Rueckwaerts.csproj" />
     <ProjectReference Include="..\05_Array\02_mittel\MinMaxMittelwert\MinMaxMittelwert.csproj" />
   </ItemGroup>
-
   <ItemGroup>
-    <Compile Update="Properties\Resources.Designer.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
-    <Compile Update="Properties\Settings.Designer.cs">
-      <DesignTimeSharedInput>True</DesignTimeSharedInput>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Settings.settings</DependentUpon>
-    </Compile>
+    <ProjectReference Include="..\Launcher.Apps\Launcher.Apps.csproj" />
+    <ProjectReference Include="..\Launcher.Apps.Windows\Launcher.Apps.Windows.csproj" />
+    <ProjectReference Include="..\Launcher.Pet\Launcher.Pet.csproj" />
+    <ProjectReference Include="..\Launcher.Pet.Windows\Launcher.Pet.Windows.csproj" />
+    <ProjectReference Include="..\Launcher.Device\Launcher.Device.csproj" />
   </ItemGroup>
-
   <ItemGroup>
-    <EmbeddedResource Update="Properties\Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    <EmbeddedResource Update="Windows\MainWindow.resx">
+      <LogicalName>Launcher.Windows.MainWindow.resources</LogicalName>
     </EmbeddedResource>
-    <EmbeddedResource Update="UI\Main.Theme.resx">
-      <ManifestResourceName>Launcher.UI.Main.Theme</ManifestResourceName>
-    </EmbeddedResource>
-    <EmbeddedResource Update="UI\Main.Events.resx">
-      <ManifestResourceName>Launcher.UI.Main.Events</ManifestResourceName>
-    </EmbeddedResource>
-    <EmbeddedResource Update="UI\Main.Rendering.resx">
-      <ManifestResourceName>Launcher.UI.Main.Rendering</ManifestResourceName>
-    </EmbeddedResource>
-    <EmbeddedResource Update="UI\Main.Esp.resx">
-      <ManifestResourceName>Launcher.UI.Main.Esp</ManifestResourceName>
-    </EmbeddedResource>
+    <Compile Update="Windows\*.cs"><SubType>Code</SubType></Compile>
   </ItemGroup>
-
-  <ItemGroup>
-    <None Update="Properties\Settings.settings">
-      <Generator>SettingsSingleFileGenerator</Generator>
-      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
-    </None>
-    <None Update="Resources\spritesheet_sumrak_hat.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="Resources\spritesheet_sumrak_no_hat.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="Resources\hat_small.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Resources\" />
-  </ItemGroup>
-
 </Project>
