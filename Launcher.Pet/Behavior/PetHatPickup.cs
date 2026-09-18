@@ -8,7 +8,7 @@ internal static class PetHatPickup
 {
     internal const float RunSpeedPixelsPerSecond = 220f;
     internal const int RunFrameMs = 80;
-    internal static float TargetX(Point screenPoint, PetEnvironment environment) => Math.Clamp(screenPoint.X - environment.AreaScreenPosition.X - PetAnimationCatalog.FrameWidth / 2f, PetAnimationCatalog.EdgePadding, Math.Max(PetAnimationCatalog.EdgePadding, environment.AreaWidth - PetAnimationCatalog.FrameWidth - PetAnimationCatalog.EdgePadding));
+    internal static float TargetX(Point screenPoint, PetEnvironment environment) => Math.Clamp(screenPoint.X - environment.AreaScreenPosition.X - PetLogicalGeometry.Width / 2f, PetLogicalGeometry.EdgePadding, Math.Max(PetLogicalGeometry.EdgePadding, environment.AreaWidth - PetLogicalGeometry.Width - PetLogicalGeometry.EdgePadding));
     internal static bool Walk(PetState state, PetEnvironment environment, Point target, long nowMs, float elapsedSeconds)
     {
         float distance = TargetX(target, environment) - state.X;

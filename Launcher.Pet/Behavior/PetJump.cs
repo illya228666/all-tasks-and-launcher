@@ -27,7 +27,7 @@ internal static class PetJump
             {
                 state.Row = frame.Row;
                 state.Frame = frame.Frame;
-                state.JumpLift = frame.Lift * PetAnimationCatalog.FrameHeight / (state.FailedJump ? 4f : 3f);
+                state.JumpLift = frame.Lift * PetLogicalGeometry.Height / (state.FailedJump ? 4f : 3f);
                 return false;
             }
 

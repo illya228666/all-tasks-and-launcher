@@ -1,5 +1,4 @@
 using Launcher.Apps.Data;
-using Launcher.Pet.Animation;
 using Launcher.Pet.Windows.Windows;
 
 namespace Launcher.Windows;
@@ -102,11 +101,11 @@ internal sealed class AppListPanel : UserControl
                 cards.Width = width - 16;
                 int columns = Math.Max(1, cards.Width / 292);
                 int rows = (cards.Controls.Count + columns - 1) / columns;
-                int ground = rows * 178;
-                cards.Height = ground + (cards == PetArea ? PetAnimationCatalog.FrameHeight : 0);
+                int cardsHeight = rows * 178;
+                cards.Height = cardsHeight + (cards == PetArea ? PetArea.RequiredExtraHeight : 0);
                 cards.PerformLayout();
                 if (cards == PetArea)
-                    PetArea.SetGeometry(ground, cards.Controls.Cast<Control>().Select(control => control.Bounds));
+                    PetArea.SetGeometry(cardsHeight, cards.Controls.Cast<Control>().Select(control => control.Bounds));
                 section.Height = cards.Top + cards.Height + 10;
             }
         }

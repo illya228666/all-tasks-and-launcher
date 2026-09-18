@@ -9,8 +9,8 @@ internal static class PetWalk
     internal const int MinDelayMs = 10000;
     internal static bool Prepare(PetState state, PetEnvironment environment, Random random)
     {
-        float min = PetAnimationCatalog.EdgePadding;
-        float max = Math.Max(min, environment.AreaWidth - PetAnimationCatalog.FrameWidth - min);
+        float min = PetLogicalGeometry.EdgePadding;
+        float max = Math.Max(min, environment.AreaWidth - PetLogicalGeometry.Width - min);
         float distance = environment.WindowWidth / 8f;
         bool left = state.X - min >= distance, right = max - state.X >= distance;
         if (!left && !right)

@@ -7,8 +7,8 @@ internal static class PetLook
     internal const int DeadzoneRadiusPixels = 12;
     internal static void Update(PetState state, PetEnvironment environment)
     {
-        int x = environment.CursorScreenPosition.X - environment.AreaScreenPosition.X - (int)Math.Round(state.X) - PetAnimationCatalog.FrameWidth / 2;
-        int y = environment.CursorScreenPosition.Y - environment.AreaScreenPosition.Y - environment.GroundLocalY - PetAnimationCatalog.FrameHeight / 2;
+        int x = environment.CursorScreenPosition.X - environment.AreaScreenPosition.X - (int)Math.Round(state.X) - PetLogicalGeometry.Width / 2;
+        int y = environment.CursorScreenPosition.Y - environment.AreaScreenPosition.Y - environment.PetZoneTopY - PetLogicalGeometry.Height / 2;
         if ((long)x * x + (long)y * y > PetLook.DeadzoneRadiusPixels * PetLook.DeadzoneRadiusPixels)
             state.LookIndex = GetLookIndex(x, y);
         state.Row = PetAnimationCatalog.LookFirstRow + state.LookIndex / 8;

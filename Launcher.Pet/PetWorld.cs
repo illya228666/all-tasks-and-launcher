@@ -1,5 +1,5 @@
 using System.Drawing;
-using Launcher.Pet.Animation;
+using Launcher.Pet.Sprites;
 using Launcher.Pet.Behavior;
 using Launcher.Pet.Data;
 using Launcher.Pet.Hat;
@@ -51,7 +51,7 @@ public sealed class PetWorld
         {
             PetPlacement.Fit(_state, environment);
             _hat.Update(elapsed, environment.Surfaces);
-            _behavior.Update(nowMs, elapsed, environment, _hat, _speech, PetPlacement.VisibleHead(_state, environment, _behavior.Shake) is not null);
+            _behavior.Update(nowMs, elapsed, environment, _hat, _speech, GetVisibleHead(environment, GetSpriteBounds(environment, _behavior.Shake)) is not null);
         }
 
         return Scene = CreateScene(environment);
@@ -101,8 +101,14 @@ public sealed class PetWorld
     private PetScene CreateScene(PetEnvironment environment)
     {
         Point shake = _behavior.Shake;
-        Rectangle bounds = PetPlacement.LocalBounds(_state, environment, shake);
-        Point? head = PetPlacement.VisibleHead(_state, environment, shake);
+        Rectangle bounds = GetSpriteBounds(environment, shake);
+        Point? head = GetVisibleHead(environment, bounds);
         return new(_state.Mode, _state.Row, _state.Frame, bounds, head, shake, _hat.Attached, _hat.Scene, _speech.Phrase, _speech.VisibleLetters);
     }
+
+    private Rectangle GetSpriteBounds(PetEnvironment environment, Point shake) =>
+        PetSpriteLayout.GetBounds(PetPlacement.LogicalPosition(_state, environment), PetSpriteCatalog.GetFrameGeometry(_state.Row, _state.Frame), shake);
+
+    private Point? GetVisibleHead(PetEnvironment environment, Rectangle spriteBounds) =>
+        PetSpriteLayout.VisibleHead(spriteBounds, PetSpriteCatalog.GetFrameGeometry(_state.Row, _state.Frame), environment.AreaScreenPosition, environment.VisibleScreenBounds);
 }

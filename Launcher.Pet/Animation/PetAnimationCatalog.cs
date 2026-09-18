@@ -1,35 +1,6 @@
-using System.Drawing;
-
 namespace Launcher.Pet.Animation;
 public static class PetAnimationCatalog
 {
-    // Логическая зона питомца, а не размер ячейки PNG. Сохраняет прежние границы
-    // движения, центр слежения, компоновку и программную высоту прыжков.
-    public const int FrameWidth = 192;
-    public const int FrameHeight = 208;
-    // Новая сетка PNG: 8 столбцов x 11 строк, ячейка 149x200, без зазоров.
-    public const int AtlasColumns = 8;
-    public const int AtlasRows = 11;
-    public const int CellWidth = 149;
-    public const int CellHeight = 200;
-    internal const int AtlasTopOffset = 3;
-    public const int HeadHitHeight = 90;
-    // X середины таза относительно левого края каждой ячейки. Первый индекс —
-    // строка, второй — кадр. Увеличение числа сдвигает рисунок влево.
-    internal static readonly int[][] BodyAnchorXByRow =
-    {
-        new[] { 53, 53, 53, 53, 53, 53, 53 },
-        new[] { 78, 82, 79, 77, 80, 80, 80, 75 },
-        new[] { 72, 67, 63, 69, 65, 64, 68, 69 },
-        new[] { 53, 54, 62, 51 },
-        new[] { 53, 58, 60, 57, 57 },
-        new[] { 47, 49, 46, 65, 63, 52, 53, 55 },
-        new[] { 45, 49, 50, 50, 50, 50 },
-        new[] { 52, 48, 54, 52, 52, 56 },
-        new[] { 56, 55, 55, 56, 55, 56 },
-        new[] { 54, 68, 66, 65, 65, 66, 70, 70 },
-        new[] { 46, 50, 44, 44, 43, 41, 40, 37 }
-    };
     internal const int IdleRow = 0;
     internal const int MoveRightRow = 1;
     internal const int MoveLeftRow = 2;
@@ -37,7 +8,6 @@ public static class PetAnimationCatalog
     internal const int JumpRow = 4;
     internal const int FailedRow = 5;
     internal const int LookFirstRow = 9;
-    internal const int EdgePadding = 16;
     // Землетрясение: время от начала в мс, существующие кадры потери равновесия и подъёма.
     internal static readonly (int UntilMs, int Row, int Frame)[] EarthquakeFrames =
     {
@@ -95,6 +65,4 @@ public static class PetAnimationCatalog
         new(FailedRow, 6, 0f),
         new(FailedRow, 7, 0f)
     };
-    public static Rectangle GetSourceRectangle(int row, int frame) => new(frame * CellWidth, row * CellHeight, CellWidth, CellHeight);
-    internal static Point GetFrameOffset(int row, int frame) => new(FrameWidth / 2 - BodyAnchorXByRow[row][frame], AtlasTopOffset);
 }

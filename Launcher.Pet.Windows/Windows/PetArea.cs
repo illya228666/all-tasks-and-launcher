@@ -1,11 +1,11 @@
-using Launcher.Pet.Animation;
 using Launcher.Pet.Data;
 using Launcher.Pet.Hat;
 
 namespace Launcher.Pet.Windows.Windows;
 public sealed class PetArea : FlowLayoutPanel
 {
-    public int GroundLocalY { get; private set; }
+    public int PetZoneTopY { get; private set; }
+    public int RequiredExtraHeight => PetLogicalGeometry.Height;
     public IReadOnlyList<Rectangle> ObstaclesLocal { get; private set; } = Array.Empty<Rectangle>();
 
     public PetArea()
@@ -14,9 +14,9 @@ public sealed class PetArea : FlowLayoutPanel
         WrapContents = true;
     }
 
-    public void SetGeometry(int groundLocalY, IEnumerable<Rectangle> obstaclesLocal)
+    public void SetGeometry(int petZoneTopY, IEnumerable<Rectangle> obstaclesLocal)
     {
-        GroundLocalY = groundLocalY;
+        PetZoneTopY = petZoneTopY;
         ObstaclesLocal = Array.AsReadOnly(obstaclesLocal.ToArray());
         Invalidate();
     }
@@ -40,10 +40,10 @@ public sealed class PetArea : FlowLayoutPanel
     {
         if (!IsHandleCreated)
             return null;
-        Rectangle ground = RectangleToScreen(new Rectangle(0, GroundLocalY + PetAnimationCatalog.FrameHeight - 1, ClientSize.Width, 1));
+        Rectangle ground = RectangleToScreen(new Rectangle(0, PetZoneTopY + PetLogicalGeometry.Height - 1, ClientSize.Width, 1));
         ground = Rectangle.Intersect(ground, VisibleScreenBounds(window));
         return ground.Width > 0 && ground.Height > 0 ? ground : null;
     }
 
-    internal PetEnvironment ReadEnvironment(Form window, Point cursor, IReadOnlyList<HatSurface> surfaces) => new(IsHandleCreated ? PointToScreen(Point.Empty) : Point.Empty, ClientSize.Width, GroundLocalY, window.ClientSize.Width, VisibleScreenBounds(window), window.Visible && window.WindowState != FormWindowState.Minimized && window.RectangleToScreen(window.ClientRectangle).Contains(cursor), cursor, ObstaclesLocal, surfaces);
+    internal PetEnvironment ReadEnvironment(Form window, Point cursor, IReadOnlyList<HatSurface> surfaces) => new(IsHandleCreated ? PointToScreen(Point.Empty) : Point.Empty, ClientSize.Width, PetZoneTopY, window.ClientSize.Width, VisibleScreenBounds(window), window.Visible && window.WindowState != FormWindowState.Minimized && window.RectangleToScreen(window.ClientRectangle).Contains(cursor), cursor, ObstaclesLocal, surfaces);
 }

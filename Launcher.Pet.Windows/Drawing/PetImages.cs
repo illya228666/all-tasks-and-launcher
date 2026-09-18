@@ -1,7 +1,7 @@
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
-using Launcher.Pet.Animation;
+using Launcher.Pet.Sprites;
 
 namespace Launcher.Pet.Windows.Drawing;
 internal sealed class PetImages : IDisposable
@@ -58,15 +58,15 @@ internal sealed class PetImages : IDisposable
 
     private static (Bitmap WithHat, Bitmap WithoutHat) NormalizeAtlases(Bitmap withHat, Bitmap withoutHat)
     {
-        int columns = PetAnimationCatalog.AtlasColumns;
-        int rows = PetAnimationCatalog.AtlasRows;
+        int columns = PetSpriteCatalog.AtlasColumns;
+        int rows = PetSpriteCatalog.AtlasRows;
         if (withHat.Size != withoutHat.Size || withHat.Width < columns || withHat.Height < rows || withHat.Width % columns != 0 || withHat.Height % rows != 0)
             throw new InvalidDataException("Die Sprite-Atlanten muessen dieselbe durch das Raster teilbare Groesse haben.");
 
         int sourceWidth = withHat.Width / columns;
         int sourceHeight = withHat.Height / rows;
-        int targetWidth = PetAnimationCatalog.CellWidth;
-        int targetHeight = PetAnimationCatalog.CellHeight;
+        int targetWidth = PetSpriteCatalog.AtlasCellWidth;
+        int targetHeight = PetSpriteCatalog.AtlasCellHeight;
         var withResult = new Bitmap(columns * targetWidth, rows * targetHeight, PixelFormat.Format32bppPArgb);
         Bitmap? withoutResult = null;
         try

@@ -1,4 +1,4 @@
-using Launcher.Pet.Animation;
+using Launcher.Pet.Sprites;
 using Launcher.Pet.Data;
 using Launcher.Pet.Windows.Windows;
 
@@ -18,7 +18,7 @@ internal sealed class PetDrawing : IDisposable
 
     internal void Display(PetScene scene)
     {
-        bool changed = _scene is null || _scene.Row != scene.Row || _scene.Frame != scene.Frame || _scene.LocalBounds != scene.LocalBounds || _scene.HatAttached != scene.HatAttached;
+        bool changed = _scene is null || _scene.Row != scene.Row || _scene.Frame != scene.Frame || _scene.SpriteBounds != scene.SpriteBounds || _scene.HatAttached != scene.HatAttached;
         _scene = scene;
         if (changed)
             _area.Invalidate();
@@ -34,10 +34,10 @@ internal sealed class PetDrawing : IDisposable
     private void Paint(object? sender, PaintEventArgs args)
     {
         using var pen = new Pen(_colors.Border);
-        args.Graphics.DrawRectangle(pen, 0, _area.GroundLocalY, Math.Max(1, _area.ClientSize.Width - 1), PetAnimationCatalog.FrameHeight - 1);
+        args.Graphics.DrawRectangle(pen, 0, _area.PetZoneTopY, Math.Max(1, _area.ClientSize.Width - 1), PetLogicalGeometry.Height - 1);
         if (_scene is null)
             return;
-        args.Graphics.DrawImage(_scene.HatAttached ? _images.WithHat : _images.WithoutHat, _scene.LocalBounds, PetAnimationCatalog.GetSourceRectangle(_scene.Row, _scene.Frame), GraphicsUnit.Pixel);
+        args.Graphics.DrawImage(_scene.HatAttached ? _images.WithHat : _images.WithoutHat, _scene.SpriteBounds, PetSpriteCatalog.GetSourceRectangle(_scene.Row, _scene.Frame), GraphicsUnit.Pixel);
     }
 
     internal bool IsPetAtScreen(Point screenPoint, Rectangle visibleScreenBounds) =>
@@ -48,9 +48,9 @@ internal sealed class PetDrawing : IDisposable
         if (!TryGetPetPixel(screenPoint, visibleScreenBounds, out _, out int y, out Rectangle source, out Bitmap atlas))
             return false;
         for (int row = 0; row <= y; row++)
-            for (int column = 0; column < PetAnimationCatalog.CellWidth; column++)
+            for (int column = 0; column < source.Width; column++)
                 if (atlas.GetPixel(source.X + column, source.Y + row).A != 0)
-                    return y - row < PetAnimationCatalog.HeadHitHeight;
+                    return y - row < PetSpriteCatalog.HeadHitHeight;
         return false;
     }
 
@@ -62,11 +62,13 @@ internal sealed class PetDrawing : IDisposable
         if (_scene is null || !visibleScreenBounds.Contains(screenPoint))
             return false;
         Point local = _area.PointToClient(screenPoint);
-        if (_area.GetChildAtPoint(local, GetChildAtPointSkip.Invisible) is not null || !_scene.LocalBounds.Contains(local))
+        if (_area.GetChildAtPoint(local, GetChildAtPointSkip.Invisible) is not null || !_scene.SpriteBounds.Contains(local))
             return false;
-        x = local.X - _scene.LocalBounds.X;
-        y = local.Y - _scene.LocalBounds.Y;
-        source = PetAnimationCatalog.GetSourceRectangle(_scene.Row, _scene.Frame);
+        source = PetSpriteCatalog.GetSourceRectangle(_scene.Row, _scene.Frame);
+        // Обратное преобразование из пикселей назначения в ячейку атласа.
+        // При нынешнем размере 149x200 оно совпадает с прежним вычитанием X/Y.
+        x = (int)((long)(local.X - _scene.SpriteBounds.X) * source.Width / _scene.SpriteBounds.Width);
+        y = (int)((long)(local.Y - _scene.SpriteBounds.Y) * source.Height / _scene.SpriteBounds.Height);
         atlas = _scene.HatAttached ? _images.WithHat : _images.WithoutHat;
         return atlas.GetPixel(source.X + x, source.Y + y).A != 0;
     }
