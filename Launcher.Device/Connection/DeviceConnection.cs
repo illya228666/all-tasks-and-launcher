@@ -8,9 +8,10 @@ namespace Launcher.Device.Connection;
 public sealed class DeviceConnection : IAsyncDisposable
 {
     private const int BaudRate = 115200;
-    private const int StartupDelayMs = 1200;
+    private const int StartupDelayMs = 1600;
     private const int DiscoveryRetryMs = 2000;
     private const int PollIntervalMs = 100;
+    private const int HelloRetryDelayMs = 250;
 
     private enum CommandKind
     {
@@ -39,7 +40,9 @@ public sealed class DeviceConnection : IAsyncDisposable
     {
         if (_started || _stopped)
             return;
+
         _started = true;
+        StateChanged?.Invoke(new(DeviceConnectionPhase.Searching, Message: "Suche nach Controller..."));
         _loop = Task.Run(RunAsync);
     }
 
@@ -73,7 +76,7 @@ public sealed class DeviceConnection : IAsyncDisposable
                 }
                 catch (Exception error) when (IsConnectionError(error))
                 {
-                    ClosePort();
+                    Disconnect("Verbindung verloren: " + FriendlyMessage(error));
                 }
 
                 await Task.Delay(PollIntervalMs, token).ConfigureAwait(false);
@@ -123,7 +126,7 @@ public sealed class DeviceConnection : IAsyncDisposable
         catch (Exception error) when (IsConnectionError(error))
         {
             available = false;
-            ClosePort();
+            Disconnect("Befehl fehlgeschlagen: " + FriendlyMessage(error));
         }
 
         if (command.Kind == CommandKind.Indicator)
@@ -135,9 +138,23 @@ public sealed class DeviceConnection : IAsyncDisposable
         if (Environment.TickCount64 < _nextDiscoveryAt)
             return;
 
-        foreach (string name in SerialPort.GetPortNames().OrderBy(value => value, StringComparer.OrdinalIgnoreCase))
+        string[] ports = SerialPort.GetPortNames()
+            .OrderBy(value => value, StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+
+        if (ports.Length == 0)
+        {
+            StateChanged?.Invoke(new(DeviceConnectionPhase.Retry, Message: "Kein COM-Port gefunden. Neuer Versuch..."));
+            _nextDiscoveryAt = Environment.TickCount64 + DiscoveryRetryMs;
+            return;
+        }
+
+        string? lastFailure = null;
+        foreach (string name in ports)
         {
             token.ThrowIfCancellationRequested();
+            StateChanged?.Invoke(new(DeviceConnectionPhase.Connecting, name, Message: "Pruefe " + name + "..."));
+
             try
             {
                 _port = new SerialPort(name, BaudRate, Parity.None, 8, StopBits.One)
@@ -149,19 +166,41 @@ public sealed class DeviceConnection : IAsyncDisposable
                     ReadTimeout = SerialExchange.ResponseTimeoutMs,
                     WriteTimeout = SerialExchange.WriteTimeoutMs
                 };
+
                 _port.Open();
                 await Task.Delay(StartupDelayMs, token).ConfigureAwait(false);
 
-                string identity = SerialExchange.Send(_port, DeviceProtocol.Hello, token, DeviceProtocol.Identities);
+                string identity;
+                try
+                {
+                    identity = SerialExchange.Send(_port, DeviceProtocol.Hello, token, DeviceProtocol.Identities);
+                }
+                catch (TimeoutException)
+                {
+                    await Task.Delay(HelloRetryDelayMs, token).ConfigureAwait(false);
+                    identity = SerialExchange.Send(_port, DeviceProtocol.Hello, token, DeviceProtocol.Identities);
+                }
+
                 _protocol = DeviceProtocol.FromIdentity(identity);
-                StateChanged?.Invoke(new(true, name, _protocol.Version));
+                StateChanged?.Invoke(new(
+                    DeviceConnectionPhase.Connected,
+                    name,
+                    _protocol.Version,
+                    $"Verbunden: {name} | LAUNCHER_IO {(int)_protocol.Version}"));
                 return;
             }
             catch (Exception error) when (IsConnectionError(error))
             {
+                lastFailure = name + ": " + FriendlyMessage(error);
                 ClosePort();
             }
         }
+
+        StateChanged?.Invoke(new(
+            DeviceConnectionPhase.Retry,
+            Message: lastFailure is null
+                ? "Kein kompatibler Controller gefunden. Neuer Versuch..."
+                : lastFailure + " | Neuer Versuch..."));
 
         _nextDiscoveryAt = Environment.TickCount64 + DiscoveryRetryMs;
     }
@@ -169,12 +208,28 @@ public sealed class DeviceConnection : IAsyncDisposable
     private static bool IsConnectionError(Exception error) =>
         error is IOException or UnauthorizedAccessException or TimeoutException or InvalidOperationException or ArgumentException;
 
+    private static string FriendlyMessage(Exception error) => error switch
+    {
+        UnauthorizedAccessException => "Port ist belegt oder Zugriff wurde verweigert. Arduino Serial Monitor schliessen.",
+        TimeoutException => "keine LAUNCHER_IO-Antwort",
+        IOException => string.IsNullOrWhiteSpace(error.Message) ? "I/O-Fehler" : error.Message,
+        _ => string.IsNullOrWhiteSpace(error.Message) ? error.GetType().Name : error.Message
+    };
+
+    private void Disconnect(string message)
+    {
+        string? portName = _port?.PortName;
+        ClosePort();
+        StateChanged?.Invoke(new(DeviceConnectionPhase.Retry, portName, Message: message + " | Neuer Versuch..."));
+    }
+
     private void ClosePort()
     {
         SerialPort? port = _port;
         _port = null;
         _protocol = null;
         _nextDiscoveryAt = Environment.TickCount64 + DiscoveryRetryMs;
+
         try
         {
             port?.Dispose();
@@ -183,9 +238,6 @@ public sealed class DeviceConnection : IAsyncDisposable
         {
             System.Diagnostics.Debug.WriteLine(error);
         }
-
-        if (port is not null)
-            StateChanged?.Invoke(new(false));
     }
 
     public async Task StopAsync()
@@ -204,6 +256,7 @@ public sealed class DeviceConnection : IAsyncDisposable
     {
         if (_disposed)
             return;
+
         _disposed = true;
         try
         {
