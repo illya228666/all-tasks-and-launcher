@@ -15,11 +15,11 @@
 // breadboard scheme. If the board ever boots into flashing mode, move the red
 // LED signal to a non-strap pin (for example D5) and change redLedPin below.
 
-const int greenLedPin = D1;
-const int yellowLedPin = D2;
-const int redLedPin = D3;
-const int rightButtonPin = D6;
-const int leftButtonPin = D7;
+const int greenLedPin = D4;
+const int yellowLedPin = D3;
+const int redLedPin = D2;
+const int rightButtonPin = D5;
+const int leftButtonPin = D6;
 
 const unsigned long debounceMs = 30;
 const unsigned long chordWindowMs = 90;
