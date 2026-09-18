@@ -57,12 +57,12 @@ internal sealed class MainWindow : Form
         var options = new FlowLayoutPanel
         {
             Dock = DockStyle.Bottom,
-            Height = 32,
-            WrapContents = false
+            Height = 36,
+            WrapContents = false,
+            AutoScroll = true
         };
         _collisions.Checked = showCollisions;
-        options.Controls.AddRange(new Control[] { _theme, _collisions });
-        _header.Controls.Add(Device);
+        options.Controls.AddRange(new Control[] { _theme, _collisions, Device });
         _header.Controls.Add(options);
         _header.Controls.Add(_title);
         _layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 92));

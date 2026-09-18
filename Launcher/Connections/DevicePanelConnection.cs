@@ -8,6 +8,7 @@ internal sealed class DevicePanelConnection : IDisposable
     private readonly DeviceConnection _device;
     private readonly MainWindow _window;
     private readonly Action<Action> _post;
+
     internal DevicePanelConnection(DeviceConnection device, MainWindow window, Action<Action> post)
     {
         _device = device;
@@ -17,6 +18,7 @@ internal sealed class DevicePanelConnection : IDisposable
         device.IndicatorCompleted += IndicatorCompleted;
         device.Failed += Failed;
         window.Device.IndicatorRequested += SetIndicator;
+        window.Device.Display(new(DeviceConnectionPhase.Waiting));
     }
 
     private void SetIndicator(bool enabled)
@@ -26,12 +28,20 @@ internal sealed class DevicePanelConnection : IDisposable
     }
 
     private void StateChanged(DeviceState state) =>
-        _post(() => _window.Device.Display(state.IsConnected, state.PortName, state.ProtocolVersion));
+        _post(() =>
+        {
+            _window.Device.Display(state);
+            if (!string.IsNullOrWhiteSpace(state.Message))
+                _window.Status.ShowHint("Controller: " + state.Message);
+        });
 
     private void IndicatorCompleted(bool enabled, bool available) =>
-        _post(() => _window.Status.ShowHint(!available ? "Controller nicht erreichbar." : enabled ? "LED eingeschaltet." : "LED ausgeschaltet."));
+        _post(() => _window.Status.ShowHint(!available
+            ? "Controller nicht erreichbar."
+            : enabled ? "LED eingeschaltet." : "LED ausgeschaltet."));
 
-    private void Failed(string message) => _post(() => _window.Status.ShowHint("Controller: " + message));
+    private void Failed(string message) =>
+        _post(() => _window.Status.ShowHint("Controller: " + message));
 
     public void Dispose()
     {
