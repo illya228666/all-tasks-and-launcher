@@ -12,19 +12,25 @@ public static class PetSpriteCatalog
     public const int HeadHitHeight = 90;
 
     private const int DefaultRenderOffsetY = 3;
+    private const int DefaultRenderBottomY = DefaultRenderOffsetY + AtlasCellHeight;
     private const int DefaultHeadAnchorY = HeadHitHeight / 2;
 
-    // Preset'ы отвечают только за визуальный размер/offset кадра.
-    // Пока все значения сохраняют прежний вид 149x200; дальше достаточно менять
-    // одну строку здесь, чтобы скорректировать целую группу кадров.
+    // Первые шесть preset'ов откалиброваны по фактическим alpha-bounds исходного
+    // sprite sheet. Берётся визуальный масштаб, но не позиция внутри PNG-ячейки:
+    // вертикальное положение остаётся явной частью render-layout и не влияет на
+    // программную высоту прыжка.
     private static readonly IReadOnlyDictionary<PetFramePreset, PetFramePresetGeometry> Presets =
         new Dictionary<PetFramePreset, PetFramePresetGeometry>
         {
-            [PetFramePreset.Standing] = Preset(),
-            [PetFramePreset.Running] = Preset(),
-            [PetFramePreset.Waving] = Preset(),
-            [PetFramePreset.Jumping] = Preset(),
-            [PetFramePreset.Failed] = Preset(),
+            [PetFramePreset.Standing] = Preset(renderWidth: 146, renderHeight: 196),
+            [PetFramePreset.Running] = Preset(renderWidth: 141, renderHeight: 189),
+            [PetFramePreset.Waving] = Preset(renderWidth: 145, renderHeight: 194),
+            // Средний размер полноразмерной фазы прыжка; приседание в кадрах 0/4
+            // существенно ниже и задаётся frame override'ами.
+            [PetFramePreset.Jumping] = Preset(renderWidth: 116, renderHeight: 156),
+            // База для стоящих/восстанавливающихся failed-кадров; фаза падения
+            // ниже и задаётся отдельными frame override'ами.
+            [PetFramePreset.Failed] = Preset(renderWidth: 140, renderHeight: 188),
             [PetFramePreset.Action] = Preset(),
             [PetFramePreset.Looking] = Preset(),
             [PetFramePreset.LookingUp] = Preset(),
@@ -33,11 +39,12 @@ public static class PetSpriteCatalog
 
     // Индексы: строка, затем кадр.
     // BodyAnchorX остаётся индивидуальным для каждого изображения.
-    // Остальная геометрия наследуется из preset'а и при необходимости
-    // переопределяется прямо в Frame(...), например:
-    // Frame(53, PetFramePreset.Standing, renderWidth: 145, renderOffsetX: 2).
+    // Width/Height наследуются из preset'а; заметные отклонения задаются только
+    // на конкретном кадре. Изменение Height без renderOffsetY автоматически
+    // сохраняет нижнюю опорную линию кадра.
     private static readonly PetFrameGeometry[][] FramesByRow =
     {
+        // Row 0: idle / blink. Размеры практически идентичны.
         new[]
         {
             Frame(53, PetFramePreset.Standing), Frame(53, PetFramePreset.Standing),
@@ -45,36 +52,49 @@ public static class PetSpriteCatalog
             Frame(53, PetFramePreset.Standing), Frame(53, PetFramePreset.Standing),
             Frame(53, PetFramePreset.Standing)
         },
+        // Row 1: run right. Высота фиксирована; только один кадр заметно уже.
         new[]
         {
             Frame(78, PetFramePreset.Running), Frame(82, PetFramePreset.Running),
             Frame(79, PetFramePreset.Running), Frame(77, PetFramePreset.Running),
-            Frame(80, PetFramePreset.Running), Frame(80, PetFramePreset.Running),
+            Frame(80, PetFramePreset.Running),
+            Frame(80, PetFramePreset.Running, renderWidth: 136),
             Frame(80, PetFramePreset.Running), Frame(75, PetFramePreset.Running)
         },
+        // Row 2: run left. Та же высота; крайние силуэты немного шире/уже.
         new[]
         {
-            Frame(72, PetFramePreset.Running), Frame(67, PetFramePreset.Running),
-            Frame(63, PetFramePreset.Running), Frame(69, PetFramePreset.Running),
-            Frame(65, PetFramePreset.Running), Frame(64, PetFramePreset.Running),
-            Frame(68, PetFramePreset.Running), Frame(69, PetFramePreset.Running)
+            Frame(72, PetFramePreset.Running, renderWidth: 145),
+            Frame(67, PetFramePreset.Running), Frame(63, PetFramePreset.Running),
+            Frame(69, PetFramePreset.Running), Frame(65, PetFramePreset.Running),
+            Frame(64, PetFramePreset.Running),
+            Frame(68, PetFramePreset.Running, renderWidth: 137),
+            Frame(69, PetFramePreset.Running, renderWidth: 145)
         },
+        // Row 3: wave. Разброс небольшой и остаётся на одном preset'е.
         new[]
         {
             Frame(53, PetFramePreset.Waving), Frame(54, PetFramePreset.Waving),
             Frame(62, PetFramePreset.Waving), Frame(51, PetFramePreset.Waving)
         },
+        // Row 4: jump. Кадры 0/4 — выраженное приседание; 1-3 близки между собой.
         new[]
         {
-            Frame(53, PetFramePreset.Jumping), Frame(58, PetFramePreset.Jumping),
-            Frame(60, PetFramePreset.Jumping), Frame(57, PetFramePreset.Jumping),
-            Frame(57, PetFramePreset.Jumping)
+            Frame(53, PetFramePreset.Jumping, renderWidth: 96, renderHeight: 129),
+            Frame(58, PetFramePreset.Jumping),
+            Frame(60, PetFramePreset.Jumping),
+            Frame(57, PetFramePreset.Jumping),
+            Frame(57, PetFramePreset.Jumping, renderWidth: 97, renderHeight: 130)
         },
+        // Row 5: failed jump / fall. Начало и восстановление близки к preset'у,
+        // середина последовательно уменьшается вместе с фактической позой.
         new[]
         {
             Frame(47, PetFramePreset.Failed), Frame(49, PetFramePreset.Failed),
-            Frame(46, PetFramePreset.Failed), Frame(65, PetFramePreset.Failed),
-            Frame(63, PetFramePreset.Failed), Frame(52, PetFramePreset.Failed),
+            Frame(46, PetFramePreset.Failed, renderWidth: 122, renderHeight: 164),
+            Frame(65, PetFramePreset.Failed, renderWidth: 119, renderHeight: 160),
+            Frame(63, PetFramePreset.Failed, renderWidth: 106, renderHeight: 143),
+            Frame(52, PetFramePreset.Failed, renderWidth: 125, renderHeight: 168),
             Frame(53, PetFramePreset.Failed), Frame(55, PetFramePreset.Failed)
         },
         new[]
@@ -128,9 +148,14 @@ public static class PetSpriteCatalog
         int renderWidth = AtlasCellWidth,
         int renderHeight = AtlasCellHeight,
         int renderOffsetX = 0,
-        int renderOffsetY = DefaultRenderOffsetY,
+        int? renderOffsetY = null,
         int headAnchorY = DefaultHeadAnchorY) =>
-        new(renderWidth, renderHeight, renderOffsetX, renderOffsetY, headAnchorY);
+        new(
+            renderWidth,
+            renderHeight,
+            renderOffsetX,
+            renderOffsetY ?? DefaultRenderBottomY - renderHeight,
+            headAnchorY);
 
     private static PetFrameGeometry Frame(
         int bodyAnchorX,
@@ -146,7 +171,10 @@ public static class PetSpriteCatalog
         int width = renderWidth ?? inherited.RenderWidth;
         int height = renderHeight ?? inherited.RenderHeight;
         int offsetX = renderOffsetX ?? inherited.RenderOffsetX;
-        int offsetY = renderOffsetY ?? inherited.RenderOffsetY;
+        int offsetY = renderOffsetY
+            ?? (renderHeight.HasValue
+                ? inherited.RenderOffsetY + inherited.RenderHeight - height
+                : inherited.RenderOffsetY);
         int headY = headAnchorY ?? inherited.HeadAnchorY;
 
         ValidateFrameGeometry(bodyAnchorX, width, height, headY);
