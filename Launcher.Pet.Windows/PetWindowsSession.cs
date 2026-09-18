@@ -166,7 +166,7 @@ public sealed class PetWindowsSession : IDisposable
     {
         if (_hat is not null)
             return _hat;
-        _hat = new(_images.Hat);
+        _hat = new(_images.Hat, _images.HatFalling);
         _hat.DragStarted += HatDragStarted;
         _hat.DragMoved += HatDragMoved;
         _hat.Dropped += HatDropped;
@@ -186,7 +186,7 @@ public sealed class PetWindowsSession : IDisposable
         if (scene.Hat.Mode != HatMode.Dragging)
             hat.MoveTo(scene.Hat.ScreenPosition);
         if (_running && !_disposed && version == _version)
-            hat.SetAngle(scene.Hat.Angle);
+            hat.SetPose(scene.Hat.Mode, scene.Hat.Angle, scene.Hat.FallTimeSeconds);
     }
 
     private void DisplaySpeech(PetScene scene)

@@ -7,7 +7,7 @@ internal sealed class HatWorld
     private readonly HatState _state = new();
     private readonly HatPhysics _physics = new();
     private readonly HatCollisionProfile _collision = new(ImageSize);
-    internal HatScene Scene => new(_state.Mode, Point.Round(_state.Position), _state.Angle);
+    internal HatScene Scene => new(_state.Mode, Point.Round(_state.Position), _state.Angle, _state.FallTimeSeconds);
     internal bool Attached => _state.Mode == HatMode.Attached;
 
     internal void BeginDrag(Point cursor)

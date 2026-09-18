@@ -6,7 +6,7 @@
     <UseWindowsForms>true</UseWindowsForms>
   </PropertyGroup>
   <ItemGroup><ProjectReference Include="..\Launcher.Pet\Launcher.Pet.csproj" /></ItemGroup>
-  <ItemGroup><None Update="Resources\*.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" /></ItemGroup>
+  <ItemGroup><None Update="Resources\**\*.png" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" /></ItemGroup>
   <ItemGroup><Compile Update="Windows\*.cs;Debug\*.cs"><SubType>Code</SubType></Compile></ItemGroup>
 </Project>
 

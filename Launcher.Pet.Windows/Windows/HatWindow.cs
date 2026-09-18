@@ -9,15 +9,20 @@ namespace Launcher.Pet.Windows.Windows;
 // Визуальное окно шляпы: drag/input и выбор заранее отрисованного угла, без физики и scheduler.
 internal sealed class HatWindow : TransparentOverlayWindow
 {
+    private const int FallFrameDurationMs = 350;
     private readonly Bitmap[] _angleFrames;
+    private readonly Bitmap[] _fallFrames;
     private int _angleFrame = -1;
+    private int _fallFrame = -1;
+    private bool _showingFall;
     private bool _interactionEnabled = true;
     private bool _dragging;
     internal event Action? DragStarted;
     internal event Action<Point>? Dropped;
     internal event Action<Point>? DragMoved;
-    internal HatWindow(Bitmap sprite) : base(clickThrough: false)
+    internal HatWindow(Bitmap sprite, Bitmap[] fallFrames) : base(clickThrough: false)
     {
+        _fallFrames = fallFrames;
         _angleFrames = CreateAngleFrames(sprite);
         try
         {
@@ -64,12 +69,31 @@ internal sealed class HatWindow : TransparentOverlayWindow
     }
 
     internal void MoveTo(Point location) => ShowAt(location);
+    internal void SetPose(HatMode mode, float angle, float fallTimeSeconds)
+    {
+        if (mode != HatMode.Falling)
+        {
+            SetAngle(angle);
+            return;
+        }
+
+        int cycle = 2 * (_fallFrames.Length - 1);
+        int phase = (int)(Math.Max(0f, fallTimeSeconds) * 1000f / FallFrameDurationMs) % cycle;
+        int frame = Math.Min(phase, cycle - phase);
+        if (_showingFall && frame == _fallFrame)
+            return;
+        _fallFrame = frame;
+        _showingFall = true;
+        SetImage(_fallFrames[frame]);
+    }
+
     internal void SetAngle(float angle)
     {
         int frame = HatRotationProfile.GetNearestFrameIndex(angle);
-        if (frame == _angleFrame)
+        if (!_showingFall && frame == _angleFrame)
             return;
         _angleFrame = frame;
+        _showingFall = false;
         SetImage(_angleFrames[frame]);
     }
 
