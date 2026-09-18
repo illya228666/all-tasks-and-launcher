@@ -9,12 +9,14 @@ namespace Launcher.Pet.Windows.Windows;
 // Визуальное окно шляпы: drag/input и выбор 3D-позы + программного Z-угла, без физики и scheduler.
 internal sealed class HatWindow : TransparentOverlayWindow
 {
+    private const float FallPoseDurationSeconds = 1.8f;
+    private const int SettlementBlendSteps = 16;
+
     private readonly Bitmap[] _angleFrames;
     private readonly Bitmap[][] _fallPoseFrames;
-    private readonly Bitmap[][] _mirroredFallPoseFrames;
     private int _angleFrame = -1;
     private int _fallFrame = -1;
-    private bool _fallMirrored;
+    private int _settlementStep = -1;
     private bool _showingFall;
     private bool _interactionEnabled = true;
     private bool _dragging;
@@ -25,20 +27,13 @@ internal sealed class HatWindow : TransparentOverlayWindow
     internal HatWindow(Bitmap sprite, Bitmap[] fallFrames) : base(clickThrough: false)
     {
         _angleFrames = CreateAngleFrames(sprite);
-        Bitmap[][] normal = Array.Empty<Bitmap[]>();
-        Bitmap[][] mirrored = Array.Empty<Bitmap[]>();
         try
         {
-            normal = CreateFallPoseFrames(fallFrames, _angleFrames, mirrored: false);
-            mirrored = CreateFallPoseFrames(fallFrames, _angleFrames, mirrored: true);
-            _fallPoseFrames = normal;
-            _mirroredFallPoseFrames = mirrored;
+            _fallPoseFrames = CreateFallPoseFrames(fallFrames, _angleFrames);
             SetAngle(0f);
         }
         catch
         {
-            DisposeFallPoseFrames(normal);
-            DisposeFallPoseFrames(mirrored);
             foreach (Bitmap frame in _angleFrames)
                 frame.Dispose();
             base.Dispose(true);
@@ -82,25 +77,70 @@ internal sealed class HatWindow : TransparentOverlayWindow
 
     internal void SetPose(HatMode mode, float angle, float fallTimeSeconds, float settlementProgress)
     {
-        if (mode != HatMode.Falling && mode != HatMode.Settling)
+        if (mode == HatMode.Falling)
         {
-            SetAngle(angle);
+            SetFallingPose(angle, fallTimeSeconds);
             return;
         }
 
-        (int fallFrame, bool mirrored) = mode == HatMode.Settling
-            ? GetSettlingPose(fallTimeSeconds, settlementProgress)
-            : GetFallPose(fallTimeSeconds);
+        if (mode == HatMode.Settling)
+        {
+            SetSettlingPose(angle, fallTimeSeconds, settlementProgress);
+            return;
+        }
+
+        SetAngle(angle);
+    }
+
+    private void SetFallingPose(float angle, float fallTimeSeconds)
+    {
+        int fallFrame = GetFallFrame(fallTimeSeconds);
         int angleFrame = HatRotationProfile.GetNearestFrameIndex(angle);
-        if (_showingFall && fallFrame == _fallFrame && angleFrame == _angleFrame && mirrored == _fallMirrored)
+        if (_showingFall && _settlementStep < 0 && fallFrame == _fallFrame && angleFrame == _angleFrame)
             return;
 
         _fallFrame = fallFrame;
         _angleFrame = angleFrame;
-        _fallMirrored = mirrored;
+        _settlementStep = -1;
         _showingFall = true;
-        Bitmap[][] poses = mirrored ? _mirroredFallPoseFrames : _fallPoseFrames;
-        SetImage(poses[fallFrame][angleFrame]);
+        SetImage(_fallPoseFrames[fallFrame][angleFrame]);
+    }
+
+    private void SetSettlingPose(float angle, float fallTimeSeconds, float settlementProgress)
+    {
+        // FallTime во время Settling больше не растёт, поэтому 3D-поза фиксируется
+        // ровно в том состоянии, в котором шляпа коснулась поверхности.
+        int fallFrame = GetFallFrame(fallTimeSeconds);
+        int angleFrame = HatRotationProfile.GetNearestFrameIndex(angle);
+        int step = Math.Clamp(
+            (int)MathF.Round(Math.Clamp(settlementProgress, 0f, 1f) * SettlementBlendSteps),
+            0,
+            SettlementBlendSteps);
+
+        if (_showingFall && step == _settlementStep && fallFrame == _fallFrame && angleFrame == _angleFrame)
+            return;
+
+        _fallFrame = fallFrame;
+        _angleFrame = angleFrame;
+        _settlementStep = step;
+        _showingFall = true;
+
+        if (step == 0)
+        {
+            SetImage(_fallPoseFrames[fallFrame][angleFrame]);
+            return;
+        }
+
+        if (step == SettlementBlendSteps)
+        {
+            SetImage(_angleFrames[angleFrame]);
+            return;
+        }
+
+        float progress = (float)step / SettlementBlendSteps;
+        float smooth = progress * progress * (3f - 2f * progress);
+        using Bitmap blended = BlendFrames(_fallPoseFrames[fallFrame][angleFrame], _angleFrames[angleFrame], smooth);
+        SetImage(blended);
     }
 
     internal void SetAngle(float angle)
@@ -109,32 +149,27 @@ internal sealed class HatWindow : TransparentOverlayWindow
         if (!_showingFall && frame == _angleFrame)
             return;
         _angleFrame = frame;
+        _fallFrame = -1;
+        _settlementStep = -1;
         _showingFall = false;
         SetImage(_angleFrames[frame]);
     }
 
-    private (int Frame, bool Mirrored) GetFallPose(float fallTimeSeconds)
+    private int GetFallFrame(float fallTimeSeconds)
     {
-        // Одна фаза наклона даёт две симметричные стороны:
-        // 0 -> normal max -> 0 -> mirrored max -> 0.
-        float phase = Math.Max(0f, fallTimeSeconds) * HatRotationProfile.TiltRadiansPerSecond;
-        float tilt = MathF.Sin(phase);
-        int frame = Math.Clamp((int)MathF.Round(MathF.Abs(tilt) * (_fallPoseFrames.Length - 1)), 0, _fallPoseFrames.Length - 1);
-        return (frame, frame > 0 && tilt < 0f);
-    }
-
-    private (int Frame, bool Mirrored) GetSettlingPose(float fallTimeSeconds, float settlementProgress)
-    {
-        (int landingFrame, bool mirrored) = GetFallPose(fallTimeSeconds);
-        float progress = Math.Clamp(settlementProgress, 0f, 1f);
+        // 3D-ракурс развивается только вперёд и больше не кодирует left/right.
+        // После достижения последней позы она удерживается до приземления.
+        float progress = Math.Clamp(Math.Max(0f, fallTimeSeconds) / FallPoseDurationSeconds, 0f, 1f);
         float smooth = progress * progress * (3f - 2f * progress);
-        int frame = Math.Clamp((int)MathF.Round(landingFrame * (1f - smooth)), 0, _fallPoseFrames.Length - 1);
-        return (frame, frame > 0 && mirrored);
+        return Math.Clamp(
+            (int)MathF.Round(smooth * (_fallPoseFrames.Length - 1)),
+            0,
+            _fallPoseFrames.Length - 1);
     }
 
-    private static Bitmap[][] CreateFallPoseFrames(Bitmap[] fallFrames, Bitmap[] neutralAngleFrames, bool mirrored)
+    private static Bitmap[][] CreateFallPoseFrames(Bitmap[] fallFrames, Bitmap[] neutralAngleFrames)
     {
-        // hat.png является общей нулевой 3D-позой; отражаются только ненулевые fall-позы.
+        // hat.png является нулевой 3D-позой. Остальные позы идут вперёд в исходном порядке.
         var poses = new Bitmap[fallFrames.Length + 1][];
         poses[0] = neutralAngleFrames;
         int created = 1;
@@ -142,16 +177,7 @@ internal sealed class HatWindow : TransparentOverlayWindow
         {
             for (int index = 0; index < fallFrames.Length; index++)
             {
-                if (mirrored)
-                {
-                    using Bitmap source = new(fallFrames[index]);
-                    source.RotateFlip(RotateFlipType.RotateNoneFlipX);
-                    poses[index + 1] = CreateAngleFrames(source);
-                }
-                else
-                {
-                    poses[index + 1] = CreateAngleFrames(fallFrames[index]);
-                }
+                poses[index + 1] = CreateAngleFrames(fallFrames[index]);
                 created++;
             }
 
@@ -167,6 +193,47 @@ internal sealed class HatWindow : TransparentOverlayWindow
 
             throw;
         }
+    }
+
+    private static Bitmap BlendFrames(Bitmap from, Bitmap to, float progress)
+    {
+        var result = new Bitmap(from.Width, from.Height, PixelFormat.Format32bppPArgb);
+        try
+        {
+            using Graphics graphics = Graphics.FromImage(result);
+            graphics.Clear(Color.Transparent);
+            DrawWithOpacity(graphics, from, 1f - progress);
+            DrawWithOpacity(graphics, to, progress);
+            return result;
+        }
+        catch
+        {
+            result.Dispose();
+            throw;
+        }
+    }
+
+    private static void DrawWithOpacity(Graphics graphics, Bitmap image, float opacity)
+    {
+        using var attributes = new ImageAttributes();
+        var matrix = new ColorMatrix
+        {
+            Matrix00 = 1f,
+            Matrix11 = 1f,
+            Matrix22 = 1f,
+            Matrix33 = Math.Clamp(opacity, 0f, 1f),
+            Matrix44 = 1f
+        };
+        attributes.SetColorMatrix(matrix, ColorMatrixFlag.Default, ColorAdjustType.Bitmap);
+        graphics.DrawImage(
+            image,
+            new Rectangle(0, 0, image.Width, image.Height),
+            0,
+            0,
+            image.Width,
+            image.Height,
+            GraphicsUnit.Pixel,
+            attributes);
     }
 
     private static Bitmap[] CreateAngleFrames(Bitmap sprite)
@@ -254,7 +321,6 @@ internal sealed class HatWindow : TransparentOverlayWindow
         {
             _dragging = false;
             DisposeFallPoseFrames(_fallPoseFrames);
-            DisposeFallPoseFrames(_mirroredFallPoseFrames);
             foreach (Bitmap frame in _angleFrames)
                 frame.Dispose();
         }
