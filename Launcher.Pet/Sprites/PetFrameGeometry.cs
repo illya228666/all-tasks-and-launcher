@@ -1,12 +1,15 @@
 namespace Launcher.Pet.Sprites;
 
-// RenderWidth/RenderHeight и RenderOffsetX/Y описывают только отрисовку кадра.
-// BodyAnchorX/HeadAnchorY заданы в координатах нормализованной ячейки атласа.
-// Это авторские настройки кода и никогда не вычисляются из прозрачных полей PNG.
+// Размер кадра задаётся только uniform scale: aspect ratio нормализованной
+// ячейки атласа не меняется. Offset'ы отвечают только за визуальное положение.
+// BodyAnchorX/HeadAnchorY остаются в координатах нормализованной ячейки атласа.
 internal readonly record struct PetFrameGeometry(
     int BodyAnchorX,
-    int RenderWidth,
-    int RenderHeight,
+    float RenderScale,
     int RenderOffsetX,
     int RenderOffsetY,
-    int HeadAnchorY);
+    int HeadAnchorY)
+{
+    internal int RenderWidth => PetSpriteCatalog.GetRenderWidth(RenderScale);
+    internal int RenderHeight => PetSpriteCatalog.GetRenderHeight(RenderScale);
+}

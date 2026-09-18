@@ -1,14 +1,16 @@
 namespace Launcher.Pet.Sprites;
 
-// Общая визуальная форма кадра. Preset задаёт базовые render-настройки,
-// а конкретный кадр может переопределить только отличающиеся значения.
+// Preset описывает визуальную позу, а не конкретную анимацию.
+// Например idle, blink и wave могут использовать один Standing.
 internal enum PetFramePreset
 {
     Standing,
     Running,
-    Waving,
-    Jumping,
-    Failed,
+    Crouched,
+    Airborne,
+    Leaning,
+    Staggering,
+    Fallen,
     Action,
     Looking,
     LookingUp,

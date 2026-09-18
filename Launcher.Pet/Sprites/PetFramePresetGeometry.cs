@@ -1,8 +1,7 @@
 namespace Launcher.Pet.Sprites;
 
 internal readonly record struct PetFramePresetGeometry(
-    int RenderWidth,
-    int RenderHeight,
+    float RenderScale,
     int RenderOffsetX,
     int RenderOffsetY,
     int HeadAnchorY);

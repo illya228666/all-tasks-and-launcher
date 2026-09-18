@@ -15,22 +15,21 @@ public static class PetSpriteCatalog
     private const int DefaultRenderBottomY = DefaultRenderOffsetY + AtlasCellHeight;
     private const int DefaultHeadAnchorY = HeadHitHeight / 2;
 
-    // Первые шесть preset'ов откалиброваны по фактическим alpha-bounds исходного
-    // sprite sheet. Берётся визуальный масштаб, но не позиция внутри PNG-ячейки:
-    // вертикальное положение остаётся явной частью render-layout и не влияет на
-    // программную высоту прыжка.
+    // Масштаб — единый по X/Y. Это намеренно: preset меняет размер персонажа,
+    // но никогда не растягивает и не сплющивает конкретный кадр.
+    //
+    // Значения первых шести строк приблизительно восстанавливают относительный
+    // визуальный размер исходного sprite sheet после NormalizeAtlases().
     private static readonly IReadOnlyDictionary<PetFramePreset, PetFramePresetGeometry> Presets =
         new Dictionary<PetFramePreset, PetFramePresetGeometry>
         {
-            [PetFramePreset.Standing] = Preset(renderWidth: 146, renderHeight: 196),
-            [PetFramePreset.Running] = Preset(renderWidth: 141, renderHeight: 189),
-            [PetFramePreset.Waving] = Preset(renderWidth: 145, renderHeight: 194),
-            // Средний размер полноразмерной фазы прыжка; приседание в кадрах 0/4
-            // существенно ниже и задаётся frame override'ами.
-            [PetFramePreset.Jumping] = Preset(renderWidth: 116, renderHeight: 156),
-            // База для стоящих/восстанавливающихся failed-кадров; фаза падения
-            // ниже и задаётся отдельными frame override'ами.
-            [PetFramePreset.Failed] = Preset(renderWidth: 140, renderHeight: 188),
+            [PetFramePreset.Standing] = Preset(renderScale: 0.98f),
+            [PetFramePreset.Running] = Preset(renderScale: 0.945f),
+            [PetFramePreset.Crouched] = Preset(renderScale: 0.645f),
+            [PetFramePreset.Airborne] = Preset(renderScale: 0.78f),
+            [PetFramePreset.Leaning] = Preset(renderScale: 0.92f),
+            [PetFramePreset.Staggering] = Preset(renderScale: 0.84f),
+            [PetFramePreset.Fallen] = Preset(renderScale: 0.80f),
             [PetFramePreset.Action] = Preset(),
             [PetFramePreset.Looking] = Preset(),
             [PetFramePreset.LookingUp] = Preset(),
@@ -38,13 +37,13 @@ public static class PetSpriteCatalog
         };
 
     // Индексы: строка, затем кадр.
-    // BodyAnchorX остаётся индивидуальным для каждого изображения.
-    // Width/Height наследуются из preset'а; заметные отклонения задаются только
-    // на конкретном кадре. Изменение Height без renderOffsetY автоматически
-    // сохраняет нижнюю опорную линию кадра.
+    //
+    // BodyAnchorX остаётся индивидуальным, потому что это компенсация положения
+    // тела внутри конкретного рисунка. Scale/offset наследуются из визуальной
+    // позы; override нужен только для реально выбивающегося кадра.
     private static readonly PetFrameGeometry[][] FramesByRow =
     {
-        // Row 0: idle / blink. Размеры практически идентичны.
+        // Row 0: idle / blink -> одна и та же стоящая фигура.
         new[]
         {
             Frame(53, PetFramePreset.Standing), Frame(53, PetFramePreset.Standing),
@@ -52,51 +51,59 @@ public static class PetSpriteCatalog
             Frame(53, PetFramePreset.Standing), Frame(53, PetFramePreset.Standing),
             Frame(53, PetFramePreset.Standing)
         },
-        // Row 1: run right. Высота фиксирована; только один кадр заметно уже.
+
+        // Row 1: run right. Геометрический размер стабилен; различия ширины
+        // остаются естественной частью самой позы внутри нормализованного кадра.
         new[]
         {
             Frame(78, PetFramePreset.Running), Frame(82, PetFramePreset.Running),
             Frame(79, PetFramePreset.Running), Frame(77, PetFramePreset.Running),
-            Frame(80, PetFramePreset.Running),
-            Frame(80, PetFramePreset.Running, renderWidth: 136),
+            Frame(80, PetFramePreset.Running), Frame(80, PetFramePreset.Running),
             Frame(80, PetFramePreset.Running), Frame(75, PetFramePreset.Running)
         },
-        // Row 2: run left. Та же высота; крайние силуэты немного шире/уже.
+
+        // Row 2: run left -> тот же preset, без отдельного растяжения по X.
         new[]
         {
-            Frame(72, PetFramePreset.Running, renderWidth: 145),
-            Frame(67, PetFramePreset.Running), Frame(63, PetFramePreset.Running),
-            Frame(69, PetFramePreset.Running), Frame(65, PetFramePreset.Running),
-            Frame(64, PetFramePreset.Running),
-            Frame(68, PetFramePreset.Running, renderWidth: 137),
-            Frame(69, PetFramePreset.Running, renderWidth: 145)
+            Frame(72, PetFramePreset.Running), Frame(67, PetFramePreset.Running),
+            Frame(63, PetFramePreset.Running), Frame(69, PetFramePreset.Running),
+            Frame(65, PetFramePreset.Running), Frame(64, PetFramePreset.Running),
+            Frame(68, PetFramePreset.Running), Frame(69, PetFramePreset.Running)
         },
-        // Row 3: wave. Разброс небольшой и остаётся на одном preset'е.
+
+        // Row 3: wave визуально остаётся standing-позой.
         new[]
         {
-            Frame(53, PetFramePreset.Waving), Frame(54, PetFramePreset.Waving),
-            Frame(62, PetFramePreset.Waving), Frame(51, PetFramePreset.Waving)
+            Frame(53, PetFramePreset.Standing), Frame(54, PetFramePreset.Standing),
+            Frame(62, PetFramePreset.Standing), Frame(51, PetFramePreset.Standing)
         },
-        // Row 4: jump. Кадры 0/4 — выраженное приседание; 1-3 близки между собой.
+
+        // Row 4: jump -> компактная подготовка/приземление и полноразмерная
+        // воздушная фаза. Программный JumpLift от этих scale не зависит.
         new[]
         {
-            Frame(53, PetFramePreset.Jumping, renderWidth: 96, renderHeight: 129),
-            Frame(58, PetFramePreset.Jumping),
-            Frame(60, PetFramePreset.Jumping),
-            Frame(57, PetFramePreset.Jumping),
-            Frame(57, PetFramePreset.Jumping, renderWidth: 97, renderHeight: 130)
+            Frame(53, PetFramePreset.Crouched),
+            Frame(58, PetFramePreset.Airborne),
+            Frame(60, PetFramePreset.Airborne),
+            Frame(57, PetFramePreset.Airborne),
+            Frame(57, PetFramePreset.Crouched)
         },
-        // Row 5: failed jump / fall. Начало и восстановление близки к preset'у,
-        // середина последовательно уменьшается вместе с фактической позой.
+
+        // Row 5: failed jump / fall классифицируется по визуальной позе,
+        // а не одним общим Failed preset'ом.
         new[]
         {
-            Frame(47, PetFramePreset.Failed), Frame(49, PetFramePreset.Failed),
-            Frame(46, PetFramePreset.Failed, renderWidth: 122, renderHeight: 164),
-            Frame(65, PetFramePreset.Failed, renderWidth: 119, renderHeight: 160),
-            Frame(63, PetFramePreset.Failed, renderWidth: 106, renderHeight: 143),
-            Frame(52, PetFramePreset.Failed, renderWidth: 125, renderHeight: 168),
-            Frame(53, PetFramePreset.Failed), Frame(55, PetFramePreset.Failed)
+            Frame(47, PetFramePreset.Standing),
+            Frame(49, PetFramePreset.Leaning),
+            Frame(46, PetFramePreset.Staggering),
+            Frame(65, PetFramePreset.Fallen),
+            Frame(63, PetFramePreset.Fallen, renderScale: 0.73f),
+            Frame(52, PetFramePreset.Staggering),
+            Frame(53, PetFramePreset.Standing),
+            Frame(55, PetFramePreset.Standing)
         },
+
+        // Строки 6-8 пока не калибруются этой задачей.
         new[]
         {
             Frame(45, PetFramePreset.Action), Frame(49, PetFramePreset.Action),
@@ -115,9 +122,11 @@ public static class PetSpriteCatalog
             Frame(55, PetFramePreset.Action), Frame(56, PetFramePreset.Action),
             Frame(55, PetFramePreset.Action), Frame(56, PetFramePreset.Action)
         },
+
+        // Look-направления оставлены отдельными visual preset'ами для следующей
+        // калибровки: вверх можно сделать выше, вниз — компактнее.
         new[]
         {
-            // LookIndex 0 = прямо вверх; остальные кадры строки — поворот от верха к низу.
             Frame(54, PetFramePreset.LookingUp),
             Frame(68, PetFramePreset.Looking), Frame(66, PetFramePreset.Looking),
             Frame(65, PetFramePreset.Looking), Frame(65, PetFramePreset.Looking),
@@ -126,7 +135,6 @@ public static class PetSpriteCatalog
         },
         new[]
         {
-            // LookIndex 8 = прямо вниз; остальные продолжают круг до направления вверх.
             Frame(46, PetFramePreset.LookingDown),
             Frame(50, PetFramePreset.Looking), Frame(44, PetFramePreset.Looking),
             Frame(44, PetFramePreset.Looking), Frame(43, PetFramePreset.Looking),
@@ -144,53 +152,63 @@ public static class PetSpriteCatalog
     public static Rectangle GetSourceRectangle(int row, int frame) =>
         new(frame * AtlasCellWidth, row * AtlasCellHeight, AtlasCellWidth, AtlasCellHeight);
 
+    internal static int GetRenderWidth(float scale) =>
+        Math.Max(1, (int)Math.Round(AtlasCellWidth * scale));
+
+    internal static int GetRenderHeight(float scale) =>
+        Math.Max(1, (int)Math.Round(AtlasCellHeight * scale));
+
     private static PetFramePresetGeometry Preset(
-        int renderWidth = AtlasCellWidth,
-        int renderHeight = AtlasCellHeight,
+        float renderScale = 1f,
         int renderOffsetX = 0,
         int? renderOffsetY = null,
-        int headAnchorY = DefaultHeadAnchorY) =>
-        new(
-            renderWidth,
-            renderHeight,
+        int headAnchorY = DefaultHeadAnchorY)
+    {
+        ValidateScale(renderScale);
+        return new(
+            renderScale,
             renderOffsetX,
-            renderOffsetY ?? DefaultRenderBottomY - renderHeight,
+            renderOffsetY ?? DefaultRenderBottomY - GetRenderHeight(renderScale),
             headAnchorY);
+    }
 
     private static PetFrameGeometry Frame(
         int bodyAnchorX,
         PetFramePreset preset,
-        int? renderWidth = null,
-        int? renderHeight = null,
+        float? renderScale = null,
         int? renderOffsetX = null,
         int? renderOffsetY = null,
         int? headAnchorY = null)
     {
         PetFramePresetGeometry inherited = Presets[preset];
 
-        int width = renderWidth ?? inherited.RenderWidth;
-        int height = renderHeight ?? inherited.RenderHeight;
+        float scale = renderScale ?? inherited.RenderScale;
         int offsetX = renderOffsetX ?? inherited.RenderOffsetX;
         int offsetY = renderOffsetY
-            ?? (renderHeight.HasValue
-                ? inherited.RenderOffsetY + inherited.RenderHeight - height
+            ?? (renderScale.HasValue
+                ? inherited.RenderOffsetY
+                    + GetRenderHeight(inherited.RenderScale)
+                    - GetRenderHeight(scale)
                 : inherited.RenderOffsetY);
         int headY = headAnchorY ?? inherited.HeadAnchorY;
 
-        ValidateFrameGeometry(bodyAnchorX, width, height, headY);
-        return new(bodyAnchorX, width, height, offsetX, offsetY, headY);
+        ValidateFrameGeometry(bodyAnchorX, scale, headY);
+        return new(bodyAnchorX, scale, offsetX, offsetY, headY);
     }
 
-    private static void ValidateFrameGeometry(int bodyAnchorX, int renderWidth, int renderHeight, int headAnchorY)
+    private static void ValidateFrameGeometry(int bodyAnchorX, float renderScale, int headAnchorY)
     {
         if (bodyAnchorX < 0 || bodyAnchorX >= AtlasCellWidth)
             throw new ArgumentOutOfRangeException(nameof(bodyAnchorX));
         if (headAnchorY < 0 || headAnchorY >= AtlasCellHeight)
             throw new ArgumentOutOfRangeException(nameof(headAnchorY));
-        if (renderWidth <= 0)
-            throw new ArgumentOutOfRangeException(nameof(renderWidth));
-        if (renderHeight <= 0)
-            throw new ArgumentOutOfRangeException(nameof(renderHeight));
+        ValidateScale(renderScale);
+    }
+
+    private static void ValidateScale(float renderScale)
+    {
+        if (float.IsNaN(renderScale) || float.IsInfinity(renderScale) || renderScale <= 0f)
+            throw new ArgumentOutOfRangeException(nameof(renderScale));
     }
 
     private static int ComputeRequiredRenderAreaHeight()
