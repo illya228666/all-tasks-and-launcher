@@ -209,10 +209,17 @@ public sealed class PetWindowsSession : IDisposable
 
     private void AreaMouseDown(object? sender, MouseEventArgs args)
     {
-        if (!_running || args.Button != MouseButtons.Left || _world.Scene is not { HatAttached: true })
+        if (!_running || args.Button != MouseButtons.Left)
             return;
         Point cursor = Cursor.Position;
-        if (!_drawing.IsHeadAtScreen(cursor, _area.VisibleScreenBounds(_window)))
+        Rectangle visibleBounds = _area.VisibleScreenBounds(_window);
+        if (args.Clicks >= 2 && _drawing.IsPetAtScreen(cursor, visibleBounds))
+        {
+            TryStartEarthquake();
+            return;
+        }
+
+        if (_world.Scene is not { HatAttached: true } || !_drawing.IsHeadAtScreen(cursor, visibleBounds))
             return;
         try
         {
