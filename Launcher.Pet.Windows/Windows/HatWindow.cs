@@ -6,12 +6,11 @@ using System.Runtime.InteropServices;
 using Launcher.Pet.Hat;
 
 namespace Launcher.Pet.Windows.Windows;
-// Визуальное окно шляпы: drag/input и выбор заранее отрисованного угла, без физики и scheduler.
+// Визуальное окно шляпы: drag/input и выбор 3D-позы + программного Z-угла, без физики и scheduler.
 internal sealed class HatWindow : TransparentOverlayWindow
 {
-    private const int FallFrameDurationMs = 350;
     private readonly Bitmap[] _angleFrames;
-    private readonly Bitmap[] _fallFrames;
+    private readonly Bitmap[][] _fallPoseFrames;
     private int _angleFrame = -1;
     private int _fallFrame = -1;
     private bool _showingFall;
@@ -20,12 +19,13 @@ internal sealed class HatWindow : TransparentOverlayWindow
     internal event Action? DragStarted;
     internal event Action<Point>? Dropped;
     internal event Action<Point>? DragMoved;
+
     internal HatWindow(Bitmap sprite, Bitmap[] fallFrames) : base(clickThrough: false)
     {
-        _fallFrames = fallFrames;
         _angleFrames = CreateAngleFrames(sprite);
         try
         {
+            _fallPoseFrames = CreateFallPoseFrames(fallFrames, _angleFrames);
             SetAngle(0f);
         }
         catch
@@ -61,6 +61,7 @@ internal sealed class HatWindow : TransparentOverlayWindow
     }
 
     internal void CancelDrag() => _dragging = false;
+
     internal void SetInteractionEnabled(bool enabled)
     {
         _interactionEnabled = enabled;
@@ -69,6 +70,7 @@ internal sealed class HatWindow : TransparentOverlayWindow
     }
 
     internal void MoveTo(Point location) => ShowAt(location);
+
     internal void SetPose(HatMode mode, float angle, float fallTimeSeconds)
     {
         if (mode != HatMode.Falling)
@@ -77,14 +79,15 @@ internal sealed class HatWindow : TransparentOverlayWindow
             return;
         }
 
-        int cycle = 2 * (_fallFrames.Length - 1);
-        int phase = (int)(Math.Max(0f, fallTimeSeconds) * 1000f / FallFrameDurationMs) % cycle;
-        int frame = Math.Min(phase, cycle - phase);
-        if (_showingFall && frame == _fallFrame)
+        int fallFrame = GetFallFrame(fallTimeSeconds);
+        int angleFrame = HatRotationProfile.GetNearestFrameIndex(angle);
+        if (_showingFall && fallFrame == _fallFrame && angleFrame == _angleFrame)
             return;
-        _fallFrame = frame;
+
+        _fallFrame = fallFrame;
+        _angleFrame = angleFrame;
         _showingFall = true;
-        SetImage(_fallFrames[frame]);
+        SetImage(_fallPoseFrames[fallFrame][angleFrame]);
     }
 
     internal void SetAngle(float angle)
@@ -95,6 +98,43 @@ internal sealed class HatWindow : TransparentOverlayWindow
         _angleFrame = frame;
         _showingFall = false;
         SetImage(_angleFrames[frame]);
+    }
+
+    private int GetFallFrame(float fallTimeSeconds)
+    {
+        // Та же фаза, что используется HatPhysics для бокового скольжения и Angle:
+        // 0 -> последний 3D-ракурс -> 0 за один полный цикл качания.
+        float phase = Math.Max(0f, fallTimeSeconds) * HatRotationProfile.SwingRadiansPerSecond;
+        float progress = (1f - MathF.Cos(phase)) * 0.5f;
+        return Math.Clamp((int)MathF.Round(progress * (_fallPoseFrames.Length - 1)), 0, _fallPoseFrames.Length - 1);
+    }
+
+    private static Bitmap[][] CreateFallPoseFrames(Bitmap[] fallFrames, Bitmap[] neutralAngleFrames)
+    {
+        // hat.png является нулевой 3D-позой. Остальные позы приходят из hat_falling_*.png.
+        var poses = new Bitmap[fallFrames.Length + 1][];
+        poses[0] = neutralAngleFrames;
+        int created = 1;
+        try
+        {
+            for (int index = 0; index < fallFrames.Length; index++)
+            {
+                poses[index + 1] = CreateAngleFrames(fallFrames[index]);
+                created++;
+            }
+
+            return poses;
+        }
+        catch
+        {
+            for (int pose = 1; pose < created; pose++)
+            {
+                foreach (Bitmap frame in poses[pose])
+                    frame.Dispose();
+            }
+
+            throw;
+        }
     }
 
     private static Bitmap[] CreateAngleFrames(Bitmap sprite)
@@ -135,6 +175,7 @@ internal sealed class HatWindow : TransparentOverlayWindow
     }
 
     private Point GetLocationAtCursor(Point cursorPosition) => new(cursorPosition.X - ClientSize.Width / 2, cursorPosition.Y - ClientSize.Height / 2);
+
     private void MoveToCursor(Point cursorPosition)
     {
         Location = GetLocationAtCursor(cursorPosition);
@@ -170,6 +211,12 @@ internal sealed class HatWindow : TransparentOverlayWindow
         if (disposing)
         {
             _dragging = false;
+            for (int pose = 1; pose < _fallPoseFrames.Length; pose++)
+            {
+                foreach (Bitmap frame in _fallPoseFrames[pose])
+                    frame.Dispose();
+            }
+
             foreach (Bitmap frame in _angleFrames)
                 frame.Dispose();
         }
