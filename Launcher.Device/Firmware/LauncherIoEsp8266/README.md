@@ -1,7 +1,7 @@
-# Launcher IO firmware (ESP8266 / NodeMCU 1.0)
+# Launcher IO firmware v1 (ESP8266 / NodeMCU 1.0)
 
-`LauncherIoEsp8266.ino` is the firmware counterpart for `DeviceConnection / DeviceProtocol`.
-It uses no extra Arduino libraries.
+`LauncherIoEsp8266.ino` is the legacy v1 firmware counterpart. The desktop receiver still supports it through protocol negotiation.
+See `../README.md` for the v1/v2 matrix. It uses no extra Arduino libraries.
 
 ## Hardware assumptions
 
