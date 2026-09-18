@@ -46,6 +46,8 @@ internal sealed class DeviceInputConnection : IDisposable
         if (_disposed)
             return;
 
+        _window.Device.DisplayInput(input);
+
         switch (input)
         {
             case DeviceInput.PrimaryButtonPressed:
