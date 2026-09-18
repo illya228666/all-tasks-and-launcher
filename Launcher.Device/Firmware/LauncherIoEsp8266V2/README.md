@@ -9,3 +9,13 @@ single events.
 
 The desktop side identifies this firmware by `LAUNCHER_IO 2` and automatically
 uses the v2 event set.
+
+
+## Final pin/input configuration
+
+- LEDs: D1 / D2 / D3
+- left button: D6, active LOW with `INPUT_PULLUP`
+- right button: D7, active HIGH with external pull-down
+
+The debounce/chord layer compares each button against its own pressed level, so
+LEFT/RIGHT/BOTH events work even though the two inputs use opposite polarities.

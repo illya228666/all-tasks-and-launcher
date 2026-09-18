@@ -31,13 +31,16 @@ LED mask bits are: red = 1, yellow = 2, green = 4. Masks can be combined.
 
 The v2 sketch follows `2xInput_GPIO.jpg`:
 
-- green LED: D4
-- yellow LED: D3
-- red LED: D2
-- right button: D5
+- green LED: D1
+- yellow LED: D2
+- red LED: D3
 - left button: D6
+- right button: D7
 
-Buttons are active HIGH and use the external resistors shown on the breadboard.
+The two inputs deliberately use different electrical conventions:
+
+- left button: active LOW, configured as `INPUT_PULLUP`
+- right button: active HIGH, using the external pull-down resistor
 
 D3 is GPIO0, which is an ESP8266 boot-strap pin. If boot becomes unreliable,
-move the yellow LED signal to a non-strap pin and change `yellowLedPin` in the v2 sketch.
+move the red LED signal to a non-strap pin and change `redLedPin` in the v2 sketch.
