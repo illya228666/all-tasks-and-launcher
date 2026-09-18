@@ -8,6 +8,8 @@ using Launcher.Pet.Speech;
 namespace Launcher.Pet;
 public sealed class PetWorld
 {
+    public const int EarthquakeDurationMs = PetEarthquake.DurationMs;
+
     private readonly PetState _state = new();
     private readonly HatWorld _hat = new();
     private readonly PetSpeech _speech;

@@ -16,7 +16,7 @@ internal sealed class LauncherSession : IDisposable
     private readonly DeviceConnection _device;
     private readonly AppListConnection _appConnection;
     private readonly DevicePanelConnection _devicePanelConnection;
-    private readonly DevicePetConnection _devicePetConnection;
+    private readonly DeviceInputConnection _deviceInputConnection;
     private readonly PetWindowsSession? _pet;
     private readonly string? _startupWarning;
     private bool _closing, _readyToClose, _disposed;
@@ -36,7 +36,7 @@ internal sealed class LauncherSession : IDisposable
             _pet.Problem += ShowProblem;
         _appConnection = new(Window, apps, launch, Save);
         _devicePanelConnection = new(_device, Window, Post);
-        _devicePetConnection = new(_device, _pet, Post);
+        _deviceInputConnection = new(_device, _pet, _appConnection, Window, Post);
         Window.Shown += Shown;
         Window.FormClosing += Closing;
         Window.ThemeRequested += ChangeTheme;
@@ -139,6 +139,10 @@ internal sealed class LauncherSession : IDisposable
             return;
         _disposed = true;
         _closing = true;
+
+        _deviceInputConnection.Dispose();
+        _devicePanelConnection.Dispose();
+
         try
         {
             _device.DisposeAsync().AsTask().GetAwaiter().GetResult();
@@ -148,8 +152,6 @@ internal sealed class LauncherSession : IDisposable
             System.Diagnostics.Debug.WriteLine(error);
         }
 
-        _devicePetConnection.Dispose();
-        _devicePanelConnection.Dispose();
         _appConnection.Dispose();
         if (_pet is not null)
         {

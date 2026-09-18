@@ -12,7 +12,7 @@ Launcher startet Lernprogramme, zeigt einen Begleiter und verarbeitet ESP8266-Ei
 | Launcher.Apps.Windows | Проектные файлы, EXE, процессы / Projektdateien, EXE, Prozesse |
 | Launcher.Pet | Поведение, речь, шляпа / Verhalten, Sprache, Hut |
 | Launcher.Pet.Windows | Рисование и рабочий стол / Zeichnen und Desktop |
-| Launcher.Device | Порт, команды, прошивка / Port, Befehle, Firmware |
+| Launcher.Device | Порт, версии протокола, команды, прошивки / Port, Protokollversionen, Befehle, Firmware |
 
 Все шесть проектов находятся в папке решения `Launcher`. Библиотеки лежат рядом с запускаемым проектом в репозитории.
 Alle sechs Projekte stehen im Lösungsordner `Launcher`. Bibliotheken liegen neben dem Startprojekt im Repository.
@@ -24,8 +24,19 @@ Alle sechs Projekte stehen im Lösungsordner `Launcher`. Bibliotheken liegen neb
 3. `ProjectAppSource` → `FolderAppSource`: источники программ / Programmquellen.
 4. `AppLaunch` → `AppProcess`: запуск и статистика / Start und Statistik.
 5. `PetWindowsSession` → `PetWorld` → `PetBehavior`: входные данные, решения, отображение / Eingaben, Entscheidungen, Anzeige.
-6. `DeviceConnection` → `DeviceProtocol` + `SerialExchange`: последовательный обмен / serieller Austausch.
-7. `DevicePetConnection`: кнопка платы вызывает землетрясение / Gerätetaste löst Erdbeben aus.
+6. `DeviceConnection` → `DeviceProtocol` + выбранная версия `IDeviceProtocolVersion` + `SerialExchange`: последовательный обмен / serieller Austausch.
+7. `DeviceInputConnection`: v1-кнопка или v2 left/right/both связываются с действиями Launcher / verbindet v1/v2-Eingaben mit Launcher-Aktionen.
+
+## ESP8266 / Launcher IO
+
+При `HELLO` приложение принимает `LAUNCHER_IO 1` либо `LAUNCHER_IO 2` и выбирает соответствующий декодер событий автоматически.
+Bei `HELLO` wird `LAUNCHER_IO 1` oder `LAUNCHER_IO 2` erkannt und der passende Ereignisdecoder gewählt.
+
+- v1: одна кнопка → землетрясение; встроенный indicator.
+- v2: левая → землетрясение; правая → случайная программа; обе → chaos.
+- chaos: землетрясение + цикл красный/жёлтый/зелёный на внешних LED + тот же цвет на интерактивных контролах формы.
+- v2 LED mask: red=1, yellow=2, green=4; команда `LEDS 0..7`.
+- Прошивки и таблица протоколов: `Launcher.Device/Firmware`.
 
 ## Настройки и ресурсы / Einstellungen und Ressourcen
 
@@ -33,7 +44,7 @@ Alle sechs Projekte stehen im Lösungsordner `Launcher`. Bibliotheken liegen neb
 - Повреждённый JSON копируется в `.broken-*` до сброса. Если копирование или чтение невозможно, запись блокируется. / Beschädigte Daten werden gesichert; bei fehlendem sicheren Zugriff wird nicht überschrieben.
 - Тема и показ столкновений — независимые настройки. / Farbthema und Kollisionsanzeige sind unabhängig.
 - PNG принадлежат `Launcher.Pet.Windows`, копируются в `Resources` при сборке и публикации. / Bilder gehören der Windows-Begleiterbibliothek und werden mitgeliefert.
-- Прошивка: `Launcher.Device/Firmware/LauncherIoEsp8266`. После изменения протокола требуется соответствующая прошивка. / Die Firmware muss zum Protokoll passen.
+- После изменения конкретной версии протокола требуется соответствующая прошивка; v1 и v2 при этом могут сосуществовать. / Protokollversion und Firmware müssen zueinander passen; v1 und v2 können parallel unterstützt werden.
 
 ## Платформа / Plattform
 

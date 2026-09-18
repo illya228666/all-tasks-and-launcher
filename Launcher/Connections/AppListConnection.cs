@@ -108,7 +108,7 @@ internal sealed class AppListConnection : IDisposable
             });
     }
 
-    private void LaunchRandom()
+    internal void LaunchRandom()
     {
         var candidates = _apps.VisibleApps().Where(app => app.IsAvailable).ToArray();
         if (candidates.Length == 0)

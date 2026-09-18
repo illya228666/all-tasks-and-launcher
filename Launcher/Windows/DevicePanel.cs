@@ -1,3 +1,5 @@
+using Launcher.Device.Data;
+
 namespace Launcher.Windows;
 internal sealed class DevicePanel : FlowLayoutPanel
 {
@@ -30,9 +32,11 @@ internal sealed class DevicePanel : FlowLayoutPanel
         _off.Click += (_, _) => IndicatorRequested?.Invoke(false);
     }
 
-    internal void Display(bool connected, string? port)
+    internal void Display(bool connected, string? port, DeviceProtocolVersion? protocolVersion)
     {
-        _status.Text = connected ? "Controller: " + port : "Controller: nicht verbunden";
+        _status.Text = connected
+            ? $"Controller: {port} | IO v{(int)(protocolVersion ?? DeviceProtocolVersion.V1)}"
+            : "Controller: nicht verbunden";
         _on.Enabled = _off.Enabled = connected;
     }
 }

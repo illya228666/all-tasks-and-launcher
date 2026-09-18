@@ -11,18 +11,30 @@ public sealed class DeviceConnection : IAsyncDisposable
     private const int StartupDelayMs = 1200;
     private const int DiscoveryRetryMs = 2000;
     private const int PollIntervalMs = 100;
-    private readonly Channel<bool> _commands = Channel.CreateUnbounded<bool>(new() { SingleReader = true });
+
+    private enum CommandKind
+    {
+        Indicator,
+        Lights
+    }
+
+    private readonly record struct DeviceCommand(CommandKind Kind, bool IndicatorEnabled, DeviceLights Lights);
+
+    private readonly Channel<DeviceCommand> _commands = Channel.CreateUnbounded<DeviceCommand>(new() { SingleReader = true });
     private readonly CancellationTokenSource _lifetime = new();
     private Task _loop = Task.CompletedTask;
     private SerialPort? _port;
+    private IDeviceProtocolVersion? _protocol;
     private bool _started;
     private bool _stopped;
     private bool _disposed;
     private long _nextDiscoveryAt;
+
     public event Action<DeviceState>? StateChanged;
     public event Action<DeviceInput>? InputReceived;
     public event Action<bool, bool>? IndicatorCompleted;
     public event Action<string>? Failed;
+
     public void Start()
     {
         if (_started || _stopped)
@@ -31,7 +43,12 @@ public sealed class DeviceConnection : IAsyncDisposable
         _loop = Task.Run(RunAsync);
     }
 
-    public bool SetIndicator(bool enabled) => !_stopped && _commands.Writer.TryWrite(enabled);
+    public bool SetIndicator(bool enabled) =>
+        !_stopped && _commands.Writer.TryWrite(new(CommandKind.Indicator, enabled, DeviceLights.None));
+
+    public bool SetLights(DeviceLights lights) =>
+        !_stopped && _commands.Writer.TryWrite(new(CommandKind.Lights, false, lights));
+
     private async Task RunAsync()
     {
         CancellationToken token = _lifetime.Token;
@@ -43,29 +60,14 @@ public sealed class DeviceConnection : IAsyncDisposable
                 {
                     if (_port is null)
                         await ConnectAsync(token).ConfigureAwait(false);
-                    if (_commands.Reader.TryRead(out bool enabled))
-                    {
-                        bool available = _port is not null;
-                        if (available)
-                        {
-                            try
-                            {
-                                SerialExchange.Send(_port!, DeviceProtocol.Indicator(enabled), token, DeviceProtocol.IndicatorReply);
-                            }
-                            catch (Exception error) when (IsConnectionError(error))
-                            {
-                                available = false;
-                                ClosePort();
-                            }
-                        }
 
-                        IndicatorCompleted?.Invoke(enabled, available);
-                    }
+                    if (_commands.Reader.TryRead(out DeviceCommand command))
+                        ExecuteCommand(command, token);
 
-                    if (_port is not null)
+                    if (_port is not null && _protocol is not null)
                     {
-                        string reply = SerialExchange.Send(_port, DeviceProtocol.Poll, token, DeviceProtocol.NoInput, DeviceProtocol.ButtonPressed);
-                        if (DeviceProtocol.ReadInput(reply) is DeviceInput input)
+                        string reply = SerialExchange.Send(_port, _protocol.PollCommand, token, _protocol.PollReplies);
+                        if (_protocol.ReadInput(reply) is DeviceInput input)
                             InputReceived?.Invoke(input);
                     }
                 }
@@ -90,10 +92,49 @@ public sealed class DeviceConnection : IAsyncDisposable
         }
     }
 
+    private void ExecuteCommand(DeviceCommand command, CancellationToken token)
+    {
+        bool available = _port is not null && _protocol is not null;
+        if (!available)
+        {
+            if (command.Kind == CommandKind.Indicator)
+                IndicatorCompleted?.Invoke(command.IndicatorEnabled, false);
+            return;
+        }
+
+        DeviceWireCommand? wire = command.Kind switch
+        {
+            CommandKind.Indicator => _protocol!.Indicator(command.IndicatorEnabled),
+            CommandKind.Lights => _protocol!.Lights(command.Lights),
+            _ => null
+        };
+
+        if (wire is null)
+        {
+            if (command.Kind == CommandKind.Indicator)
+                IndicatorCompleted?.Invoke(command.IndicatorEnabled, false);
+            return;
+        }
+
+        try
+        {
+            SerialExchange.Send(_port!, wire.Value.Command, token, wire.Value.ExpectedReply);
+        }
+        catch (Exception error) when (IsConnectionError(error))
+        {
+            available = false;
+            ClosePort();
+        }
+
+        if (command.Kind == CommandKind.Indicator)
+            IndicatorCompleted?.Invoke(command.IndicatorEnabled, available);
+    }
+
     private async Task ConnectAsync(CancellationToken token)
     {
         if (Environment.TickCount64 < _nextDiscoveryAt)
             return;
+
         foreach (string name in SerialPort.GetPortNames().OrderBy(value => value, StringComparer.OrdinalIgnoreCase))
         {
             token.ThrowIfCancellationRequested();
@@ -110,8 +151,10 @@ public sealed class DeviceConnection : IAsyncDisposable
                 };
                 _port.Open();
                 await Task.Delay(StartupDelayMs, token).ConfigureAwait(false);
-                SerialExchange.Send(_port, DeviceProtocol.Hello, token, DeviceProtocol.Identity);
-                StateChanged?.Invoke(new(true, name));
+
+                string identity = SerialExchange.Send(_port, DeviceProtocol.Hello, token, DeviceProtocol.Identities);
+                _protocol = DeviceProtocol.FromIdentity(identity);
+                StateChanged?.Invoke(new(true, name, _protocol.Version));
                 return;
             }
             catch (Exception error) when (IsConnectionError(error))
@@ -123,11 +166,14 @@ public sealed class DeviceConnection : IAsyncDisposable
         _nextDiscoveryAt = Environment.TickCount64 + DiscoveryRetryMs;
     }
 
-    private static bool IsConnectionError(Exception error) => error is IOException or UnauthorizedAccessException or TimeoutException or InvalidOperationException or ArgumentException;
+    private static bool IsConnectionError(Exception error) =>
+        error is IOException or UnauthorizedAccessException or TimeoutException or InvalidOperationException or ArgumentException;
+
     private void ClosePort()
     {
         SerialPort? port = _port;
         _port = null;
+        _protocol = null;
         _nextDiscoveryAt = Environment.TickCount64 + DiscoveryRetryMs;
         try
         {

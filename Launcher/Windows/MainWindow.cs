@@ -26,6 +26,9 @@ internal sealed class MainWindow : Form
         ColumnCount = 1,
         RowCount = 4
     };
+    private WindowTheme _currentTheme = new(false);
+    private Color? _chaosColor;
+
     internal SearchPanel Search { get; } = new();
     internal AppListPanel Apps { get; } = new();
     internal DevicePanel Device { get; } = new();
@@ -80,12 +83,60 @@ internal sealed class MainWindow : Form
 
     internal void SetTheme(WindowTheme theme)
     {
-        theme.Apply(this);
-        _header.BackColor = theme.Header;
-        _title.BackColor = theme.Header;
+        _currentTheme = theme;
+        ApplyBaseTheme();
+        if (_chaosColor is Color color)
+            ApplyChaosColor(color);
+    }
+
+    internal void SetChaosColor(Color? color)
+    {
+        _chaosColor = color;
+        if (color is Color active)
+            ApplyChaosColor(active);
+        else
+            ApplyBaseTheme();
+    }
+
+    private void ApplyBaseTheme()
+    {
+        _currentTheme.Apply(this);
+        _header.BackColor = _currentTheme.Header;
+        _title.BackColor = _currentTheme.Header;
         _title.ForeColor = Color.White;
-        _theme.Text = theme.Dark ? "Theme: Dark" : "Theme: Light";
-        Apps.SetTheme(theme);
+        _theme.Text = _currentTheme.Dark ? "Theme: Dark" : "Theme: Light";
+        Apps.SetTheme(_currentTheme);
+    }
+
+    private void ApplyChaosColor(Color color)
+    {
+        Color foreground = Contrast(color);
+        _header.BackColor = color;
+        _title.BackColor = color;
+        _title.ForeColor = foreground;
+        ApplyChaosColor(this, color, foreground);
+    }
+
+    private static void ApplyChaosColor(Control parent, Color background, Color foreground)
+    {
+        foreach (Control child in parent.Controls)
+        {
+            if (child is ButtonBase or TextBox or ComboBox)
+            {
+                child.BackColor = background;
+                child.ForeColor = foreground;
+                if (child is Button button)
+                    button.FlatAppearance.BorderColor = foreground;
+            }
+
+            ApplyChaosColor(child, background, foreground);
+        }
+    }
+
+    private static Color Contrast(Color color)
+    {
+        int luminance = color.R * 299 + color.G * 587 + color.B * 114;
+        return luminance >= 150000 ? Color.Black : Color.White;
     }
 
     internal void DisableActions()

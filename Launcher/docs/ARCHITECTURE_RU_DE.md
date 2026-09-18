@@ -23,10 +23,11 @@ DE: Lernprojekt-Verweise beschreiben mitgelieferte Programme. Sie stehen getrenn
 | --- | --- |
 | LauncherSession | Настройки приложения, связи, время жизни устройства / Einstellungen, Verbindungen, Gerätelebensdauer |
 | AppList | Программы, фильтр, избранное, статистика / Programme, Filter, Favoriten, Statistik |
-| MainWindow и панели / und Bereiche | Элементы управления и меню / Steuerelemente und Menüs |
+| MainWindow и панели / und Bereiche | Элементы управления, тема и временный chaos-цвет / Steuerelemente, Thema und temporäre Chaos-Farbe |
 | PetWorld | Закрытые состояния питомца, речи и шляпы / interne Zustände von Begleiter, Sprache und Hut |
-| PetWindowsSession | Единственный таймер, изображения, дополнительные окна / einziger Timer, Bilder, Zusatzfenster |
-| DeviceConnection | Последовательный порт, цикл опроса, очередь LED-команд / serieller Port, Abfrageschleife, LED-Warteschlange |
+| PetWindowsSession | Единственный таймер питомца, изображения, дополнительные окна / Begleiter-Timer, Bilder, Zusatzfenster |
+| DeviceConnection | Порт, выбранная версия протокола, цикл опроса, очередь команд / Port, gewählte Protokollversion, Abfrageschleife, Befehlswarteschlange |
+| DeviceInputConnection | Привязка входных событий и 5-секундный chaos-цикл / Eingabebindung und 5-Sekunden-Chaos-Zyklus |
 
 RU: Форма не меняет коллекции AppList. Для сохранения получается копия `AppListSettings`; результаты показа используют неизменяемые записи. Отрисовка читает `PetScene` и не меняет PetWorld.
 DE: Das Fenster verändert keine AppList-Sammlungen. Einstellungen werden als Kopie exportiert. Die Zeichnung liest `PetScene`, ohne PetWorld zu verändern.
@@ -98,14 +99,22 @@ DE: WindowShake bewegt nur das normale Hauptfenster. Maximierte Fenster bleiben 
 
 ## 5. Устройство / Gerät
 
-RU: DeviceConnection выполняет один фоновый цикл, который единолично использует порт. LED-команды ожидают в Channel; опрос и команды не пересекаются. Ошибка подключения даёт отключённое состояние; повторный поиск ограничен паузой. Закрытие отменяет ожидания и дожидается выхода цикла.
-DE: Eine Hintergrundschleife besitzt den Port. LED-Befehle warten im Channel; Befehle und Abfragen überlappen nicht. Verbindungsfehler führen zum getrennten Zustand und einer Pause vor erneuter Suche. Beim Schließen wird der Ablauf abgebrochen und abgewartet.
+RU: DeviceConnection выполняет один фоновый цикл, который единолично использует порт. Очередь содержит indicator/LED-команды; опрос и команды не пересекаются. Ошибка подключения даёт отключённое состояние; повторный поиск ограничен паузой. Закрытие отменяет ожидания и дожидается выхода цикла.
+DE: Eine Hintergrundschleife besitzt den Port. Indicator-/LED-Befehle warten in der Queue; Befehle und Abfragen überlappen nicht. Verbindungsfehler führen zum getrennten Zustand und einer Pause vor erneuter Suche.
 
-RU: DevicePanelConnection передаёт результаты в UI через BeginInvoke. DevicePetConnection связывает только смысловое событие кнопки и действие питомца. Устройство не знает GPIO-поведения питомца или элементов формы.
-DE: DevicePanelConnection stellt UI-Ergebnisse über BeginInvoke zu. DevicePetConnection verbindet ausschließlich die Bedeutung einer Taste mit einer Begleiteraktion.
+RU: Сначала отправляется `HELLO`. Ответ `LAUNCHER_IO 1` или `LAUNCHER_IO 2` выбирает реализацию `IDeviceProtocolVersion`; после этого только эта версия определяет допустимые ответы `POLL` и кодирование выходных команд.
+DE: `HELLO` wählt anhand von `LAUNCHER_IO 1` bzw. `LAUNCHER_IO 2` die passende `IDeviceProtocolVersion`; nur diese Version dekodiert danach Eingaben und Ausgabebefehle.
 
-Протокол / Protokoll: `HELLO` → `LAUNCHER_IO 1`; `POLL` → `INPUT NONE` / `INPUT BUTTON_PRESSED`; `INDICATOR ON/OFF` → `OK INDICATOR`.
-`HELLO` очищает старые нажатия / verwirft alte Tastendrücke. Электрические параметры сохранены / elektrische Parameter unverändert.
+| Версия | Входы | Выход |
+| --- | --- | --- |
+| v1 | `INPUT BUTTON_PRESSED` | `INDICATOR ON/OFF` |
+| v2 | `INPUT LEFT_PRESSED`, `RIGHT_PRESSED`, `BOTH_PRESSED` | `LEDS 0..7` |
+
+RU: `DeviceInputConnection` переводит события в смысл: v1 button и v2 left → Earthquake; v2 right → случайная программа; v2 both → Chaos. Chaos длится столько же, сколько Earthquake, и одним UI-таймером переключает red/yellow/green как в форме, так и на ESP.
+DE: `DeviceInputConnection` ordnet die Ereignisse zu: v1 button und v2 left → Erdbeben; v2 right → Zufallsprogramm; v2 both → Chaos. Ein UI-Timer hält Formularfarbe und externe LEDs synchron.
+
+RU: GPIO-смысл остаётся только в прошивке. Desktop-код работает с `DeviceInput` и `DeviceLights`, а устройство не знает Pet/App/UI.
+DE: GPIO-Details bleiben in der Firmware. Desktop-Code arbeitet nur mit `DeviceInput` und `DeviceLights`; das Gerät kennt Pet/App/UI nicht.
 
 ## 6. Запуск, закрытие, ошибки / Start, Ende, Fehler
 
@@ -120,10 +129,10 @@ DE: Erwartbare externe Fehler werden Ergebnisse oder sichtbare Hinweise. Stilles
 
 ## 7. Как расширять / Erweiterungswege
 
-1. **Действие каталога / Listenaktion:** добавить смысл в AppCardAction, обработать в AppListConnection; правило — в Launcher.Apps, системный вызов — в Launcher.Apps.Windows. / Bedeutung verbinden, Regel und Systemaufruf getrennt halten.
-2. **Поведение питомца / Begleiteraktion:** добавить режим, класс расчёта и переходы в PetBehavior; кадры — в каталоге анимаций. Windows не решает приоритеты. / Modus, Berechnung und Übergänge hinzufügen; Windows wählt keine Priorität.
-3. **Команда платы / Gerätebefehl:** согласованно изменить DeviceProtocol, очередь/обмен и прошивку, обновить таблицу протокола. / Protokoll, Austausch und Firmware gemeinsam ändern.
-4. **Связь возможностей / Verbindung:** добавить конкретную подписку в Connections и её снятие в Dispose. Например, событие устройства вызывает метод PetWindowsSession; прямой ссылки Device → Pet нет. / Konkrete Verbindung anlegen und wieder lösen; keine direkte Geräteabhängigkeit zum Begleiter.
+1. **Действие каталога / Listenaktion:** добавить смысл в AppCardAction, обработать в AppListConnection; правило — в Launcher.Apps, системный вызов — в Launcher.Apps.Windows.
+2. **Поведение питомца / Begleiteraktion:** добавить режим, класс расчёта и переходы в PetBehavior; кадры — в каталоге анимаций.
+3. **Новая версия платы / Neue Geräteversion:** добавить новую реализацию `IDeviceProtocolVersion` и отдельную прошивку; старые версии не переписывать.
+4. **Связь возможностей / Verbindung:** новые смысловые события связывать в `Connections`, а не давать Device прямую ссылку на Pet/App/UI.
 
 RU: Новый самостоятельный тип — новый файл; namespace повторяет папку. Значения настройки находятся рядом со своим поведением, единицы видны в именах. Дополнительный проект нужен для самостоятельной границы зависимости, а не для каждого класса.
 DE: Jeder eigenständige Typ hat eine Datei; Namespaces folgen Ordnern. Einstellwerte stehen bei ihrem Verhalten und nennen Einheiten. Neue Projekte bilden Abhängigkeitsgrenzen, keine Einzelklassen.
