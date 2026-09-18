@@ -1,5 +1,11 @@
 namespace Launcher.Device.Data;
 public enum DeviceInput
 {
-    PrimaryButtonPressed
+    // Protocol v1
+    PrimaryButtonPressed,
+
+    // Protocol v2
+    LeftButtonPressed,
+    RightButtonPressed,
+    BothButtonsPressed
 }
