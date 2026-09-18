@@ -1,14 +1,16 @@
 // Launcher IO firmware for ESP8266 / NodeMCU 1.0
 // Protocol version: LAUNCHER_IO 2
 //
-// Wiring follows 2xInput_GPIO.jpg:
-// - green LED  -> D1
-// - yellow LED -> D2
-// - red LED    -> D3
-// - right button -> D6
-// - left button  -> D7
+// Final wiring:
+// - green LED    -> D1
+// - yellow LED   -> D2
+// - red LED      -> D3
+// - left button  -> D6
+// - right button -> D7
 //
-// Buttons use the external resistors from the breadboard and are pressed HIGH.
+// Input wiring is intentionally asymmetric:
+// - left: active LOW, uses ESP8266 INPUT_PULLUP
+// - right: active HIGH, uses the external pull-down resistor
 // LEDs are active HIGH.
 //
 // NOTE: D3 is GPIO0, a boot-strap pin on ESP8266. This matches the supplied
@@ -42,6 +44,7 @@ enum InputEvent : uint8_t
 struct DebouncedButton
 {
     int pin;
+    int pressedState;
     int rawState;
     int stableState;
     unsigned long rawChangedAt;
@@ -71,10 +74,11 @@ void setLeds(uint8_t mask)
     digitalWrite(greenLedPin, (mask & 4) != 0 ? HIGH : LOW);
 }
 
-void initializeButton(DebouncedButton& button, int pin)
+void initializeButton(DebouncedButton& button, int pin, int inputMode, int pressedState)
 {
     button.pin = pin;
-    pinMode(pin, INPUT);
+    button.pressedState = pressedState;
+    pinMode(pin, inputMode);
     button.rawState = digitalRead(pin);
     button.stableState = button.rawState;
     button.rawChangedAt = millis();
@@ -95,12 +99,17 @@ void serviceButton(DebouncedButton& button)
         button.stableState = current;
 }
 
+bool isPressed(const DebouncedButton& button)
+{
+    return button.stableState == button.pressedState;
+}
+
 uint8_t currentButtonMask()
 {
     uint8_t mask = 0;
-    if (leftButton.stableState == HIGH)
+    if (isPressed(leftButton))
         mask |= leftMask;
-    if (rightButton.stableState == HIGH)
+    if (isPressed(rightButton))
         mask |= rightMask;
     return mask;
 }
@@ -285,8 +294,8 @@ void setup()
     pinMode(greenLedPin, OUTPUT);
     setLeds(0);
 
-    initializeButton(leftButton, leftButtonPin);
-    initializeButton(rightButton, rightButtonPin);
+    initializeButton(leftButton, leftButtonPin, INPUT_PULLUP, LOW);
+    initializeButton(rightButton, rightButtonPin, INPUT, HIGH);
 
     Serial.begin(115200);
 }
