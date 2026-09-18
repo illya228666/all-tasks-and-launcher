@@ -1,24 +1,26 @@
 // Launcher IO firmware for ESP8266 / NodeMCU 1.0
 // Protocol version: LAUNCHER_IO 2
 //
-// Current wiring:
-// - green LED    -> D4
-// - yellow LED   -> D3
-// - red LED      -> D2
-// - right button -> D5
-// - left button  -> D6
+// Wiring follows 2xInput_GPIO.jpg:
+// - green LED  -> D1
+// - yellow LED -> D2
+// - red LED    -> D3
+// - right button -> D6
+// - left button  -> D7
 //
-// Buttons use the external pull-down resistors and are pressed HIGH.
-// External LEDs are active HIGH.
+// Buttons use the external resistors from the breadboard and are pressed HIGH.
+// LEDs are active HIGH.
 //
-// D3/GPIO0 is a boot-strap pin. If boot becomes unreliable, move the yellow
-// LED to a non-strap pin and update yellowLedPin below.
+// NOTE: D3 is GPIO0, a boot-strap pin on ESP8266. This matches the supplied
+// breadboard scheme. If the board ever boots into flashing mode, move the red
+// LED signal to a non-strap pin (for example D5) and change redLedPin below.
 
-const int greenLedPin = D4;
-const int yellowLedPin = D3;
-const int redLedPin = D2;
-const int rightButtonPin = D5;
+const int greenLedPin = D1;
+const int yellowLedPin = D2;
+const int redLedPin = D3;
 const int leftButtonPin = D6;
+const int rightButtonPin = D7;
+
 
 const unsigned long debounceMs = 30;
 const unsigned long chordWindowMs = 90;
