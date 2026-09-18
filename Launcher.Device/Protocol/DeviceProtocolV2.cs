@@ -33,7 +33,7 @@ internal sealed class DeviceProtocolV2 : IDeviceProtocolVersion
 
     private static DeviceWireCommand CreateLights(DeviceLights lights)
     {
-        if ((lights & ~DeviceLights.All) != 0)
+        if ((lights & ~DeviceLights.All) != DeviceLights.None)
             throw new ArgumentOutOfRangeException(nameof(lights));
         return new($"LEDS {(int)lights}", LedsReply);
     }
