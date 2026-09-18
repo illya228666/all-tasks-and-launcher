@@ -21,7 +21,7 @@ internal sealed class PetImages : IDisposable
             (WithHat, WithoutHat) = NormalizeAtlases(withHat, withoutHat);
             using var hat = Read(Path.Combine("hat", "hat.png"));
             Hat = Normalize(hat, HatSize);
-            HatFalling = ReadFrames("hat", "hat_falling_", 7, HatSize);
+            HatFalling = ReadFrames("hat", "hat_falling_", HatSize);
         }
         catch
         {
@@ -36,14 +36,37 @@ internal sealed class PetImages : IDisposable
         return source.Clone(new Rectangle(Point.Empty, source.Size), PixelFormat.Format32bppArgb);
     }
 
-    private static Bitmap[] ReadFrames(string folder, string prefix, int count, Size target)
+    private static Bitmap[] ReadFrames(string folder, string prefix, Size target)
     {
-        var frames = new Bitmap[count];
+        string directory = Path.Combine(AppContext.BaseDirectory, "Resources", folder);
+        if (!Directory.Exists(directory))
+            throw new DirectoryNotFoundException($"Der Sprite-Ordner wurde nicht gefunden: {directory}");
+
+        var paths = new List<(int Index, string Path)>();
+        foreach (string path in Directory.EnumerateFiles(directory, $"{prefix}*.png", SearchOption.TopDirectoryOnly))
+        {
+            string name = Path.GetFileNameWithoutExtension(path);
+            string suffix = name[prefix.Length..];
+            if (int.TryParse(suffix, out int index) && index > 0)
+                paths.Add((index, path));
+        }
+
+        paths.Sort((left, right) => left.Index.CompareTo(right.Index));
+        if (paths.Count == 0)
+            throw new InvalidDataException($"Keine nummerierten Frames '{prefix}*.png' in '{directory}' gefunden.");
+
+        for (int index = 1; index < paths.Count; index++)
+        {
+            if (paths[index - 1].Index == paths[index].Index)
+                throw new InvalidDataException($"Doppelter Frame-Index {paths[index].Index} fuer '{prefix}'.");
+        }
+
+        var frames = new Bitmap[paths.Count];
         try
         {
-            for (int frame = 0; frame < count; frame++)
+            for (int frame = 0; frame < paths.Count; frame++)
             {
-                using var source = Read(Path.Combine(folder, $"{prefix}{frame + 1}.png"));
+                using var source = new Bitmap(paths[frame].Path);
                 frames[frame] = Normalize(source, target);
             }
             return frames;

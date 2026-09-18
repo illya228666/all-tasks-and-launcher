@@ -4,8 +4,10 @@ public static class HatRotationProfile
     public const float MaxAngleDegrees = 7f;
     // 17 заранее отрисованных поз вместо 5: шаг 0,875°, включая нейтральный кадр.
     public const int FrameCount = 17;
-    // Полный цикл скольжения занимает примерно 2,5 секунды.
+    // Медленное боковое скольжение и более быстрое левое/правое покачивание разделены:
+    // шляпа успевает заметно наклониться в обе стороны даже за сравнительно короткое падение.
     public const float SwingRadiansPerSecond = 2.5f;
+    public const float TiltRadiansPerSecond = 5f;
     public static float GetFrameAngle(int frameIndex)
     {
         if ((uint)frameIndex >= FrameCount)

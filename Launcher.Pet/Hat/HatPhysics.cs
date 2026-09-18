@@ -19,8 +19,13 @@ internal sealed class HatPhysics
         // Разность косинусов даёт плавный старт и разворот без накопления дрейфа.
         // Третья гармоника добавляет мелкое трепетание к широкому скольжению.
         float dx = SwayDistance * (MathF.Cos(previousPhase) - MathF.Cos(phase) + FlutterStrength / 3f * (MathF.Cos(3f * previousPhase) - MathF.Cos(3f * phase)));
-        float tilt = (swing + FlutterStrength * MathF.Sin(3f * phase)) / (1f + FlutterStrength);
+
+        // Наклон колеблется быстрее бокового скольжения, поэтому даже короткое падение
+        // не выглядит как постоянный завал в одну сторону.
+        float tiltPhase = state.FallTimeSeconds * HatRotationProfile.TiltRadiansPerSecond;
+        float tilt = (MathF.Sin(tiltPhase) + FlutterStrength * MathF.Sin(3f * tiltPhase)) / (1f + FlutterStrength);
         state.Angle = HatRotationProfile.MaxAngleDegrees * tilt;
+
         // При боковом скольжении воздух поддерживает шляпу; на развороте она проседает.
         // Экспоненциальное сопротивление плавно выводит скорость на предел без рывка.
         float targetSpeed = MaxSpeed * (1f - GlideLift * swing * swing);

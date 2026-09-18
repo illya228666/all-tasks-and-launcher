@@ -186,7 +186,7 @@ public sealed class PetWindowsSession : IDisposable
         if (scene.Hat.Mode != HatMode.Dragging)
             hat.MoveTo(scene.Hat.ScreenPosition);
         if (_running && !_disposed && version == _version)
-            hat.SetPose(scene.Hat.Mode, scene.Hat.Angle, scene.Hat.FallTimeSeconds);
+            hat.SetPose(scene.Hat.Mode, scene.Hat.Angle, scene.Hat.FallTimeSeconds, scene.Hat.SettlementProgress);
     }
 
     private void DisplaySpeech(PetScene scene)
