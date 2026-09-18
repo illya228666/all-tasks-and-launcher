@@ -122,8 +122,8 @@ internal sealed class LauncherSession : IDisposable
 
             _pet?.Stop();
             _settings.Apps = _apps.SaveSettings();
-            if (_settingsFile.Write(_settings) is string error)
-                MessageBox.Show(Window, error, "Einstellungen", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            if (_settingsFile.Write(_settings) is string settingsError)
+                MessageBox.Show(Window, settingsError, "Einstellungen", MessageBoxButtons.OK, MessageBoxIcon.Warning);
         }
         finally
         {

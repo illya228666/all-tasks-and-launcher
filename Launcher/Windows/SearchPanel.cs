@@ -86,7 +86,8 @@ internal sealed class SearchPanel : FlowLayoutPanel
                 _category.Items.Add(new CategoryChoice(category));
             _category.SelectedIndex = 0;
             for (int i = 1; i < _category.Items.Count; i++)
-                if (string.Equals(((CategoryChoice)_category.Items[i]).Category, filter.Category, StringComparison.OrdinalIgnoreCase))
+                if (_category.Items[i] is CategoryChoice choice
+                    && string.Equals(choice.Category, filter.Category, StringComparison.OrdinalIgnoreCase))
                     _category.SelectedIndex = i;
             _sort.SelectedIndex = (int)filter.Sort;
             _favorites.Checked = filter.FavoritesOnly;

@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
@@ -69,8 +68,8 @@ internal sealed class SpeechBubbleWindow : TransparentOverlayWindow
         textWidth = Math.Max(textWidth, Measure(line));
         _bubbleSize = new Size((int)Math.Ceiling(textWidth) + TextPadding * 2 + TailWidth, _lineHeight * _lines.Count + TextPadding * 2);
         // Проверка редактируемого набора: отдельное слово должно помещаться в строку.
-        Debug.Assert(textWidth <= MaxTextWidth);
-        Debug.Assert(_lines.All(item => item.Start >= 0 && item.Start + item.Length <= phrase.Length));
+        System.Diagnostics.Debug.Assert(textWidth <= MaxTextWidth);
+        System.Diagnostics.Debug.Assert(_lines.All(item => item.Start >= 0 && item.Start + item.Length <= phrase.Length));
         float Measure(string value) => graphics.MeasureString(value, _textFont, PointF.Empty, _textFormat).Width;
     }
 
