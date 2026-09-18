@@ -11,26 +11,63 @@ public static class PetSpriteCatalog
     // Высота кликабельной области головы в пикселях нормализованного атласа.
     public const int HeadHitHeight = 90;
 
-    // Индексы: строка, затем кадр. Настройка одного кадра, например:
-    // new(53, Width: 145, Height: 194, OffsetX: 2, OffsetY: 6).
-    // Значения по умолчанию сохраняют прежние размеры, смещения и привязки.
+    private const int DefaultRenderOffsetY = 3;
+    private const int DefaultHeadAnchorY = HeadHitHeight / 2;
+
+    // Индексы: строка, затем кадр.
+    // Здесь настраивается визуальная геометрия конкретного кадра, например:
+    // Frame(53, renderWidth: 145, renderHeight: 194, renderOffsetX: 2, renderOffsetY: 6).
+    // Размер ячейки атласа при этом остаётся фиксированным 149x200.
     private static readonly PetFrameGeometry[][] FramesByRow =
     {
-        new PetFrameGeometry[] { new(53), new(53), new(53), new(53), new(53), new(53), new(53) },
-        new PetFrameGeometry[] { new(78), new(82), new(79), new(77), new(80), new(80), new(80), new(75) },
-        new PetFrameGeometry[] { new(72), new(67), new(63), new(69), new(65), new(64), new(68), new(69) },
-        new PetFrameGeometry[] { new(53), new(54), new(62), new(51) },
-        new PetFrameGeometry[] { new(53), new(58), new(60), new(57), new(57) },
-        new PetFrameGeometry[] { new(47), new(49), new(46), new(65), new(63), new(52), new(53), new(55) },
-        new PetFrameGeometry[] { new(45), new(49), new(50), new(50), new(50), new(50) },
-        new PetFrameGeometry[] { new(52), new(48), new(54), new(52), new(52), new(56) },
-        new PetFrameGeometry[] { new(56), new(55), new(55), new(56), new(55), new(56) },
-        new PetFrameGeometry[] { new(54), new(68), new(66), new(65), new(65), new(66), new(70), new(70) },
-        new PetFrameGeometry[] { new(46), new(50), new(44), new(44), new(43), new(41), new(40), new(37) }
+        new[] { Frame(53), Frame(53), Frame(53), Frame(53), Frame(53), Frame(53), Frame(53) },
+        new[] { Frame(78), Frame(82), Frame(79), Frame(77), Frame(80), Frame(80), Frame(80), Frame(75) },
+        new[] { Frame(72), Frame(67), Frame(63), Frame(69), Frame(65), Frame(64), Frame(68), Frame(69) },
+        new[] { Frame(53), Frame(54), Frame(62), Frame(51) },
+        new[] { Frame(53), Frame(58), Frame(60), Frame(57), Frame(57) },
+        new[] { Frame(47), Frame(49), Frame(46), Frame(65), Frame(63), Frame(52), Frame(53), Frame(55) },
+        new[] { Frame(45), Frame(49), Frame(50), Frame(50), Frame(50), Frame(50) },
+        new[] { Frame(52), Frame(48), Frame(54), Frame(52), Frame(52), Frame(56) },
+        new[] { Frame(56), Frame(55), Frame(55), Frame(56), Frame(55), Frame(56) },
+        new[] { Frame(54), Frame(68), Frame(66), Frame(65), Frame(65), Frame(66), Frame(70), Frame(70) },
+        new[] { Frame(46), Frame(50), Frame(44), Frame(44), Frame(43), Frame(41), Frame(40), Frame(37) }
     };
+
+    // UI может зарезервировать больше места для крупного визуального кадра,
+    // но логический ground/прыжки по-прежнему используют PetLogicalGeometry.
+    public static int RequiredRenderAreaHeight { get; } = ComputeRequiredRenderAreaHeight();
 
     internal static PetFrameGeometry GetFrameGeometry(int row, int frame) => FramesByRow[row][frame];
 
     public static Rectangle GetSourceRectangle(int row, int frame) =>
         new(frame * AtlasCellWidth, row * AtlasCellHeight, AtlasCellWidth, AtlasCellHeight);
+
+    private static PetFrameGeometry Frame(
+        int bodyAnchorX,
+        int renderWidth = AtlasCellWidth,
+        int renderHeight = AtlasCellHeight,
+        int renderOffsetX = 0,
+        int renderOffsetY = DefaultRenderOffsetY,
+        int headAnchorY = DefaultHeadAnchorY)
+    {
+        if (bodyAnchorX < 0 || bodyAnchorX >= AtlasCellWidth)
+            throw new ArgumentOutOfRangeException(nameof(bodyAnchorX));
+        if (headAnchorY < 0 || headAnchorY >= AtlasCellHeight)
+            throw new ArgumentOutOfRangeException(nameof(headAnchorY));
+        if (renderWidth <= 0)
+            throw new ArgumentOutOfRangeException(nameof(renderWidth));
+        if (renderHeight <= 0)
+            throw new ArgumentOutOfRangeException(nameof(renderHeight));
+
+        return new(bodyAnchorX, renderWidth, renderHeight, renderOffsetX, renderOffsetY, headAnchorY);
+    }
+
+    private static int ComputeRequiredRenderAreaHeight()
+    {
+        int height = PetLogicalGeometry.Height;
+        foreach (PetFrameGeometry[] row in FramesByRow)
+            foreach (PetFrameGeometry frame in row)
+                height = Math.Max(height, frame.RenderOffsetY + frame.RenderHeight);
+        return height;
+    }
 }

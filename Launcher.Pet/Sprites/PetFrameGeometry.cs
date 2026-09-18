@@ -1,13 +1,12 @@
 namespace Launcher.Pet.Sprites;
 
-// Width/Height и OffsetX/Y — пиксели назначения. OffsetX добавляется после
-// совмещения BodyAnchorX с центром логической зоны, OffsetY — от её верха.
+// RenderWidth/RenderHeight и RenderOffsetX/Y описывают только отрисовку кадра.
 // BodyAnchorX/HeadAnchorY заданы в координатах нормализованной ячейки атласа.
-// Это авторские настройки, а не результат анализа прозрачности PNG.
+// Это авторские настройки кода и никогда не вычисляются из прозрачных полей PNG.
 internal readonly record struct PetFrameGeometry(
     int BodyAnchorX,
-    int Width = 149,
-    int Height = 200,
-    int OffsetX = 0,
-    int OffsetY = 3,
-    int HeadAnchorY = 45);
+    int RenderWidth,
+    int RenderHeight,
+    int RenderOffsetX,
+    int RenderOffsetY,
+    int HeadAnchorY);

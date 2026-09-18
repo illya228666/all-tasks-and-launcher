@@ -1,11 +1,16 @@
 using Launcher.Pet.Data;
 using Launcher.Pet.Hat;
+using Launcher.Pet.Sprites;
 
 namespace Launcher.Pet.Windows.Windows;
 public sealed class PetArea : FlowLayoutPanel
 {
     public int PetZoneTopY { get; private set; }
-    public int RequiredExtraHeight => PetLogicalGeometry.Height;
+
+    // Высота контрола может учитывать крупные визуальные кадры, не меняя
+    // логическую высоту питомца и координату физического ground.
+    public int RequiredExtraHeight => PetSpriteCatalog.RequiredRenderAreaHeight;
+
     public IReadOnlyList<Rectangle> ObstaclesLocal { get; private set; } = Array.Empty<Rectangle>();
 
     public PetArea()

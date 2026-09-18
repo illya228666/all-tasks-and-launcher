@@ -64,11 +64,11 @@ internal sealed class PetDrawing : IDisposable
         Point local = _area.PointToClient(screenPoint);
         if (_area.GetChildAtPoint(local, GetChildAtPointSkip.Invisible) is not null || !_scene.SpriteBounds.Contains(local))
             return false;
+
+        Point atlasCell = PetSpriteLayout.MapDestinationToAtlasCell(local, _scene.SpriteBounds);
+        x = atlasCell.X;
+        y = atlasCell.Y;
         source = PetSpriteCatalog.GetSourceRectangle(_scene.Row, _scene.Frame);
-        // Обратное преобразование из пикселей назначения в ячейку атласа.
-        // При нынешнем размере 149x200 оно совпадает с прежним вычитанием X/Y.
-        x = (int)((long)(local.X - _scene.SpriteBounds.X) * source.Width / _scene.SpriteBounds.Width);
-        y = (int)((long)(local.Y - _scene.SpriteBounds.Y) * source.Height / _scene.SpriteBounds.Height);
         atlas = _scene.HatAttached ? _images.WithHat : _images.WithoutHat;
         return atlas.GetPixel(source.X + x, source.Y + y).A != 0;
     }

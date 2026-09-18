@@ -4,15 +4,16 @@ namespace Launcher.Pet.Sprites;
 
 // Однонаправленное преобразование логической позиции в визуальную геометрию.
 // Не изменяет PetState и не читает исходные изображения.
-internal static class PetSpriteLayout
+public static class PetSpriteLayout
 {
     internal static Rectangle GetBounds(Point logicalPosition, PetFrameGeometry frame, Point shake)
     {
-        int bodyAnchorX = Scale(frame.BodyAnchorX, frame.Width, PetSpriteCatalog.AtlasCellWidth);
+        int bodyAnchorX = Scale(frame.BodyAnchorX, frame.RenderWidth, PetSpriteCatalog.AtlasCellWidth);
         return new(
-            logicalPosition.X + PetLogicalGeometry.Width / 2 - bodyAnchorX + frame.OffsetX - shake.X / 2,
-            logicalPosition.Y + frame.OffsetY + Math.Min(0, shake.Y / 2),
-            frame.Width, frame.Height);
+            logicalPosition.X + PetLogicalGeometry.Width / 2 - bodyAnchorX + frame.RenderOffsetX - shake.X / 2,
+            logicalPosition.Y + frame.RenderOffsetY + Math.Min(0, shake.Y / 2),
+            frame.RenderWidth,
+            frame.RenderHeight);
     }
 
     internal static Point? VisibleHead(Rectangle spriteBounds, PetFrameGeometry frame, Point areaScreenPosition, Rectangle visibleScreenBounds)
@@ -23,6 +24,21 @@ internal static class PetSpriteLayout
         return visibleScreenBounds.Contains(head) ? head : null;
     }
 
+    // Переводит точку из destination rectangle обратно в локальные координаты
+    // фиксированной ячейки атласа. Нужен hit-test при разных RenderWidth/Height.
+    public static Point MapDestinationToAtlasCell(Point destinationPoint, Rectangle spriteBounds) =>
+        new(
+            MapCoordinate(destinationPoint.X - spriteBounds.X, spriteBounds.Width, PetSpriteCatalog.AtlasCellWidth),
+            MapCoordinate(destinationPoint.Y - spriteBounds.Y, spriteBounds.Height, PetSpriteCatalog.AtlasCellHeight));
+
     private static int Scale(int value, int destinationSize, int sourceSize) =>
         (int)Math.Round((double)value * destinationSize / sourceSize);
+
+    private static int MapCoordinate(int value, int destinationSize, int sourceSize)
+    {
+        if (destinationSize <= 0)
+            throw new ArgumentOutOfRangeException(nameof(destinationSize));
+
+        return Math.Clamp((int)((long)value * sourceSize / destinationSize), 0, sourceSize - 1);
+    }
 }
