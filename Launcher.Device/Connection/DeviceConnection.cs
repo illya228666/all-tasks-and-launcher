@@ -1,170 +1,194 @@
-using System.IO.Ports;
-using System.Threading.Channels;
 using Launcher.Device.Data;
 using Launcher.Device.Protocol;
-
 namespace Launcher.Device.Connection;
-// RU: Один цикл владеет портом и очередью команд. DE: Ein Ablauf besitzt Port und Befehlswarteschlange.
+
+// One worker owns the transport. The lock protects only lifecycle and the latest pending output.
 public sealed class DeviceConnection : IAsyncDisposable
 {
-    private const int BaudRate = 115200;
-    private const int StartupDelayMs = 1200;
-    private const int DiscoveryRetryMs = 2000;
-    private const int PollIntervalMs = 100;
-    private readonly Channel<bool> _commands = Channel.CreateUnbounded<bool>(new() { SingleReader = true });
+    private readonly object _gate = new();
+    private readonly IDeviceTransportFactory _factory;
+    private readonly DeviceConnectionTiming _timing;
     private readonly CancellationTokenSource _lifetime = new();
     private Task _loop = Task.CompletedTask;
-    private SerialPort? _port;
-    private bool _started;
-    private bool _stopped;
-    private bool _disposed;
-    private long _nextDiscoveryAt;
+    private DeviceState _state = new(DeviceConnectionPhase.Waiting);
+    private PendingDeviceOutput? _pending;
+    private bool _started, _stopped, _disposed;
     public event Action<DeviceState>? StateChanged;
     public event Action<DeviceInput>? InputReceived;
-    public event Action<bool, bool>? IndicatorCompleted;
-    public event Action<string>? Failed;
+    public DeviceState State { get { lock (_gate) return _state; } }
+    public DeviceConnection() : this(new SerialDeviceTransportFactory(), new()) { }
+    internal DeviceConnection(IDeviceTransportFactory factory, DeviceConnectionTiming timing)
+    {
+        _factory = factory;
+        _timing = timing;
+    }
     public void Start()
     {
-        if (_started || _stopped)
-            return;
-        _started = true;
-        _loop = Task.Run(RunAsync);
+        lock (_gate)
+        {
+            if (_started || _stopped) return;
+            _started = true;
+            _loop = Task.Run(RunAsync);
+        }
     }
-
-    public bool SetIndicator(bool enabled) => !_stopped && _commands.Writer.TryWrite(enabled);
+    public Task<DeviceCommandResult> SetIndicatorAsync(bool enabled) => Queue(DeviceCapabilities.Indicator, enabled, DeviceLights.None);
+    public Task<DeviceCommandResult> SetLightsAsync(DeviceLights lights)
+    {
+        if ((lights & ~DeviceLights.All) != 0) throw new ArgumentOutOfRangeException(nameof(lights));
+        return Queue(DeviceCapabilities.Lights, false, lights);
+    }
+    private Task<DeviceCommandResult> Queue(DeviceCapabilities capability, bool indicator, DeviceLights lights)
+    {
+        lock (_gate)
+        {
+            if (_stopped) return Task.FromResult(DeviceCommandResult.Cancelled);
+            if (!_state.IsConnected) return Task.FromResult(DeviceCommandResult.Disconnected);
+            if ((_state.Capabilities & capability) == 0) return Task.FromResult(DeviceCommandResult.Unsupported);
+            _pending?.Completion.TrySetResult(DeviceCommandResult.Superseded);
+            var completion = new TaskCompletionSource<DeviceCommandResult>(TaskCreationOptions.RunContinuationsAsynchronously);
+            _pending = new(capability, indicator, lights, completion);
+            return completion.Task;
+        }
+    }
+    private void Publish(DeviceState state)
+    {
+        lock (_gate)
+        {
+            _state = state;
+            if (!state.IsConnected)
+            {
+                _pending?.Completion.TrySetResult(_stopped ? DeviceCommandResult.Cancelled : DeviceCommandResult.Disconnected);
+                _pending = null;
+            }
+        }
+        StateChanged?.Invoke(state);
+    }
     private async Task RunAsync()
     {
-        CancellationToken token = _lifetime.Token;
+        var token = _lifetime.Token;
+        bool faulted = false;
         try
         {
-            while (!token.IsCancellationRequested)
+            while (true)
+            {
+                token.ThrowIfCancellationRequested();
+                Publish(new(DeviceConnectionPhase.Searching));
+                IReadOnlyList<string> ports;
+                try { ports = _factory.GetPortNames(); }
+                catch (Exception error) when (IsExpected(error))
+                {
+                    Publish(new(DeviceConnectionPhase.Retry, Failure: Classify(error), Detail: error.Message));
+                    await Task.Delay(_timing.RetryDelayMs, token).ConfigureAwait(false);
+                    continue;
+                }
+                if (ports.Count == 0) Publish(new(DeviceConnectionPhase.Retry, Failure: DeviceFailure.NoPorts));
+                foreach (string name in ports)
+                {
+                    token.ThrowIfCancellationRequested();
+                    Publish(new(DeviceConnectionPhase.Connecting, name));
+                    try
+                    {
+                        using var transport = _factory.Open(name);
+                        await Task.Delay(_timing.StartupDelayMs, token).ConfigureAwait(false);
+                        string identity;
+                        try { identity = transport.Exchange(DeviceProtocol.Hello, token); }
+                        catch (TimeoutException)
+                        {
+                            await Task.Delay(_timing.HelloRetryMs, token).ConfigureAwait(false);
+                            identity = transport.Exchange(DeviceProtocol.Hello, token);
+                        }
+                        var protocol = DeviceProtocol.FromIdentity(identity);
+                        Publish(new(DeviceConnectionPhase.Connected, name, protocol.Version, protocol.Capabilities));
+                        await ServeAsync(transport, protocol, token).ConfigureAwait(false);
+                    }
+                    catch (Exception error) when (IsExpected(error))
+                    {
+                        Publish(new(DeviceConnectionPhase.Retry, name, Failure: Classify(error), Detail: error.Message));
+                    }
+                }
+                await Task.Delay(_timing.RetryDelayMs, token).ConfigureAwait(false);
+            }
+        }
+        catch (OperationCanceledException) when (token.IsCancellationRequested) { }
+        catch (Exception error)
+        {
+            faulted = true;
+            Publish(new(DeviceConnectionPhase.Faulted, Failure: DeviceFailure.Unexpected, Detail: error.Message));
+        }
+        finally
+        {
+            lock (_gate) _stopped = true;
+            if (!faulted) Publish(new(DeviceConnectionPhase.Stopped));
+        }
+    }
+    private async Task ServeAsync(IDeviceTransport transport, IDeviceProtocolVersion protocol, CancellationToken token)
+    {
+        while (true)
+        {
+            token.ThrowIfCancellationRequested();
+            PendingDeviceOutput? pending;
+            lock (_gate) { pending = _pending; _pending = null; }
+            if (pending is not null)
             {
                 try
                 {
-                    if (_port is null)
-                        await ConnectAsync(token).ConfigureAwait(false);
-                    if (_commands.Reader.TryRead(out bool enabled))
+                    var wire = pending.Capability == DeviceCapabilities.Indicator ? protocol.Indicator(pending.Indicator) : protocol.Lights(pending.Lights);
+                    if (wire is null) pending.Completion.TrySetResult(DeviceCommandResult.Unsupported);
+                    else
                     {
-                        bool available = _port is not null;
-                        if (available)
-                        {
-                            try
-                            {
-                                SerialExchange.Send(_port!, DeviceProtocol.Indicator(enabled), token, DeviceProtocol.IndicatorReply);
-                            }
-                            catch (Exception error) when (IsConnectionError(error))
-                            {
-                                available = false;
-                                ClosePort();
-                            }
-                        }
-
-                        IndicatorCompleted?.Invoke(enabled, available);
-                    }
-
-                    if (_port is not null)
-                    {
-                        string reply = SerialExchange.Send(_port, DeviceProtocol.Poll, token, DeviceProtocol.NoInput, DeviceProtocol.ButtonPressed);
-                        if (DeviceProtocol.ReadInput(reply) is DeviceInput input)
-                            InputReceived?.Invoke(input);
+                        string reply = transport.Exchange(wire.Value.Command, token);
+                        if (reply != wire.Value.ExpectedReply) throw new DeviceProtocolException(DeviceFailure.InvalidReply, reply);
+                        pending.Completion.TrySetResult(DeviceCommandResult.Completed);
                     }
                 }
-                catch (Exception error) when (IsConnectionError(error))
+                catch (OperationCanceledException) when (token.IsCancellationRequested)
                 {
-                    ClosePort();
+                    pending.Completion.TrySetResult(DeviceCommandResult.Cancelled);
+                    throw;
                 }
-
-                await Task.Delay(PollIntervalMs, token).ConfigureAwait(false);
-            }
-        }
-        catch (OperationCanceledException) when (token.IsCancellationRequested)
-        {
-        }
-        catch (Exception error)
-        {
-            Failed?.Invoke(error.Message);
-        }
-        finally
-        {
-            ClosePort();
-        }
-    }
-
-    private async Task ConnectAsync(CancellationToken token)
-    {
-        if (Environment.TickCount64 < _nextDiscoveryAt)
-            return;
-        foreach (string name in SerialPort.GetPortNames().OrderBy(value => value, StringComparer.OrdinalIgnoreCase))
-        {
-            token.ThrowIfCancellationRequested();
-            try
-            {
-                _port = new SerialPort(name, BaudRate, Parity.None, 8, StopBits.One)
+                catch
                 {
-                    Handshake = Handshake.None,
-                    NewLine = "\n",
-                    DtrEnable = false,
-                    RtsEnable = false,
-                    ReadTimeout = SerialExchange.ResponseTimeoutMs,
-                    WriteTimeout = SerialExchange.WriteTimeoutMs
-                };
-                _port.Open();
-                await Task.Delay(StartupDelayMs, token).ConfigureAwait(false);
-                SerialExchange.Send(_port, DeviceProtocol.Hello, token, DeviceProtocol.Identity);
-                StateChanged?.Invoke(new(true, name));
-                return;
+                    pending.Completion.TrySetResult(DeviceCommandResult.Failed);
+                    throw;
+                }
             }
-            catch (Exception error) when (IsConnectionError(error))
-            {
-                ClosePort();
-            }
+            string inputReply = transport.Exchange(protocol.PollCommand, token);
+            if (protocol.ReadInput(inputReply) is DeviceInput input) InputReceived?.Invoke(input);
+            await Task.Delay(_timing.PollIntervalMs, token).ConfigureAwait(false);
         }
-
-        _nextDiscoveryAt = Environment.TickCount64 + DiscoveryRetryMs;
     }
-
-    private static bool IsConnectionError(Exception error) => error is IOException or UnauthorizedAccessException or TimeoutException or InvalidOperationException or ArgumentException;
-    private void ClosePort()
+    private static bool IsExpected(Exception error) => error is IOException or UnauthorizedAccessException or TimeoutException or InvalidOperationException;
+    private static DeviceFailure Classify(Exception error) => error switch
     {
-        SerialPort? port = _port;
-        _port = null;
-        _nextDiscoveryAt = Environment.TickCount64 + DiscoveryRetryMs;
-        try
-        {
-            port?.Dispose();
-        }
-        catch (Exception error) when (IsConnectionError(error))
-        {
-            System.Diagnostics.Debug.WriteLine(error);
-        }
-
-        if (port is not null)
-            StateChanged?.Invoke(new(false));
-    }
-
+        DeviceProtocolException protocol => protocol.Failure,
+        UnauthorizedAccessException => DeviceFailure.AccessDenied,
+        TimeoutException => DeviceFailure.Timeout,
+        _ => DeviceFailure.Transport
+    };
     public async Task StopAsync()
     {
-        if (!_stopped)
+        Task loop;
+        lock (_gate)
         {
-            _stopped = true;
-            _commands.Writer.TryComplete();
-            _lifetime.Cancel();
+            if (!_stopped)
+            {
+                _stopped = true;
+                _lifetime.Cancel();
+            }
+            _pending?.Completion.TrySetResult(DeviceCommandResult.Cancelled);
+            _pending = null;
+            loop = _loop;
         }
-
-        await _loop.ConfigureAwait(false);
+        await loop.ConfigureAwait(false);
+        if (!_started) Publish(new(DeviceConnectionPhase.Stopped));
     }
-
     public async ValueTask DisposeAsync()
     {
-        if (_disposed)
-            return;
-        _disposed = true;
-        try
+        await StopAsync().ConfigureAwait(false);
+        lock (_gate)
         {
-            await StopAsync().ConfigureAwait(false);
-        }
-        finally
-        {
+            if (_disposed) return;
+            _disposed = true;
             _lifetime.Dispose();
         }
     }

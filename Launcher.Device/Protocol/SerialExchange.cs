@@ -8,7 +8,7 @@ internal static class SerialExchange
     internal const int ResponseTimeoutMs = 500;
     internal const int WriteTimeoutMs = 500;
     private const int MaxReplyLength = 128;
-    internal static string Send(SerialPort port, string command, CancellationToken cancellation, params string[] expected)
+    internal static string Send(SerialPort port, string command, CancellationToken cancellation)
     {
         cancellation.ThrowIfCancellationRequested();
         port.DiscardInBuffer();
@@ -33,7 +33,7 @@ internal static class SerialExchange
 
             string reply = line.ToString();
             line.Clear();
-            if (expected.Contains(reply, StringComparer.Ordinal))
+            if (command != DeviceProtocol.Hello || reply.StartsWith("LAUNCHER_IO ", StringComparison.Ordinal) || reply.StartsWith("ERR ", StringComparison.Ordinal))
                 return reply;
         }
 
