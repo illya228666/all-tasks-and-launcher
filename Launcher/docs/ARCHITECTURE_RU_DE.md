@@ -26,7 +26,7 @@ DE: Lernprojekt-Verweise beschreiben mitgelieferte Programme. Sie stehen getrenn
 | MainWindow и панели / und Bereiche | Элементы управления и меню / Steuerelemente und Menüs |
 | PetWorld | Закрытые состояния питомца, речи и шляпы / interne Zustände von Begleiter, Sprache und Hut |
 | PetWindowsSession | Единственный таймер, изображения, дополнительные окна / einziger Timer, Bilder, Zusatzfenster |
-| DeviceConnection | Последовательный порт, цикл опроса, очередь LED-команд / serieller Port, Abfrageschleife, LED-Warteschlange |
+| DeviceConnection | Порт, версия протокола, последнее ожидающее состояние выхода / Port, Protokollversion, letzter wartender Ausgabezustand |
 
 RU: Форма не меняет коллекции AppList. Для сохранения получается копия `AppListSettings`; результаты показа используют неизменяемые записи. Отрисовка читает `PetScene` и не меняет PetWorld.
 DE: Das Fenster verändert keine AppList-Sammlungen. Einstellungen werden als Kopie exportiert. Die Zeichnung liest `PetScene`, ohne PetWorld zu verändern.
@@ -96,16 +96,35 @@ DE: COM kann während des Lesens Nachrichten verarbeiten. Nur vollständige Aufn
 RU: WindowShake двигает только обычное главное окно. Развёрнутое окно не перемещается. После ручного перемещения не восстанавливается устаревшая позиция. Смена темы не пересоздаёт карточки и не сбрасывает питомца.
 DE: WindowShake bewegt nur das normale Hauptfenster. Maximierte Fenster bleiben stehen; manuelle Verschiebungen werden nicht rückgängig gemacht. Ein Farbwechsel erzeugt weder neue Karten noch einen neuen Begleiterzustand.
 
+### Геометрия и анимация / Geometrie und Animation
+
+RU: Исходные ячейки 149×200 не нормализуются по отдельности. PetSpriteCatalog содержит числовые якоря тела, опоры, головы и область головы в исходной ячейке. Общий RenderScale сохраняет относительные размеры рисунков. GroundAnchorY убирает нарисованный подъём; движение задаёт JumpLift ровно один раз. Логические габариты движения не меняются от визуального масштаба.
+DE: Die ursprünglichen 149×200-Zellen werden nicht einzeln normalisiert. PetSpriteCatalog enthält Körper-, Auflage- und Kopfanker sowie den Kopfbereich. Ein gemeinsamer RenderScale erhält Größenverhältnisse. GroundAnchorY entfernt den eingezeichneten Hub; JumpLift liefert ihn genau einmal. Logische Bewegungsgrenzen bleiben unabhängig vom Zeichenmaßstab.
+
+RU: PetSpriteLayout задаёт прямое и обратное преобразование. Отрисовка, речь и взаимодействие используют одну геометрию. PetImages проверяет размер ресурсов и подготавливает маски прозрачности; чтение PNG и пикселей остаётся в Windows. Метаданные требуют проверки всех кадров при замене атласа.
+DE: PetSpriteLayout liefert Hin- und Rücktransformation für Zeichnung, Sprache und Eingabe. PetImages prüft Ressourcenmaße und erstellt Transparenzmasken; PNG und Pixel bleiben in Windows. Ein neuer Atlas erfordert die Prüfung aller Metadaten.
+
+RU: HatWorld владеет Falling → Settling → Resting и опорой. HatAnimation вычисляет HatVisualPose из времени состояния; Windows не выбирает ход анимации. Ракурс циклический, независимый от бокового движения. HatFrameCache принадлежит PetWindowsSession и переживает закрытие отдельного окна шляпы. Квантование угла и смешивания — деталь рисования. Смешивание выполняется в premultiplied RGBA; поля поворота не меняют логические координаты. Коллизии используют прежний упрощённый профиль, не силуэт каждого ракурса.
+DE: HatWorld besitzt Falling → Settling → Resting und die Auflage. HatAnimation berechnet HatVisualPose aus der Zustandszeit. Die Ansicht läuft zyklisch unabhängig von der seitlichen Bewegung. HatFrameCache gehört PetWindowsSession und überlebt einzelne Hutfenster. Winkel-/Mischquantisierung ist Zeichnungsdetail. Premultiplied-RGBA-Mischung und Drehpadding verändern keine logischen Koordinaten. Kollisionen nutzen weiterhin das vereinfachte Profil.
+
 ## 5. Устройство / Gerät
 
-RU: DeviceConnection выполняет один фоновый цикл, который единолично использует порт. LED-команды ожидают в Channel; опрос и команды не пересекаются. Ошибка подключения даёт отключённое состояние; повторный поиск ограничен паузой. Закрытие отменяет ожидания и дожидается выхода цикла.
-DE: Eine Hintergrundschleife besitzt den Port. LED-Befehle warten im Channel; Befehle und Abfragen überlappen nicht. Verbindungsfehler führen zum getrennten Zustand und einer Pause vor erneuter Suche. Beim Schließen wird der Ablauf abgebrochen und abgewartet.
+RU: DeviceConnection запускает одного владельца IDeviceTransport. Фабрика транспорта перечисляет и открывает порты; SerialExchange ограничивает время и длину ответа. После HELLO реестр DeviceProtocol выбирает отдельную реализацию версии. Неизвестная версия отличается от таймаута и некорректного ответа.
+DE: DeviceConnection startet einen Besitzer von IDeviceTransport. Die Transportfabrik findet/öffnet Ports; SerialExchange begrenzt Antwortzeit und Länge. Nach HELLO wählt das Register eine Versionsimplementierung. Unbekannte Version, Timeout und ungültige Antwort sind unterschiedliche Fehler.
 
-RU: DevicePanelConnection передаёт результаты в UI через BeginInvoke. DevicePetConnection связывает только смысловое событие кнопки и действие питомца. Устройство не знает GPIO-поведения питомца или элементов формы.
-DE: DevicePanelConnection stellt UI-Ergebnisse über BeginInvoke zu. DevicePetConnection verbindet ausschließlich die Bedeutung einer Taste mit einer Begleiteraktion.
+| Версия / Version | Вход / Eingabe | Возможность / Fähigkeit |
+| --- | --- | --- |
+| v1 | PrimaryButtonPressed | Indicator |
+| v2 | LeftButtonPressed, RightButtonPressed, BothButtonsPressed | Lights (red=1, yellow=2, green=4) |
 
-Протокол / Protokoll: `HELLO` → `LAUNCHER_IO 1`; `POLL` → `INPUT NONE` / `INPUT BUTTON_PRESSED`; `INDICATOR ON/OFF` → `OK INDICATOR`.
-`HELLO` очищает старые нажатия / verwirft alte Tastendrücke. Электрические параметры сохранены / elektrische Parameter unverändert.
+RU: SetIndicatorAsync/SetLightsAsync возвращают Completed, Unsupported, Disconnected, Cancelled, Superseded либо Failed. Отрицательные/лишние биты маски отклоняются до рабочего цикла. Есть максимум один ожидающий запрос состояния выхода и один выполняемый. Новый ожидающий заменяет старый с результатом Superseded. При разрыве ожидающий завершается Disconnected и не переносится на новое подключение. Опрос выполняется между командами. StopAsync блокирует новые запросы, отменяет ожидания и ждёт освобождения порта.
+DE: SetIndicatorAsync/SetLightsAsync liefern explizite Ergebnisse. Ungültige Masken werden vor der Arbeitsschleife abgewiesen. Höchstens ein Ausgabezustand wartet und einer wird ausgeführt. Ein neuer wartender ersetzt den alten mit Superseded. Verbindungsabbruch verwirft wartende Ausgaben mit Disconnected; sie werden nicht erneut abgespielt. Zwischen Befehlen wird abgefragt. StopAsync sperrt neue Anfragen, bricht Wartezeiten ab und wartet auf Portfreigabe.
+
+RU: DeviceState содержит фазу, версию, возможности и классификацию ошибки, без UI-текстов. DevicePanelConnection передаёт снимки и входные события через UI-диспетчер; DevicePresentation формирует немецкий текст. DevicePetConnection связывает только событие v1 с землетрясением. События v2 пока только диагностические; управление Lights существует в API, без переключателей UI и без chaos-эффектов.
+DE: DeviceState enthält Phase, Version, Fähigkeiten und Fehlerklasse ohne UI-Texte. DevicePanelConnection stellt Zustand und Eingaben im UI zu; DevicePresentation formatiert deutsche Texte. Nur das v1-Ereignis löst über DevicePetConnection ein Erdbeben aus. v2-Eingaben bleiben diagnostisch; Lights ist eine API ohne UI-Schalter oder Chaos-Effekt.
+
+RU: BoardConfig.h содержит контакты и полярность v2. Debounce/жест не зависят от Arduino; протокол не знает GPIO. HELLO очищает очередь и жест и требует отпускания кнопок. Формат и ограничения описаны в Firmware/README.md.
+DE: BoardConfig.h enthält Pins und Polarität von v2. Debounce/Geste hängen nicht von Arduino ab; das Protokoll kennt keine GPIO. HELLO löscht Queue/Geste und wartet auf Freigabe. Nachrichten und Grenzen stehen in Firmware/README.md.
 
 ## 6. Запуск, закрытие, ошибки / Start, Ende, Fehler
 
@@ -122,7 +141,7 @@ DE: Erwartbare externe Fehler werden Ergebnisse oder sichtbare Hinweise. Stilles
 
 1. **Действие каталога / Listenaktion:** добавить смысл в AppCardAction, обработать в AppListConnection; правило — в Launcher.Apps, системный вызов — в Launcher.Apps.Windows. / Bedeutung verbinden, Regel und Systemaufruf getrennt halten.
 2. **Поведение питомца / Begleiteraktion:** добавить режим, класс расчёта и переходы в PetBehavior; кадры — в каталоге анимаций. Windows не решает приоритеты. / Modus, Berechnung und Übergänge hinzufügen; Windows wählt keine Priorität.
-3. **Команда платы / Gerätebefehl:** согласованно изменить DeviceProtocol, очередь/обмен и прошивку, обновить таблицу протокола. / Protokoll, Austausch und Firmware gemeinsam ändern.
+3. **Версия платы / Geräteversion:** добавить реализацию IDeviceProtocolVersion, зарегистрировать её и согласовать прошивку; явно описать возможности. Несовместимые форматы получают новую версию. / Versionsimplementierung registrieren, Firmware und Fähigkeiten abstimmen; inkompatible Formate erhalten eine neue Version.
 4. **Связь возможностей / Verbindung:** добавить конкретную подписку в Connections и её снятие в Dispose. Например, событие устройства вызывает метод PetWindowsSession; прямой ссылки Device → Pet нет. / Konkrete Verbindung anlegen und wieder lösen; keine direkte Geräteabhängigkeit zum Begleiter.
 
 RU: Новый самостоятельный тип — новый файл; namespace повторяет папку. Значения настройки находятся рядом со своим поведением, единицы видны в именах. Дополнительный проект нужен для самостоятельной границы зависимости, а не для каждого класса.

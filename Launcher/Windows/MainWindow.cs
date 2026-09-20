@@ -1,10 +1,13 @@
 namespace Launcher.Windows;
 internal sealed class MainWindow : Form
 {
-    private readonly Panel _header = new()
+    private readonly TableLayoutPanel _header = new()
     {
         Dock = DockStyle.Fill,
-        Height = 92,
+        AutoSize = true,
+        AutoSizeMode = AutoSizeMode.GrowAndShrink,
+        ColumnCount = 1,
+        RowCount = 3,
         Padding = new Padding(10)
     };
     private readonly Label _title;
@@ -53,16 +56,19 @@ internal sealed class MainWindow : Form
         };
         var options = new FlowLayoutPanel
         {
-            Dock = DockStyle.Bottom,
-            Height = 32,
-            WrapContents = false
+            Dock = DockStyle.Fill,
+            AutoSize = true,
+            AutoSizeMode = AutoSizeMode.GrowAndShrink,
+            WrapContents = true
         };
         _collisions.Checked = showCollisions;
         options.Controls.AddRange(new Control[] { _theme, _collisions });
-        _header.Controls.Add(Device);
-        _header.Controls.Add(options);
-        _header.Controls.Add(_title);
-        _layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 92));
+        _header.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
+        for (int row = 0; row < 3; row++) _header.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+        _header.Controls.Add(_title, 0, 0);
+        _header.Controls.Add(options, 0, 1);
+        _header.Controls.Add(Device, 0, 2);
+        _layout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
         _layout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
         _layout.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
         _layout.RowStyles.Add(new RowStyle(SizeType.AutoSize));

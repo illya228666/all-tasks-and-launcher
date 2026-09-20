@@ -24,7 +24,7 @@ Alle sechs Projekte stehen im Lösungsordner `Launcher`. Bibliotheken liegen neb
 3. `ProjectAppSource` → `FolderAppSource`: источники программ / Programmquellen.
 4. `AppLaunch` → `AppProcess`: запуск и статистика / Start und Statistik.
 5. `PetWindowsSession` → `PetWorld` → `PetBehavior`: входные данные, решения, отображение / Eingaben, Entscheidungen, Anzeige.
-6. `DeviceConnection` → `DeviceProtocol` + `SerialExchange`: последовательный обмен / serieller Austausch.
+6. `DeviceConnection` → `IDeviceProtocolVersion` + `IDeviceTransport`: последовательный обмен / serieller Austausch.
 7. `DevicePetConnection`: кнопка платы вызывает землетрясение / Gerätetaste löst Erdbeben aus.
 
 ## Настройки и ресурсы / Einstellungen und Ressourcen
@@ -49,5 +49,16 @@ Das Profil `Windows-x64` bleibt im Startprojekt und erzeugt die eigenständige A
 - [Проверка и сценарии / Prüfung und Szenarien](docs/ANALYSIS_CHECKLIST_RU_DE.md)
 - [Термины / Begriffe](docs/GLOSSARY_RU_DE.md)
 
-Во время этого рефакторинга сборка, тесты, запуск и прошивка не выполнялись. Статический разбор не подтверждает работу интерфейса или оборудования.
-Während dieses Refactorings wurden Build, Tests, Programmstart und Firmware-Upload nicht ausgeführt. Statische Prüfung bestätigt weder Oberfläche noch Hardwarebetrieb.
+
+## Переработка MVP / MVP-Überarbeitung
+
+Исходные пропорции спрайтов сохраняются; анимация шляпы вычисляется в Pet, ресурсы кэшируются в Pet.Windows.
+Sprite-Proportionen bleiben erhalten; Hutanimation liegt in Pet, Ressourcencache in Pet.Windows.
+
+Launcher IO v1/v2 выбираются по HELLO. v1 button вызывает землетрясение и поддерживает indicator.
+v2 LEFT/RIGHT/BOTH пока только отображаются в диагностике; Lights доступны через API, без chaos и назначений кнопок.
+HELLO wählt v1/v2. v1 verbindet Taste/Erdbeben und Indicator. v2-Eingaben sind diagnostisch; Lights bleiben API ohne Chaos oder Tastenaktionen.
+
+- [Замысел каждого коммита / Absicht jedes Commits](docs/MVP_REWRITE_RU_DE.md)
+- [Результаты и команды проверок / Prüfergebnisse und Befehle](docs/ANALYSIS_CHECKLIST_RU_DE.md)
+- [Версии прошивки / Firmwareversionen](../Launcher.Device/Firmware/README.md)
