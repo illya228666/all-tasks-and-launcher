@@ -3,18 +3,23 @@ using System.Drawing;
 namespace Launcher.Pet.Hat;
 internal sealed class HatWorld
 {
-    internal static readonly Size ImageSize = new(109, 64);
+    private const float SettlementDurationSeconds = 0.35f;
+    internal static readonly Size ImageSize = new(HatGeometry.Width, HatGeometry.Height);
     private readonly HatState _state = new();
     private readonly HatPhysics _physics = new();
     private readonly HatCollisionProfile _collision = new(ImageSize);
-    internal HatScene Scene => new(_state.Mode, Point.Round(_state.Position), _state.Angle, _state.FallTimeSeconds);
+    internal HatScene Scene => new(_state.Mode, Point.Round(_state.Position), HatAnimation.Evaluate(_state.Mode, _state.Angle, _state.FallTimeSeconds, SettlementProgress));
     internal bool Attached => _state.Mode == HatMode.Attached;
+
+    private float SettlementProgress => _state.Mode == HatMode.Settling
+        ? Math.Clamp(_state.SettleTimeSeconds / SettlementDurationSeconds, 0f, 1f)
+        : 0f;
 
     internal void BeginDrag(Point cursor)
     {
         _state.Mode = HatMode.Dragging;
         _state.Support = null;
-        _state.Angle = 0;
+        _state.Angle = _state.SettleTimeSeconds = _state.SettleStartAngle = 0;
         Drag(cursor);
     }
 
@@ -31,7 +36,7 @@ internal sealed class HatWorld
     {
         _state.Mode = HatMode.Attached;
         _state.Support = null;
-        _state.VelocityY = _state.Angle = 0;
+        _state.VelocityY = _state.Angle = _state.SettleTimeSeconds = _state.SettleStartAngle = 0;
     }
 
     internal void KnockOff(Point head)
@@ -46,7 +51,7 @@ internal sealed class HatWorld
     {
         _state.Mode = HatMode.Falling;
         _state.Support = null;
-        _state.VelocityY = _state.Angle = _state.FallTimeSeconds = 0;
+        _state.VelocityY = _state.Angle = _state.FallTimeSeconds = _state.SettleTimeSeconds = _state.SettleStartAngle = 0;
         _state.ResolveInitialOverlap = true;
     }
 
@@ -71,8 +76,10 @@ internal sealed class HatWorld
             _state.ResolveInitialOverlap = false;
             if (collision is HatCollision found)
                 Land(found);
+            return;
         }
-        else if (_state.Mode == HatMode.Resting && _state.Support is HatSupport support)
+
+        if ((_state.Mode == HatMode.Settling || _state.Mode == HatMode.Resting) && _state.Support is HatSupport support)
         {
             RectangleF bounds = new(_state.Position, ImageSize);
             HatCollision? takeover = _collision.FindFirstCollision(surfaces.Where(surface => surface.Identity != support.Identity), bounds, bounds, true);
@@ -90,6 +97,8 @@ internal sealed class HatWorld
             }
 
             _state.Position = new(surface.Bounds.Left + support.RelativeX, surface.Bounds.Top - support.Segment.ContactY);
+            if (_state.Mode == HatMode.Settling)
+                AdvanceSettlement(elapsedSeconds);
         }
     }
 
@@ -98,6 +107,21 @@ internal sealed class HatWorld
         _state.Position = new(_state.Position.X, collision.Surface.Bounds.Top - collision.ContactY);
         _state.VelocityY = 0;
         _state.Support = new(collision.Surface.Identity, _state.Position.X - collision.Surface.Bounds.Left, collision.Segment);
+        _state.SettleTimeSeconds = 0;
+        _state.SettleStartAngle = _state.Angle;
+        _state.Mode = HatMode.Settling;
+    }
+
+    private void AdvanceSettlement(float elapsedSeconds)
+    {
+        _state.SettleTimeSeconds += Math.Clamp(elapsedSeconds, 0f, 0.05f);
+        float progress = Math.Clamp(_state.SettleTimeSeconds / SettlementDurationSeconds, 0f, 1f);
+        float smooth = progress * progress * (3f - 2f * progress);
+        _state.Angle = _state.SettleStartAngle * (1f - smooth);
+        if (progress < 1f)
+            return;
+
+        _state.Angle = 0;
         _state.Mode = HatMode.Resting;
     }
 }

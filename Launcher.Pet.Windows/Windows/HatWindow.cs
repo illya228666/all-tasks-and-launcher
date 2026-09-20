@@ -1,140 +1,53 @@
 using static Launcher.Pet.Windows.Windows.HatMouseApi;
-using System.Drawing;
-using System.Drawing.Drawing2D;
-using System.Drawing.Imaging;
-using System.Runtime.InteropServices;
 using Launcher.Pet.Hat;
-
+using Launcher.Pet.Windows.Drawing;
 namespace Launcher.Pet.Windows.Windows;
-// Визуальное окно шляпы: drag/input и выбор заранее отрисованного угла, без физики и scheduler.
+
 internal sealed class HatWindow : TransparentOverlayWindow
 {
-    private const int FallFrameDurationMs = 350;
-    private readonly Bitmap[] _angleFrames;
-    private readonly Bitmap[] _fallFrames;
-    private int _angleFrame = -1;
-    private int _fallFrame = -1;
-    private bool _showingFall;
+    private readonly HatFrameCache _frames;
+    private HatRenderKey? _lastPose;
     private bool _interactionEnabled = true;
     private bool _dragging;
     internal event Action? DragStarted;
     internal event Action<Point>? Dropped;
     internal event Action<Point>? DragMoved;
-    internal HatWindow(Bitmap sprite, Bitmap[] fallFrames) : base(clickThrough: false)
+    internal HatWindow(HatFrameCache frames) : base(clickThrough: false)
     {
-        _fallFrames = fallFrames;
-        _angleFrames = CreateAngleFrames(sprite);
-        try
-        {
-            SetAngle(0f);
-        }
-        catch
-        {
-            foreach (Bitmap frame in _angleFrames)
-                frame.Dispose();
-            base.Dispose(true);
-            throw;
-        }
+        _frames = frames;
+        DisplayPose(default);
     }
-
     internal IntPtr WindowHandle => Handle;
-
     internal void BeginDrag(Point cursorPosition)
     {
-        if (!_interactionEnabled || _dragging)
-            return;
-        SetAngle(0f);
+        if (!_interactionEnabled || _dragging) return;
+        DisplayPose(default);
         ShowAt(GetLocationAtCursor(cursorPosition));
         _dragging = true;
         DragStarted?.Invoke();
     }
-
     internal void UpdateDrag()
     {
-        if (!_dragging)
-            return;
-        // Физическое состояние ЛКМ не требует фокуса, захвата мыши или хуков.
-        if ((GetAsyncKeyState(0x01) & 0x8000) == 0)
-            EndDrag();
-        else
-            MoveToCursor(Cursor.Position);
+        if (!_dragging) return;
+        if ((GetAsyncKeyState(0x01) & 0x8000) == 0) EndDrag();
+        else MoveToCursor(Cursor.Position);
     }
-
     internal void CancelDrag() => _dragging = false;
     internal void SetInteractionEnabled(bool enabled)
     {
         _interactionEnabled = enabled;
-        if (!enabled)
-            CancelDrag();
+        if (!enabled) CancelDrag();
     }
-
-    internal void MoveTo(Point location) => ShowAt(location);
-    internal void SetPose(HatMode mode, float angle, float fallTimeSeconds)
+    internal void MoveTo(Point location) => ShowAt(new(location.X - HatFrameCache.Padding, location.Y - HatFrameCache.Padding));
+    internal void DisplayPose(HatVisualPose pose)
     {
-        if (mode != HatMode.Falling)
-        {
-            SetAngle(angle);
-            return;
-        }
-
-        int cycle = 2 * (_fallFrames.Length - 1);
-        int phase = (int)(Math.Max(0f, fallTimeSeconds) * 1000f / FallFrameDurationMs) % cycle;
-        int frame = Math.Min(phase, cycle - phase);
-        if (_showingFall && frame == _fallFrame)
-            return;
-        _fallFrame = frame;
-        _showingFall = true;
-        SetImage(_fallFrames[frame]);
+        var key = HatFrameCache.GetKey(pose);
+        if (_lastPose == key) return;
+        _frames.Draw(pose, SetImage);
+        _lastPose = key;
     }
+    private Point GetLocationAtCursor(Point cursorPosition) => new(cursorPosition.X - HatGeometry.Width / 2 - HatFrameCache.Padding, cursorPosition.Y - HatGeometry.Height / 2 - HatFrameCache.Padding);
 
-    internal void SetAngle(float angle)
-    {
-        int frame = HatRotationProfile.GetNearestFrameIndex(angle);
-        if (!_showingFall && frame == _angleFrame)
-            return;
-        _angleFrame = frame;
-        _showingFall = false;
-        SetImage(_angleFrames[frame]);
-    }
-
-    private static Bitmap[] CreateAngleFrames(Bitmap sprite)
-    {
-        var frames = new List<Bitmap>(HatRotationProfile.FrameCount);
-        try
-        {
-            for (int frameIndex = 0; frameIndex < HatRotationProfile.FrameCount; frameIndex++)
-            {
-                float angle = HatRotationProfile.GetFrameAngle(frameIndex);
-                if (angle == 0f)
-                {
-                    frames.Add(new Bitmap(sprite));
-                    continue;
-                }
-
-                var frame = new Bitmap(sprite.Width, sprite.Height, PixelFormat.Format32bppPArgb);
-                frames.Add(frame);
-                using Graphics graphics = Graphics.FromImage(frame);
-                graphics.Clear(Color.Transparent);
-                graphics.SmoothingMode = SmoothingMode.AntiAlias;
-                graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
-                graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
-                graphics.TranslateTransform(sprite.Width / 2f, sprite.Height / 2f);
-                graphics.RotateTransform(angle);
-                graphics.TranslateTransform(-sprite.Width / 2f, -sprite.Height / 2f);
-                graphics.DrawImageUnscaled(sprite, 0, 0);
-            }
-
-            return frames.ToArray();
-        }
-        catch
-        {
-            foreach (Bitmap frame in frames)
-                frame.Dispose();
-            throw;
-        }
-    }
-
-    private Point GetLocationAtCursor(Point cursorPosition) => new(cursorPosition.X - ClientSize.Width / 2, cursorPosition.Y - ClientSize.Height / 2);
     private void MoveToCursor(Point cursorPosition)
     {
         Location = GetLocationAtCursor(cursorPosition);
@@ -165,15 +78,4 @@ internal sealed class HatWindow : TransparentOverlayWindow
             EndDrag();
     }
 
-    protected override void Dispose(bool disposing)
-    {
-        if (disposing)
-        {
-            _dragging = false;
-            foreach (Bitmap frame in _angleFrames)
-                frame.Dispose();
-        }
-
-        base.Dispose(disposing);
-    }
 }

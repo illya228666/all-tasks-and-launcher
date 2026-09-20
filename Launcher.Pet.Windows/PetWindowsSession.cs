@@ -22,7 +22,8 @@ public sealed class PetWindowsSession : IDisposable
     {
         Interval = TickIntervalMs
     };
-    private readonly HatCollisionProfile _hatCollision = new(new Size(109, 64));
+    private readonly HatCollisionProfile _hatCollision = new(new Size(HatGeometry.Width, HatGeometry.Height));
+    private HatFrameCache? _hatFrames;
     private HatWindow? _hat;
     private SpeechBubbleWindow? _speech;
     private HatCollisionDebugWindow? _debug;
@@ -166,7 +167,8 @@ public sealed class PetWindowsSession : IDisposable
     {
         if (_hat is not null)
             return _hat;
-        _hat = new(_images.Hat, _images.HatFalling);
+        _hatFrames ??= new(_images.Hat, _images.HatFalling);
+        _hat = new(_hatFrames);
         _hat.DragStarted += HatDragStarted;
         _hat.DragMoved += HatDragMoved;
         _hat.Dropped += HatDropped;
@@ -186,7 +188,7 @@ public sealed class PetWindowsSession : IDisposable
         if (scene.Hat.Mode != HatMode.Dragging)
             hat.MoveTo(scene.Hat.ScreenPosition);
         if (_running && !_disposed && version == _version)
-            hat.SetPose(scene.Hat.Mode, scene.Hat.Angle, scene.Hat.FallTimeSeconds);
+            hat.DisplayPose(scene.Hat.Pose);
     }
 
     private void DisplaySpeech(PetScene scene)
@@ -277,6 +279,7 @@ public sealed class PetWindowsSession : IDisposable
         _speech?.Dispose();
         _debug?.Dispose();
         _drawing.Dispose();
+        _hatFrames?.Dispose();
         _images.Dispose();
     }
 }

@@ -4,5 +4,6 @@ public enum HatMode
     Attached,
     Dragging,
     Falling,
+    Settling,
     Resting
 }

@@ -6,7 +6,7 @@ using Launcher.Pet.Sprites;
 namespace Launcher.Pet.Windows.Drawing;
 internal sealed class PetImages : IDisposable
 {
-    private static readonly Size HatSize = new(109, 64);
+    private static readonly Size HatSize = new(Launcher.Pet.Hat.HatGeometry.Width, Launcher.Pet.Hat.HatGeometry.Height);
     internal Bitmap WithHat { get; private set; } = null!;
     internal Bitmap WithoutHat { get; private set; } = null!;
     internal SpritePixelMask WithHatMask { get; private set; } = null!;
@@ -27,7 +27,7 @@ internal sealed class PetImages : IDisposable
             WithoutHatMask = new(WithoutHat);
             using var hat = Read(Path.Combine("hat", "hat.png"));
             Hat = Normalize(hat, HatSize);
-            HatFalling = ReadFrames("hat", "hat_falling_", 7, HatSize);
+            HatFalling = ReadFrames("hat", "hat_falling_", Launcher.Pet.Hat.HatAnimation.FallingFrameCount, HatSize);
         }
         catch
         {

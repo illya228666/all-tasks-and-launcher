@@ -8,6 +8,9 @@ internal sealed class HatPhysics
     // Полуразмах бокового скольжения в пикселях; полный проход — 64 пикселя.
     private const float SwayDistance = 32f;
     private const float FlutterStrength = 0.12f;
+    private const float TiltAmplitude = 0.78f;
+    private const float TiltRampSeconds = 0.25f;
+
     internal void Advance(HatState state, float elapsedSeconds)
     {
         // Ограничение не даёт паузе UI-потока превратиться в огромный скачок.
@@ -16,11 +19,20 @@ internal sealed class HatPhysics
         state.FallTimeSeconds += dt;
         float phase = state.FallTimeSeconds * HatRotationProfile.SwingRadiansPerSecond;
         float swing = MathF.Sin(phase);
+
         // Разность косинусов даёт плавный старт и разворот без накопления дрейфа.
         // Третья гармоника добавляет мелкое трепетание к широкому скольжению.
-        float dx = SwayDistance * (MathF.Cos(previousPhase) - MathF.Cos(phase) + FlutterStrength / 3f * (MathF.Cos(3f * previousPhase) - MathF.Cos(3f * phase)));
-        float tilt = (swing + FlutterStrength * MathF.Sin(3f * phase)) / (1f + FlutterStrength);
-        state.Angle = HatRotationProfile.MaxAngleDegrees * tilt;
+        float dx = SwayDistance * (MathF.Cos(previousPhase) - MathF.Cos(phase)
+            + FlutterStrength / 3f * (MathF.Cos(3f * previousPhase) - MathF.Cos(3f * phase)));
+
+        // Z-наклон больше не имеет отдельной быстрой фазы. Он медленно "банкует"
+        // против бокового ускорения: начинает с нуля, проходит обе стороны без
+        // резкой смены направления и не перекрикивает само горизонтальное планирование.
+        float ramp = Math.Clamp(state.FallTimeSeconds / TiltRampSeconds, 0f, 1f);
+        float smoothRamp = ramp * ramp * (3f - 2f * ramp);
+        float tilt = -MathF.Cos(phase) * smoothRamp;
+        state.Angle = HatRotationProfile.MaxAngleDegrees * TiltAmplitude * tilt;
+
         // При боковом скольжении воздух поддерживает шляпу; на развороте она проседает.
         // Экспоненциальное сопротивление плавно выводит скорость на предел без рывка.
         float targetSpeed = MaxSpeed * (1f - GlideLift * swing * swing);
