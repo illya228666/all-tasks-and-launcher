@@ -1,28 +1,27 @@
 using System.Drawing;
-
 namespace Launcher.Pet.Sprites;
 
-// Однонаправленное преобразование логической позиции в визуальную геометрию.
-// Не изменяет PetState и не читает исходные изображения.
-internal static class PetSpriteLayout
+public static class PetSpriteLayout
 {
-    internal static Rectangle GetBounds(Point logicalPosition, PetFrameGeometry frame, Point shake)
+    public static Rectangle GetBounds(Point logicalPosition, PetFrameGeometry frame, Point shake)
     {
-        int bodyAnchorX = Scale(frame.BodyAnchorX, frame.Width, PetSpriteCatalog.AtlasCellWidth);
-        return new(
-            logicalPosition.X + PetLogicalGeometry.Width / 2 - bodyAnchorX + frame.OffsetX - shake.X / 2,
-            logicalPosition.Y + frame.OffsetY + Math.Min(0, shake.Y / 2),
-            frame.Width, frame.Height);
+        int width = (int)Math.Round(PetSpriteCatalog.AtlasCellWidth * PetSpriteCatalog.RenderScale);
+        int height = (int)Math.Round(PetSpriteCatalog.AtlasCellHeight * PetSpriteCatalog.RenderScale);
+        return new(logicalPosition.X + PetLogicalGeometry.Width / 2 - Scale(frame.BodyAnchorX, width, PetSpriteCatalog.AtlasCellWidth) - shake.X / 2,
+            logicalPosition.Y + PetLogicalGeometry.Height - Scale(frame.GroundAnchorY, height, PetSpriteCatalog.AtlasCellHeight) + Math.Min(0, shake.Y / 2), width, height);
     }
-
-    internal static Point? VisibleHead(Rectangle spriteBounds, PetFrameGeometry frame, Point areaScreenPosition, Rectangle visibleScreenBounds)
+    public static Point? VisibleHead(Rectangle spriteBounds, PetFrameGeometry frame, Point areaScreenPosition, Rectangle visibleScreenBounds)
     {
-        var head = new Point(
-            areaScreenPosition.X + spriteBounds.X + Scale(frame.BodyAnchorX, spriteBounds.Width, PetSpriteCatalog.AtlasCellWidth),
-            areaScreenPosition.Y + spriteBounds.Y + Scale(frame.HeadAnchorY, spriteBounds.Height, PetSpriteCatalog.AtlasCellHeight));
+        Point head = new(areaScreenPosition.X + spriteBounds.X + Scale(frame.HeadAnchor.X, spriteBounds.Width, PetSpriteCatalog.AtlasCellWidth),
+            areaScreenPosition.Y + spriteBounds.Y + Scale(frame.HeadAnchor.Y, spriteBounds.Height, PetSpriteCatalog.AtlasCellHeight));
         return visibleScreenBounds.Contains(head) ? head : null;
     }
-
-    private static int Scale(int value, int destinationSize, int sourceSize) =>
-        (int)Math.Round((double)value * destinationSize / sourceSize);
+    public static Point MapDestinationToAtlasCell(Point point, Rectangle bounds)
+    {
+        if (bounds.Width <= 0 || bounds.Height <= 0 || !bounds.Contains(point))
+            throw new ArgumentOutOfRangeException(nameof(point));
+        return new((int)((long)(point.X - bounds.X) * PetSpriteCatalog.AtlasCellWidth / bounds.Width),
+            (int)((long)(point.Y - bounds.Y) * PetSpriteCatalog.AtlasCellHeight / bounds.Height));
+    }
+    private static int Scale(int value, int destination, int source) => (int)Math.Round((double)value * destination / source);
 }

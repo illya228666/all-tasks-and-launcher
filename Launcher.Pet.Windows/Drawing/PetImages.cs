@@ -9,6 +9,8 @@ internal sealed class PetImages : IDisposable
     private static readonly Size HatSize = new(109, 64);
     internal Bitmap WithHat { get; private set; } = null!;
     internal Bitmap WithoutHat { get; private set; } = null!;
+    internal SpritePixelMask WithHatMask { get; private set; } = null!;
+    internal SpritePixelMask WithoutHatMask { get; private set; } = null!;
     internal Bitmap Hat { get; private set; } = null!;
     internal Bitmap[] HatFalling { get; private set; } = Array.Empty<Bitmap>();
 
@@ -18,7 +20,11 @@ internal sealed class PetImages : IDisposable
         {
             using var withHat = Read("spritesheet_sumrak_hat.png");
             using var withoutHat = Read("spritesheet_sumrak_no_hat.png");
-            (WithHat, WithoutHat) = NormalizeAtlases(withHat, withoutHat);
+            ValidateAtlases(withHat, withoutHat);
+            WithHat = new Bitmap(withHat);
+            WithoutHat = new Bitmap(withoutHat);
+            WithHatMask = new(WithHat);
+            WithoutHatMask = new(WithoutHat);
             using var hat = Read(Path.Combine("hat", "hat.png"));
             Hat = Normalize(hat, HatSize);
             HatFalling = ReadFrames("hat", "hat_falling_", 7, HatSize);
@@ -56,50 +62,12 @@ internal sealed class PetImages : IDisposable
         }
     }
 
-    private static (Bitmap WithHat, Bitmap WithoutHat) NormalizeAtlases(Bitmap withHat, Bitmap withoutHat)
+    private static void ValidateAtlases(Bitmap withHat, Bitmap withoutHat)
     {
-        int columns = PetSpriteCatalog.AtlasColumns;
-        int rows = PetSpriteCatalog.AtlasRows;
-        if (withHat.Size != withoutHat.Size || withHat.Width < columns || withHat.Height < rows || withHat.Width % columns != 0 || withHat.Height % rows != 0)
-            throw new InvalidDataException("Die Sprite-Atlanten muessen dieselbe durch das Raster teilbare Groesse haben.");
-
-        int sourceWidth = withHat.Width / columns;
-        int sourceHeight = withHat.Height / rows;
-        int targetWidth = PetSpriteCatalog.AtlasCellWidth;
-        int targetHeight = PetSpriteCatalog.AtlasCellHeight;
-        var withResult = new Bitmap(columns * targetWidth, rows * targetHeight, PixelFormat.Format32bppPArgb);
-        Bitmap? withoutResult = null;
-        try
-        {
-            withoutResult = new Bitmap(withResult.Width, withResult.Height, PixelFormat.Format32bppPArgb);
-            using Graphics withGraphics = Graphics.FromImage(withResult);
-            using Graphics withoutGraphics = Graphics.FromImage(withoutResult);
-            Configure(withGraphics);
-            Configure(withoutGraphics);
-            for (int row = 0; row < rows; row++)
-            {
-                for (int column = 0; column < columns; column++)
-                {
-                    var cell = new Rectangle(column * sourceWidth, row * sourceHeight, sourceWidth, sourceHeight);
-                    Rectangle withBounds = VisibleBounds(withHat, cell);
-                    Rectangle withoutBounds = VisibleBounds(withoutHat, cell);
-                    Rectangle bounds = withBounds.IsEmpty ? withoutBounds : withoutBounds.IsEmpty ? withBounds : Rectangle.Union(withBounds, withoutBounds);
-                    if (bounds.IsEmpty)
-                        continue;
-                    var destination = Fit(bounds.Size, new(targetWidth, targetHeight), bottomAligned: true);
-                    destination.Offset(column * targetWidth, row * targetHeight);
-                    withGraphics.DrawImage(withHat, destination, bounds, GraphicsUnit.Pixel);
-                    withoutGraphics.DrawImage(withoutHat, destination, bounds, GraphicsUnit.Pixel);
-                }
-            }
-            return (withResult, withoutResult);
-        }
-        catch
-        {
-            withResult.Dispose();
-            withoutResult?.Dispose();
-            throw;
-        }
+        var expected = new Size(PetSpriteCatalog.AtlasColumns * PetSpriteCatalog.AtlasCellWidth,
+            PetSpriteCatalog.AtlasRows * PetSpriteCatalog.AtlasCellHeight);
+        if (withHat.Size != expected || withoutHat.Size != expected)
+            throw new InvalidDataException("Sprite atlas dimensions do not match the authored geometry.");
     }
 
     private static Bitmap Normalize(Bitmap source, Size target)
@@ -170,3 +138,4 @@ internal sealed class PetImages : IDisposable
         WithHat?.Dispose();
     }
 }
+

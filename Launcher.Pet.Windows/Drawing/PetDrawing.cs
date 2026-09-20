@@ -45,13 +45,8 @@ internal sealed class PetDrawing : IDisposable
 
     internal bool IsHeadAtScreen(Point screenPoint, Rectangle visibleScreenBounds)
     {
-        if (!TryGetPetPixel(screenPoint, visibleScreenBounds, out _, out int y, out Rectangle source, out Bitmap atlas))
-            return false;
-        for (int row = 0; row <= y; row++)
-            for (int column = 0; column < source.Width; column++)
-                if (atlas.GetPixel(source.X + column, source.Y + row).A != 0)
-                    return y - row < PetSpriteCatalog.HeadHitHeight;
-        return false;
+        return TryGetPetPixel(screenPoint, visibleScreenBounds, out int x, out int y, out _, out _)
+            && PetSpriteCatalog.GetFrameGeometry(_scene!.Row, _scene.Frame).HeadBounds.Contains(x, y);
     }
 
     private bool TryGetPetPixel(Point screenPoint, Rectangle visibleScreenBounds, out int x, out int y, out Rectangle source, out Bitmap atlas)
@@ -65,12 +60,11 @@ internal sealed class PetDrawing : IDisposable
         if (_area.GetChildAtPoint(local, GetChildAtPointSkip.Invisible) is not null || !_scene.SpriteBounds.Contains(local))
             return false;
         source = PetSpriteCatalog.GetSourceRectangle(_scene.Row, _scene.Frame);
-        // Обратное преобразование из пикселей назначения в ячейку атласа.
-        // При нынешнем размере 149x200 оно совпадает с прежним вычитанием X/Y.
-        x = (int)((long)(local.X - _scene.SpriteBounds.X) * source.Width / _scene.SpriteBounds.Width);
-        y = (int)((long)(local.Y - _scene.SpriteBounds.Y) * source.Height / _scene.SpriteBounds.Height);
+        Point cell = PetSpriteLayout.MapDestinationToAtlasCell(local, _scene.SpriteBounds);
+        x = cell.X;
+        y = cell.Y;
         atlas = _scene.HatAttached ? _images.WithHat : _images.WithoutHat;
-        return atlas.GetPixel(source.X + x, source.Y + y).A != 0;
+        return (_scene.HatAttached ? _images.WithHatMask : _images.WithoutHatMask).Contains(source.X + x, source.Y + y);
     }
 
     public void Dispose()
