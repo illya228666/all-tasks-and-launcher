@@ -4,12 +4,34 @@ namespace Launcher.Pet.Hat;
 internal sealed class HatWorld
 {
     private const float SettlementDurationSeconds = 0.35f;
-    internal static readonly Size ImageSize = new(HatGeometry.Width, HatGeometry.Height);
+    private float _scale = 1;
+    internal Size ImageSize => new(Math.Max(1, (int)Math.Round(HatGeometry.Width * _scale)), Math.Max(1, (int)Math.Round(HatGeometry.Height * _scale)));
     private readonly HatState _state = new();
     private readonly HatPhysics _physics = new();
-    private readonly HatCollisionProfile _collision = new(ImageSize);
-    internal HatScene Scene => new(_state.Mode, Point.Round(_state.Position), HatAnimation.Evaluate(_state.Mode, _state.Angle, _state.FallTimeSeconds, SettlementProgress));
+    private HatCollisionProfile _collision = new(new Size(HatGeometry.Width, HatGeometry.Height));
+    internal HatScene Scene => new(_state.Mode, Point.Round(_state.Position), HatAnimation.Evaluate(_state.Mode, _state.Angle, _state.FallTimeSeconds, SettlementProgress), _scale);
     internal bool Attached => _state.Mode == HatMode.Attached;
+
+    internal void SetScale(float scale)
+    {
+        if (Math.Abs(scale - _scale) < 0.0001f) return;
+        Size oldSize = ImageSize;
+        _scale = scale;
+        Size newSize = ImageSize;
+        float dx = (oldSize.Width - newSize.Width) / 2f;
+        _state.Position = new(_state.Position.X + dx, _state.Position.Y + (oldSize.Height - newSize.Height) / 2f);
+        if (_state.Support is HatSupport support)
+        {
+            float ratio = (float)newSize.Width / oldSize.Width;
+            var segment = support.Segment;
+            _state.Support = support with { RelativeX = support.RelativeX + dx,
+                Segment = new(segment.Left * ratio, segment.Right * ratio, segment.ContactY * ratio) };
+        }
+        _collision = new(newSize);
+    }
+
+    internal Point? RestingPoint(IReadOnlyList<HatSurface> surfaces) =>
+        _state.Support is HatSupport support ? PickupPoint(surfaces, support.Identity) : null;
 
     private float SettlementProgress => _state.Mode == HatMode.Settling
         ? Math.Clamp(_state.SettleTimeSeconds / SettlementDurationSeconds, 0f, 1f)
@@ -44,7 +66,7 @@ internal sealed class HatWorld
         if (Attached)
             _state.Position = new(head.X - ImageSize.Width / 2, head.Y - ImageSize.Height);
         Fall();
-        _state.VelocityY = -180f;
+        _state.VelocityY = -180f * _scale;
     }
 
     private void Fall()
@@ -71,7 +93,7 @@ internal sealed class HatWorld
         if (_state.Mode == HatMode.Falling)
         {
             RectangleF previous = new(_state.Position, ImageSize);
-            _physics.Advance(_state, elapsedSeconds);
+            _physics.Advance(_state, elapsedSeconds, _scale);
             HatCollision? collision = _collision.FindFirstCollision(surfaces, previous, new RectangleF(_state.Position, ImageSize), _state.ResolveInitialOverlap);
             _state.ResolveInitialOverlap = false;
             if (collision is HatCollision found)

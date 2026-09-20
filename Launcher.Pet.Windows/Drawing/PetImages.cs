@@ -21,8 +21,8 @@ internal sealed class PetImages : IDisposable
             using var withHat = Read("spritesheet_sumrak_hat.png");
             using var withoutHat = Read("spritesheet_sumrak_no_hat.png");
             ValidateAtlases(withHat, withoutHat);
-            WithHat = new Bitmap(withHat);
-            WithoutHat = new Bitmap(withoutHat);
+            WithHat = AddClimbing(withHat, true);
+            WithoutHat = AddClimbing(withoutHat, false);
             WithHatMask = new(WithHat);
             WithoutHatMask = new(WithoutHat);
             using var hat = Read(Path.Combine("hat", "hat.png"));
@@ -34,6 +34,29 @@ internal sealed class PetImages : IDisposable
             Dispose();
             throw;
         }
+    }
+
+    private static Bitmap AddClimbing(Bitmap original, bool hat)
+    {
+        using var climbing = Read(Path.Combine("ruins", "climbing.png"));
+        var atlas = new Bitmap(original.Width, original.Height + PetSpriteCatalog.AtlasCellHeight, PixelFormat.Format32bppArgb);
+        try
+        {
+            using var graphics = Graphics.FromImage(atlas);
+            Configure(graphics);
+            // Atlas coordinates are pixels, irrespective of PNG DPI metadata.
+            graphics.DrawImage(original, new Rectangle(Point.Empty, original.Size), new Rectangle(Point.Empty, original.Size), GraphicsUnit.Pixel);
+            int w = climbing.Width / 4, h = climbing.Height / 2;
+            for (int i = 0; i < 4; i++)
+            {
+                Rectangle visible = VisibleBounds(climbing, new(i * w, hat ? h : 0, w, h));
+                Rectangle target = Fit(visible.Size, new(PetSpriteCatalog.AtlasCellWidth, PetSpriteCatalog.AtlasCellHeight), true);
+                target.Offset(i * PetSpriteCatalog.AtlasCellWidth, original.Height);
+                graphics.DrawImage(climbing, target, visible, GraphicsUnit.Pixel);
+            }
+            return atlas;
+        }
+        catch { atlas.Dispose(); throw; }
     }
 
     private static Bitmap Read(string name)

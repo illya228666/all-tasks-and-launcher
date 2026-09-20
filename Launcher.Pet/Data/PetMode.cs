@@ -8,5 +8,10 @@ public enum PetMode
     Looking,
     RetrievingHat,
     PuttingOnHat,
+    Climbing,
+    Grabbing,
+    PullingUp,
+    Falling,
+    Traversing,
     Earthquake
 }

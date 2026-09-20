@@ -10,6 +10,11 @@ internal sealed class PetDeparture
     internal PetDeparture(Point start) => _start = start;
     private float _elapsed;
     private float? _landedAt;
+    internal bool HasLanded => _landedAt is not null;
+    internal float Scale
+    {
+        get { float t = Math.Clamp(_elapsed / 0.65f, 0, 1); return 1 - 0.5f * t * t * (3 - 2 * t); }
+    }
     private const float Gravity = 1500f;
     private const float LaunchSpeed = 300f;
 
@@ -25,13 +30,13 @@ internal sealed class PetDeparture
         float distance = Math.Max(0, floor - startY);
         float flightDuration = (LaunchSpeed + MathF.Sqrt(LaunchSpeed * LaunchSpeed + 2 * Gravity * distance)) / Gravity;
         float flight = Math.Max(0, _elapsed - 0.14f);
-        state.X = startX + (targetX - startX) * Math.Clamp(flight / flightDuration, 0, 1);
+        state.X = startX + (targetX - startX) * Math.Clamp(flight / flightDuration, 0, 1) + PetLogicalGeometry.Width * (1 - Scale) / 2;
         float y = startY - LaunchSpeed * flight + Gravity * flight * flight / 2;
         if (_landedAt is null && flight >= flightDuration)
             _landedAt = _elapsed;
         if (_landedAt is float landed)
         {
-            state.X = targetX;
+            state.X = targetX + PetLogicalGeometry.Width * (1 - Scale) / 2;
             state.JumpLift = 0;
             state.Row = PetAnimationCatalog.FailedRow;
             float recovery = _elapsed - landed;

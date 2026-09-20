@@ -20,8 +20,8 @@ public sealed class HatCollisionProfile
     public HatCollisionProfile(Size hatSize)
     {
         float sideWidth = hatSize.Width * SideWidthRatio;
-        float brimContactY = hatSize.Height - SurfaceOverlap;
-        float centerContactY = brimContactY - CenterRecessDepth;
+        float brimContactY = hatSize.Height - SurfaceOverlap * hatSize.Width / HatGeometry.Width;
+        float centerContactY = brimContactY - CenterRecessDepth * hatSize.Width / HatGeometry.Width;
         _segments = new[]
         {
             new HatCollisionSegment(0f, sideWidth, brimContactY),

@@ -119,7 +119,19 @@ internal sealed class DesktopIconSurfaceProvider
                 // во время чтения геометрии, результат не становится опорой.
                 if (itemKey != GetItemKey(view, itemIndex))
                     continue;
-                target.Add(new DesktopSurface(collisionBounds, new DesktopSurfaceIdentity(DesktopSurfaceType.DesktopIcon, listView, $"{processId}:{itemKey}")));
+                Rectangle labelBounds = Rectangle.Empty;
+                rect = new NativeRect { Left = 2 }; // LVIR_LABEL
+                if (WriteProcessMemory(process, remoteRect, ref rect, rectSize, out _)
+                    && SendMessage(listView, ListViewGetItemRect, new IntPtr(itemIndex), remoteRect) != IntPtr.Zero
+                    && ReadProcessMemory(process, remoteRect, out rect, rectSize, out _))
+                {
+                    var labelStart = new NativePoint { X = rect.Left, Y = rect.Top };
+                    var labelEnd = new NativePoint { X = rect.Right, Y = rect.Bottom };
+                    if (ClientToScreen(listView, ref labelStart) && ClientToScreen(listView, ref labelEnd))
+                        labelBounds = Rectangle.FromLTRB(labelStart.X, labelStart.Y, labelEnd.X, labelEnd.Y);
+                }
+                if (itemKey == GetItemKey(view, itemIndex))
+                    target.Add(new DesktopSurface(collisionBounds, new DesktopSurfaceIdentity(DesktopSurfaceType.DesktopIcon, listView, $"{processId}:{itemKey}"), bounds, labelBounds));
             }
         }
         finally

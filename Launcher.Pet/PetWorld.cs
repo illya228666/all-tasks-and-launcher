@@ -4,6 +4,7 @@ using Launcher.Pet.Behavior;
 using Launcher.Pet.Data;
 using Launcher.Pet.Hat;
 using Launcher.Pet.Speech;
+using Launcher.Pet.Exploration;
 
 namespace Launcher.Pet;
 public sealed class PetWorld
@@ -16,6 +17,9 @@ public sealed class PetWorld
     private long _lastMs;
     private bool _running;
     private PetDeparture? _departure;
+    private readonly PetExplorer _explorer;
+    public float RenderScale => Location == PetLocation.Launcher ? 1f : _departure?.Scale ?? 0.5f;
+    public bool HasLanded => Location == PetLocation.Desktop || _departure?.HasLanded == true;
     public PetLocation Location { get; private set; }
     public bool IsHatDragging => _hat.Scene.Mode == HatMode.Dragging;
 
@@ -35,6 +39,7 @@ public sealed class PetWorld
     public PetWorld(Random random)
     {
         _speech = new(random);
+        _explorer = new(random);
         _behavior = new(_state, random);
     }
 
@@ -74,6 +79,8 @@ public sealed class PetWorld
                     _behavior.Reset(nowMs, _speech);
                 }
             }
+            else if (Location == PetLocation.Desktop && environment.Ruins is not null)
+                _explorer.Update(_state, environment, _hat, _behavior, _speech, nowMs, elapsed);
             else
             {
                 PetPlacement.Fit(_state, environment);
@@ -81,12 +88,27 @@ public sealed class PetWorld
             }
         }
 
+        environment = environment with { Scale = RenderScale };
+        _environment = environment;
+        _hat.SetScale(RenderScale);
         return Scene = CreateScene(environment);
     }
 
     public bool TryStartEarthquake(long nowMs)
     {
+        float lift = _state.JumpLift;
         bool started = _running && Location != PetLocation.LeavingLauncher && _behavior.Earthquake(nowMs, Scene?.HeadScreenPosition, _hat, _speech);
+        _state.JumpLift = lift;
+        if (started && Location == PetLocation.Desktop)
+        {
+            if (_explorer.IsAirborne)
+            {
+                _behavior.Reset(nowMs, _speech);
+                _explorer.Fall(_state);
+                _state.JumpLift = lift;
+            }
+            else _explorer.CancelRoute();
+        }
         RefreshScene();
         return started;
     }
@@ -130,11 +152,11 @@ public sealed class PetWorld
         Point shake = _behavior.Shake;
         Rectangle bounds = GetSpriteBounds(environment, shake);
         Point? head = GetVisibleHead(environment, bounds);
-        return new(_state.Mode, _state.Row, _state.Frame, bounds, head, shake, _hat.Attached, _hat.Scene, _speech.Phrase, _speech.VisibleLetters);
+        return new(_state.Mode, _state.Row, _state.Frame, bounds, head, shake, _hat.Attached, _hat.Scene, _speech.Phrase, _speech.VisibleLetters, RenderScale);
     }
 
     private Rectangle GetSpriteBounds(PetEnvironment environment, Point shake) =>
-        PetSpriteLayout.GetBounds(PetPlacement.LogicalPosition(_state, environment), PetSpriteCatalog.GetFrameGeometry(_state.Row, _state.Frame), shake);
+        PetSpriteLayout.GetBounds(PetPlacement.LogicalPosition(_state, environment), PetSpriteCatalog.GetFrameGeometry(_state.Row, _state.Frame), shake, environment.Scale);
 
     private Point? GetVisibleHead(PetEnvironment environment, Rectangle spriteBounds) =>
         PetSpriteLayout.VisibleHead(spriteBounds, PetSpriteCatalog.GetFrameGeometry(_state.Row, _state.Frame), environment.AreaScreenPosition, environment.VisibleScreenBounds);

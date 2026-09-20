@@ -4,5 +4,6 @@ public enum HatSurfaceKind
     Window,
     DesktopIcon,
     Taskbar,
-    PetGround
+    Ruin = 4,
+    PetGround = 3
 }

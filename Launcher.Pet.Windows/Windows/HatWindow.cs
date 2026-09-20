@@ -9,6 +9,14 @@ internal sealed class HatWindow : TransparentOverlayWindow
     private HatRenderKey? _lastPose;
     private bool _interactionEnabled = true;
     private bool _dragging;
+    private float _scale = 1;
+    private int ScaledPadding => (int)Math.Round(HatFrameCache.Padding * _scale);
+    internal void SetScale(float scale)
+    {
+        if (_scale == scale) return;
+        _scale = scale;
+        _lastPose = null;
+    }
     internal event Action? DragStarted;
     internal event Action<Point>? Dropped;
     internal event Action<Point>? DragMoved;
@@ -38,15 +46,25 @@ internal sealed class HatWindow : TransparentOverlayWindow
         _interactionEnabled = enabled;
         if (!enabled) CancelDrag();
     }
-    internal void MoveTo(Point location) => ShowAt(new(location.X - HatFrameCache.Padding, location.Y - HatFrameCache.Padding));
+    internal void MoveTo(Point location) => ShowAt(new(location.X - ScaledPadding, location.Y - ScaledPadding));
     internal void DisplayPose(HatVisualPose pose)
     {
         var key = HatFrameCache.GetKey(pose);
         if (_lastPose == key) return;
-        _frames.Draw(pose, SetImage);
+        _frames.Draw(pose, image =>
+        {
+            if (_scale == 1) { SetImage(image); return; }
+            using var scaled = new Bitmap(Math.Max(1, (int)Math.Round(image.Width * _scale)), Math.Max(1, (int)Math.Round(image.Height * _scale)), System.Drawing.Imaging.PixelFormat.Format32bppPArgb);
+            using (var graphics = Graphics.FromImage(scaled))
+            {
+                graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+                graphics.DrawImage(image, new Rectangle(Point.Empty, scaled.Size));
+            }
+            SetImage(scaled);
+        });
         _lastPose = key;
     }
-    private Point GetLocationAtCursor(Point cursorPosition) => new(cursorPosition.X - HatGeometry.Width / 2 - HatFrameCache.Padding, cursorPosition.Y - HatGeometry.Height / 2 - HatFrameCache.Padding);
+    private Point GetLocationAtCursor(Point cursorPosition) => new(cursorPosition.X - (int)Math.Round(HatGeometry.Width * _scale / 2) - ScaledPadding, cursorPosition.Y - (int)Math.Round(HatGeometry.Height * _scale / 2) - ScaledPadding);
 
     private void MoveToCursor(Point cursorPosition)
     {

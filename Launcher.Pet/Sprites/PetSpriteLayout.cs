@@ -3,12 +3,12 @@ namespace Launcher.Pet.Sprites;
 
 public static class PetSpriteLayout
 {
-    public static Rectangle GetBounds(Point logicalPosition, PetFrameGeometry frame, Point shake)
+    public static Rectangle GetBounds(Point logicalPosition, PetFrameGeometry frame, Point shake, float scale = 1f)
     {
-        int width = (int)Math.Round(PetSpriteCatalog.AtlasCellWidth * PetSpriteCatalog.RenderScale);
-        int height = (int)Math.Round(PetSpriteCatalog.AtlasCellHeight * PetSpriteCatalog.RenderScale);
-        return new(logicalPosition.X + PetLogicalGeometry.Width / 2 - Scale(frame.BodyAnchorX, width, PetSpriteCatalog.AtlasCellWidth) - shake.X / 2,
-            logicalPosition.Y + PetLogicalGeometry.Height - Scale(frame.GroundAnchorY, height, PetSpriteCatalog.AtlasCellHeight) + Math.Min(0, shake.Y / 2), width, height);
+        int width = (int)Math.Round(PetSpriteCatalog.AtlasCellWidth * PetSpriteCatalog.RenderScale * scale);
+        int height = (int)Math.Round(PetSpriteCatalog.AtlasCellHeight * PetSpriteCatalog.RenderScale * scale);
+        return new(logicalPosition.X + (int)(PetLogicalGeometry.Width * scale / 2) - Scale(frame.BodyAnchorX, width, PetSpriteCatalog.AtlasCellWidth) - shake.X / 2,
+            logicalPosition.Y + (int)(PetLogicalGeometry.Height * scale) - Scale(frame.GroundAnchorY, height, PetSpriteCatalog.AtlasCellHeight) + Math.Min(0, shake.Y / 2), width, height);
     }
     public static Point? VisibleHead(Rectangle spriteBounds, PetFrameGeometry frame, Point areaScreenPosition, Rectangle visibleScreenBounds)
     {

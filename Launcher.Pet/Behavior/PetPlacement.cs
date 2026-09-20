@@ -7,13 +7,13 @@ internal static class PetPlacement
     internal static void Fit(PetState state, PetEnvironment environment)
     {
         float minimum = PetLogicalGeometry.EdgePadding;
-        float maximum = Math.Max(minimum, environment.AreaWidth - PetLogicalGeometry.Width - minimum);
-        float x = float.IsNaN(state.X) ? (environment.AreaWidth - PetLogicalGeometry.Width) / 2f : state.X;
+        float maximum = Math.Max(minimum, environment.AreaWidth - PetLogicalGeometry.Width * environment.Scale - minimum);
+        float x = float.IsNaN(state.X) ? (environment.AreaWidth - PetLogicalGeometry.Width * environment.Scale) / 2f : state.X;
         state.X = Math.Clamp(x, minimum, maximum);
     }
 
     internal static Point LogicalPosition(PetState state, PetEnvironment environment)
     {
-        return new((int)Math.Round(float.IsNaN(state.X) ? 0 : state.X), environment.PetZoneTopY - (int)Math.Round(state.JumpLift));
+        return new((int)Math.Round(float.IsNaN(state.X) ? 0 : state.X), environment.PetZoneTopY + (int)Math.Round(PetLogicalGeometry.Height * (1 - environment.Scale) - state.JumpLift));
     }
 }

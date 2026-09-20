@@ -21,6 +21,11 @@ internal class TransparentOverlayWindow : Form
         TopMost = true;
     }
 
+    internal void RaiseWithoutActivation()
+    {
+        if (Visible) SetWindowPos(Handle, new IntPtr(-1), 0, 0, 0, 0, 0x0013);
+    }
+
     protected override bool ShowWithoutActivation => true;
 
     protected override CreateParams CreateParams

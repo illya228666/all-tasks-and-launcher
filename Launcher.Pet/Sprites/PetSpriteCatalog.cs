@@ -22,8 +22,15 @@ public static class PetSpriteCatalog
         new PetFrameGeometry[] { new(33, 200, new(33, 51), new(0, 8, 105, 86)), new(48, 200, new(48, 47), new(0, 3, 108, 89)), new(45, 200, new(45, 47), new(0, 2, 105, 89)), new(43, 200, new(43, 45), new(0, 0, 105, 90)), new(43, 200, new(43, 46), new(0, 1, 104, 90)), new(47, 200, new(47, 48), new(0, 4, 111, 88)), new(53, 200, new(53, 50), new(0, 7, 114, 87)), new(52, 200, new(52, 54), new(0, 12, 112, 85)) },
         new PetFrameGeometry[] { new(22, 200, new(22, 45), new(0, 0, 100, 90)), new(33, 200, new(33, 51), new(0, 8, 111, 86)), new(20, 200, new(20, 55), new(0, 13, 95, 84)), new(22, 200, new(22, 54), new(0, 12, 100, 85)), new(18, 200, new(18, 54), new(0, 11, 95, 85)), new(11, 200, new(11, 54), new(0, 12, 86, 85)), new(10, 200, new(10, 54), new(0, 12, 85, 85)), new(9, 200, new(9, 54), new(0, 12, 89, 85)) },
     };
-    public static PetFrameGeometry GetFrameGeometry(int row, int frame) => FramesByRow[row][frame];
-    public static int GetFrameCount(int row) => FramesByRow[row].Length;
+    private static readonly PetFrameGeometry[] ClimbFrames =
+    {
+        new(78, 200, new(83, 51), new(43, 12, 75, 73)),
+        new(78, 200, new(87, 52), new(48, 12, 75, 73)),
+        new(78, 200, new(86, 52), new(47, 12, 75, 73)),
+        new(78, 200, new(103, 60), new(65, 23, 78, 73))
+    };
+    public static PetFrameGeometry GetFrameGeometry(int row, int frame) => row == 11 ? ClimbFrames[frame] : FramesByRow[row][frame];
+    public static int GetFrameCount(int row) => row == 11 ? 4 : FramesByRow[row].Length;
     public static Rectangle GetSourceRectangle(int row, int frame) =>
         new(frame * AtlasCellWidth, row * AtlasCellHeight, AtlasCellWidth, AtlasCellHeight);
     public static int RequiredRenderAreaHeight => Math.Max(PetLogicalGeometry.Height,

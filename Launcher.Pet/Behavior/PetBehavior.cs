@@ -75,7 +75,7 @@ internal sealed class PetBehavior
             Change(PetMode.Idle, nowMs, speech);
         }
 
-        Point? pickup = hat.PickupPoint(environment.Surfaces, environment.PickupSurfaceIdentity);
+        Point? pickup = environment.Ruins is null ? hat.PickupPoint(environment.Surfaces, environment.PickupSurfaceIdentity) : null;
         if (_state.Mode is PetMode.RetrievingHat or PetMode.PuttingOnHat)
         {
             if (pickup is null && !hat.Attached)
@@ -123,7 +123,7 @@ internal sealed class PetBehavior
 
         if (_state.Mode == PetMode.Looking)
             Change(PetMode.Idle, nowMs, speech);
-        bool jumpDue = nowMs >= _jumpAtMs, walkDue = nowMs >= _walkAtMs;
+        bool jumpDue = environment.Ruins is null && nowMs >= _jumpAtMs, walkDue = environment.Ruins is null && nowMs >= _walkAtMs;
         speech.Update(nowMs, _state.Mode is PetMode.Idle or PetMode.Waving, headVisible, jumpDue || walkDue);
         if (_state.Mode == PetMode.Jumping)
         {
@@ -145,13 +145,13 @@ internal sealed class PetBehavior
         }
         else
         {
-            if (!speech.IsSpeaking && jumpDue)
+            if (environment.Ruins is null && !speech.IsSpeaking && jumpDue)
             {
                 PetJump.Prepare(_state, environment);
                 Change(PetMode.Jumping, nowMs, speech);
                 PetJump.Update(_state, nowMs);
             }
-            else if (!speech.IsSpeaking && walkDue)
+            else if (environment.Ruins is null && !speech.IsSpeaking && walkDue)
             {
                 if (PetWalk.Prepare(_state, environment, _random))
                 {

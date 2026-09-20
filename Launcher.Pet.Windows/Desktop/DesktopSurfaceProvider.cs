@@ -12,12 +12,21 @@ internal sealed class DesktopSurfaceProvider
     private const int CloakedAttribute = 14;
     private readonly DesktopIconSurfaceProvider _desktopIconProvider = new();
     private readonly Func<Rectangle?> _getPetGround;
+    private List<DesktopSurface> _windows = new();
+    private long _windowsAt;
+    private IntPtr _excluded;
     internal DesktopSurfaceProvider(Func<Rectangle?> getPetGround) => _getPetGround = getPetGround;
     private DesktopSurface? GetPetGround() => _getPetGround() is Rectangle bounds ? new DesktopSurface(bounds, new DesktopSurfaceIdentity(DesktopSurfaceType.PetGround, IntPtr.Zero)) : null;
     internal IReadOnlyList<DesktopSurface> GetSurfaces(IntPtr excludedWindow, bool includeDesktop)
     {
-        List<DesktopSurface> windows = includeDesktop ? EnumerateWindows(excludedWindow) : new();
-        var surfaces = new List<DesktopSurface>(windows);
+        long now = Environment.TickCount64;
+        if (includeDesktop && (now >= _windowsAt || _excluded != excludedWindow))
+        {
+            _windows = EnumerateWindows(excludedWindow);
+            _windowsAt = now + 100;
+            _excluded = excludedWindow;
+        }
+        var surfaces = includeDesktop ? new List<DesktopSurface>(_windows) : new List<DesktopSurface>();
         if (GetPetGround() is DesktopSurface ground)
             surfaces.Add(ground);
         if (!includeDesktop)

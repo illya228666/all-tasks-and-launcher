@@ -4,5 +4,6 @@ internal enum DesktopSurfaceType
     Window,
     DesktopIcon,
     Taskbar,
-    PetGround
+    PetGround,
+    Ruin
 }
