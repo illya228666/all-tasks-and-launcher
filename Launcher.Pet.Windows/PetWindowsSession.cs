@@ -25,6 +25,10 @@ public sealed class PetWindowsSession : IDisposable
     private readonly HatCollisionProfile _hatCollision = new(new Size(HatGeometry.Width, HatGeometry.Height));
     private HatFrameCache? _hatFrames;
     private HatWindow? _hat;
+    private PetWindow? _desktopPet;
+    private string? _monitor;
+    private Rectangle _desktopBounds;
+    private Point _lastPetScreenPosition;
     private SpeechBubbleWindow? _speech;
     private HatCollisionDebugWindow? _debug;
     private PetColors _colors = new(Color.White, Color.White, Color.Black, Color.Gray);
@@ -44,13 +48,15 @@ public sealed class PetWindowsSession : IDisposable
             _images = new();
             _drawing = new(area, _images);
             _shake = new(window);
-            _surfaces = new(() => area.GroundScreenBounds(window));
+            _surfaces = new(() => Outside ? null : area.GroundScreenBounds(window));
             _area.MouseDown += AreaMouseDown;
+            _window.Resize += WindowResize;
             _timer.Tick += Tick;
         }
         catch
         {
             _area.MouseDown -= AreaMouseDown;
+            _window.Resize -= WindowResize;
             _timer.Tick -= Tick;
             _drawing?.Dispose();
             _images?.Dispose();
@@ -92,6 +98,7 @@ public sealed class PetWindowsSession : IDisposable
         _speech?.Hide();
         _debug?.Hide();
         _hat?.SetInteractionEnabled(false);
+        _desktopPet?.Hide();
     }
 
     public bool TryStartEarthquake()
@@ -105,6 +112,40 @@ public sealed class PetWindowsSession : IDisposable
         return started;
     }
 
+    private bool Outside => _world.Location != PetLocation.Launcher;
+
+    private void WindowResize(object? sender, EventArgs args)
+    {
+        if (!_running || _disposed || Outside || _window.WindowState != FormWindowState.Minimized)
+            return;
+        if (!_world.LeaveLauncher(Environment.TickCount64))
+            return;
+        _version++;
+        _monitor = Screen.FromPoint(_lastPetScreenPosition).DeviceName;
+        _drawing.Enabled = false;
+        _area.Invalidate();
+        _shake.Stop();
+        _speech?.Hide();
+    }
+
+    private PetEnvironment ReadEnvironment(IReadOnlyList<HatSurface> surfaces)
+    {
+        if (!Outside)
+            return _area.ReadEnvironment(_window, _cursor, surfaces);
+        Screen screen = Screen.AllScreens.FirstOrDefault(item => item.DeviceName == _monitor)
+            ?? Screen.PrimaryScreen ?? Screen.AllScreens[0];
+        _monitor = screen.DeviceName;
+        _desktopBounds = screen.WorkingArea;
+        return new(_desktopBounds.Location, _desktopBounds.Width,
+            _desktopBounds.Height - PetLogicalGeometry.Height, _desktopBounds.Width,
+            screen.Bounds, _world.IsHatDragging, _cursor,
+            Array.Empty<Rectangle>(), surfaces, $"{DesktopSurfaceType.Taskbar}:{IntPtr.Zero}:{screen.DeviceName}");
+    }
+
+    private bool IsHeadAtScreen(Point point) => Outside
+        ? _desktopPet?.IsHeadAtScreen(point) == true
+        : _drawing.IsHeadAtScreen(point, _area.VisibleScreenBounds(_window));
+
     private void Tick(object? sender, EventArgs args)
     {
         if (!_running || _disposed || _updating || !_area.IsHandleCreated)
@@ -114,7 +155,7 @@ public sealed class PetWindowsSession : IDisposable
         {
             _hat?.UpdateDrag();
             int version = _version;
-            IReadOnlyList<DesktopSurface> desktop = _surfaces.GetSurfaces(_hat?.WindowHandle ?? IntPtr.Zero, _world.Scene is { HatAttached: false } || _showCollisions);
+            IReadOnlyList<DesktopSurface> desktop = _surfaces.GetSurfaces(_hat?.WindowHandle ?? IntPtr.Zero, Outside || _world.Scene is { HatAttached: false } || _showCollisions);
             // RU: COM может обработать закрытие или мышь. DE: COM kann Schliessen/Mauseingaben verarbeiten.
             if (!_running || _disposed || version != _version)
                 return;
@@ -126,9 +167,24 @@ public sealed class PetWindowsSession : IDisposable
             }
 
             var surfaces = desktop.Select(surface => new HatSurface($"{surface.Identity.Type}:{surface.Identity.WindowHandle}:{surface.Identity.ItemKey}", (HatSurfaceKind)surface.Type, surface.Bounds)).ToArray();
-            PetScene scene = _world.Update(nowMs, _area.ReadEnvironment(_window, _cursor, surfaces));
-            _drawing.Display(scene);
-            _shake.Apply(scene.Mode == PetMode.Earthquake, scene.WindowShake);
+            PetEnvironment environment = ReadEnvironment(surfaces);
+            PetScene scene = _world.Update(nowMs, environment);
+            if (Outside)
+            {
+                if (_desktopPet is null)
+                {
+                    _desktopPet = new(_images);
+                    _desktopPet.MouseDown += AreaMouseDown;
+                }
+                _desktopPet.Display(scene, environment.AreaScreenPosition);
+            }
+            else
+            {
+                _lastPetScreenPosition = new(environment.AreaScreenPosition.X + scene.SpriteBounds.X + scene.SpriteBounds.Width / 2,
+                    environment.AreaScreenPosition.Y + scene.SpriteBounds.Y + scene.SpriteBounds.Height / 2);
+                _drawing.Display(scene);
+            }
+            _shake.Apply(!Outside && scene.Mode == PetMode.Earthquake, scene.WindowShake);
             if (!_running || _disposed || version != _version)
                 return;
             DisplayHat(scene, version);
@@ -211,17 +267,17 @@ public sealed class PetWindowsSession : IDisposable
 
     private void AreaMouseDown(object? sender, MouseEventArgs args)
     {
-        if (!_running || args.Button != MouseButtons.Left)
+        if (!_running || (Outside && ReferenceEquals(sender, _area)) || _world.Location == PetLocation.LeavingLauncher || args.Button != MouseButtons.Left)
             return;
         Point cursor = Cursor.Position;
         Rectangle visibleBounds = _area.VisibleScreenBounds(_window);
-        if (args.Clicks >= 2 && _drawing.IsPetAtScreen(cursor, visibleBounds))
+        if (args.Clicks >= 2 && (Outside || _drawing.IsPetAtScreen(cursor, visibleBounds)))
         {
             TryStartEarthquake();
             return;
         }
 
-        if (_world.Scene is not { HatAttached: true } || !_drawing.IsHeadAtScreen(cursor, visibleBounds))
+        if (_world.Scene is not { HatAttached: true } || !IsHeadAtScreen(cursor))
             return;
         try
         {
@@ -252,7 +308,7 @@ public sealed class PetWindowsSession : IDisposable
     {
         _version++;
         _world.MoveHat(position);
-        _world.DropHat(_drawing.IsHeadAtScreen(position, _area.VisibleScreenBounds(_window)));
+        _world.DropHat(IsHeadAtScreen(position));
     }
 
     private void DisposeHat()
@@ -275,9 +331,15 @@ public sealed class PetWindowsSession : IDisposable
         _timer.Tick -= Tick;
         _timer.Dispose();
         _area.MouseDown -= AreaMouseDown;
+        _window.Resize -= WindowResize;
         DisposeHat();
         _speech?.Dispose();
         _debug?.Dispose();
+        if (_desktopPet is not null)
+        {
+            _desktopPet.MouseDown -= AreaMouseDown;
+            _desktopPet.Dispose();
+        }
         _drawing.Dispose();
         _hatFrames?.Dispose();
         _images.Dispose();

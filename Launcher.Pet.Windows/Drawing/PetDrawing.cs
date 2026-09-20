@@ -8,6 +8,7 @@ internal sealed class PetDrawing : IDisposable
     private readonly PetArea _area;
     private readonly PetImages _images;
     private PetScene? _scene;
+    internal bool Enabled { get; set; } = true;
     private PetColors _colors = new(Color.White, Color.White, Color.Black, Color.Gray);
     internal PetDrawing(PetArea area, PetImages images)
     {
@@ -35,7 +36,7 @@ internal sealed class PetDrawing : IDisposable
     {
         using var pen = new Pen(_colors.Border);
         args.Graphics.DrawRectangle(pen, 0, _area.PetZoneTopY, Math.Max(1, _area.ClientSize.Width - 1), PetLogicalGeometry.Height - 1);
-        if (_scene is null)
+        if (!Enabled || _scene is null)
             return;
         args.Graphics.DrawImage(_scene.HatAttached ? _images.WithHat : _images.WithoutHat, _scene.SpriteBounds, PetSpriteCatalog.GetSourceRectangle(_scene.Row, _scene.Frame), GraphicsUnit.Pixel);
     }

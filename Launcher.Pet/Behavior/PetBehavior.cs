@@ -75,7 +75,7 @@ internal sealed class PetBehavior
             Change(PetMode.Idle, nowMs, speech);
         }
 
-        Point? pickup = hat.PickupPoint(environment.Surfaces);
+        Point? pickup = hat.PickupPoint(environment.Surfaces, environment.PickupSurfaceIdentity);
         if (_state.Mode is PetMode.RetrievingHat or PetMode.PuttingOnHat)
         {
             if (pickup is null && !hat.Attached)
@@ -113,7 +113,7 @@ internal sealed class PetBehavior
             return;
         }
 
-        if (environment.CursorInsideWindow && !(_state.Mode == PetMode.Jumping && pickup is not null))
+        if (environment.CanTrackCursor && !(_state.Mode == PetMode.Jumping && pickup is not null))
         {
             if (_state.Mode != PetMode.Looking)
                 Change(PetMode.Looking, nowMs, speech);

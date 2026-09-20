@@ -15,6 +15,21 @@ public sealed class PetWorld
     private PetEnvironment? _environment;
     private long _lastMs;
     private bool _running;
+    private PetDeparture? _departure;
+    public PetLocation Location { get; private set; }
+    public bool IsHatDragging => _hat.Scene.Mode == HatMode.Dragging;
+
+    public bool LeaveLauncher(long nowMs)
+    {
+        if (!_running || Location != PetLocation.Launcher || _environment is null)
+            return false;
+        Point position = PetPlacement.LogicalPosition(_state, _environment);
+        position.Offset(_environment.AreaScreenPosition);
+        _departure = new(position);
+        Location = PetLocation.LeavingLauncher;
+        _behavior.Reset(nowMs, _speech);
+        return true;
+    }
     public PetScene? Scene { get; private set; }
 
     public PetWorld(Random random)
@@ -49,9 +64,21 @@ public sealed class PetWorld
         _environment = environment;
         if (_running)
         {
-            PetPlacement.Fit(_state, environment);
             _hat.Update(elapsed, environment.Surfaces);
-            _behavior.Update(nowMs, elapsed, environment, _hat, _speech, GetVisibleHead(environment, GetSpriteBounds(environment, _behavior.Shake)) is not null);
+            if (_departure is not null)
+            {
+                if (_departure.Update(_state, environment, elapsed))
+                {
+                    _departure = null;
+                    Location = PetLocation.Desktop;
+                    _behavior.Reset(nowMs, _speech);
+                }
+            }
+            else
+            {
+                PetPlacement.Fit(_state, environment);
+                _behavior.Update(nowMs, elapsed, environment, _hat, _speech, GetVisibleHead(environment, GetSpriteBounds(environment, _behavior.Shake)) is not null);
+            }
         }
 
         return Scene = CreateScene(environment);
@@ -59,14 +86,14 @@ public sealed class PetWorld
 
     public bool TryStartEarthquake(long nowMs)
     {
-        bool started = _running && _behavior.Earthquake(nowMs, Scene?.HeadScreenPosition, _hat, _speech);
+        bool started = _running && Location != PetLocation.LeavingLauncher && _behavior.Earthquake(nowMs, Scene?.HeadScreenPosition, _hat, _speech);
         RefreshScene();
         return started;
     }
 
     public bool BeginHatDrag(Point cursorScreenPosition)
     {
-        if (!_running || _state.Mode == PetMode.Earthquake)
+        if (!_running || (Location == PetLocation.LeavingLauncher && _hat.Attached) || _state.Mode == PetMode.Earthquake)
             return false;
         _hat.BeginDrag(cursorScreenPosition);
         RefreshScene();

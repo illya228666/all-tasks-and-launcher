@@ -55,11 +55,11 @@ internal sealed class HatWorld
         _state.ResolveInitialOverlap = true;
     }
 
-    internal Point? PickupPoint(IReadOnlyList<HatSurface> surfaces)
+    internal Point? PickupPoint(IReadOnlyList<HatSurface> surfaces, string? pickupSurfaceIdentity)
     {
         if (_state.Mode != HatMode.Resting || _state.Support is not HatSupport support)
             return null;
-        HatSurface? ground = surfaces.FirstOrDefault(surface => surface.Identity == support.Identity && surface.Kind == HatSurfaceKind.PetGround);
+        HatSurface? ground = surfaces.FirstOrDefault(surface => surface.Identity == support.Identity && surface.Identity == pickupSurfaceIdentity);
         if (ground is null)
             return null;
         float x = ground.Bounds.Left + support.RelativeX;

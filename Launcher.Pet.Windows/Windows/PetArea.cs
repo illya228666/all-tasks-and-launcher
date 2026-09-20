@@ -45,5 +45,5 @@ public sealed class PetArea : FlowLayoutPanel
         return ground.Width > 0 && ground.Height > 0 ? ground : null;
     }
 
-    internal PetEnvironment ReadEnvironment(Form window, Point cursor, IReadOnlyList<HatSurface> surfaces) => new(IsHandleCreated ? PointToScreen(Point.Empty) : Point.Empty, ClientSize.Width, PetZoneTopY, window.ClientSize.Width, VisibleScreenBounds(window), window.Visible && window.WindowState != FormWindowState.Minimized && window.RectangleToScreen(window.ClientRectangle).Contains(cursor), cursor, ObstaclesLocal, surfaces);
+    internal PetEnvironment ReadEnvironment(Form window, Point cursor, IReadOnlyList<HatSurface> surfaces) => new(IsHandleCreated ? PointToScreen(Point.Empty) : Point.Empty, ClientSize.Width, PetZoneTopY, window.ClientSize.Width, VisibleScreenBounds(window), window.Visible && window.WindowState != FormWindowState.Minimized && window.RectangleToScreen(window.ClientRectangle).Contains(cursor), cursor, ObstaclesLocal, surfaces, surfaces.FirstOrDefault(surface => surface.Kind == HatSurfaceKind.PetGround)?.Identity);
 }
