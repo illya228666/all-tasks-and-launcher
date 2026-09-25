@@ -23,6 +23,13 @@ public sealed class PetWorld
     public PetLocation Location { get; private set; }
     public bool IsHatDragging => _hat.Scene.Mode == HatMode.Dragging;
     public bool IsPetDragging => Location == PetLocation.Desktop && _explorer.IsDragging;
+    public IReadOnlyList<RuinLink> PlannedRoute => Location == PetLocation.Desktop && _environment?.Ruins is RuinScene scene
+        ? _explorer.PlannedRoute(scene, _environment.AwakeningSeconds) : Array.Empty<RuinLink>();
+    public Point? PlannedRouteStart => Location == PetLocation.Desktop && _environment is not null
+        ? new(_environment.AreaScreenPosition.X + (int)MathF.Round(_state.X + PetLogicalGeometry.Width * _environment.Scale / 2),
+            _environment.AreaScreenPosition.Y + (int)MathF.Round(_explorer.FootY)) : null;
+    public Point? PlannedHatTarget => Location == PetLocation.Desktop && _explorer.SeekingHat && _environment is not null
+        ? _hat.RestingPoint(_environment.Surfaces) : null;
 
     public bool LeaveLauncher(long nowMs)
     {

@@ -83,24 +83,24 @@ internal sealed class RuinRenderer : IDisposable
         var tile = _tiles[decoration.Tile];
         Rectangle pixels = Rectangle.Round(destination);
         if (pixels.Width <= 0 || pixels.Height <= 0) return;
-        if (decoration.Tile == 4)
+        if (decoration.Tile == 4 && decoration.RootBottom is PointF bottom && decoration.RootTop is PointF top)
         {
-            var saved = g.Save();
-            if (decoration.RootBottom is PointF bottom && decoration.RootTop is PointF top)
-            {
-                float dx = bottom.X - top.X, dy = bottom.Y - top.Y;
-                float length = MathF.Sqrt(dx * dx + dy * dy);
-                g.TranslateTransform(top.X, top.Y);
-                g.RotateTransform(-MathF.Atan2(dx, dy) * 180 / MathF.PI);
-                destination = new(-12, 0, 24, length);
-            }
-            float revealHeight = destination.Height * ease;
-            g.SetClip(new RectangleF(destination.Left - 1, destination.Bottom - revealHeight, destination.Width + 2, revealHeight), CombineMode.Intersect);
-            float segmentHeight = destination.Width * tile.Height / tile.Width;
+            float segmentHeight = 24f * tile.Height / tile.Width - 3;
             int index = 0;
-            for (float y = destination.Top; y < destination.Bottom; y += segmentHeight - 3)
-                DrawTile(g, tile, Rectangle.Round(new RectangleF(destination.Left, y, destination.Width, segmentHeight)), decoration.Mirrored ^ index++ % 2 == 0, attributes);
-            g.Restore(saved);
+            for (float y = bottom.Y - (bottom.Y - top.Y) * ease; y < bottom.Y;)
+            {
+                float nextY = Math.Min(bottom.Y, y + segmentHeight);
+                float x = RuinMotion.ClimbX(top, bottom, y);
+                float dx = RuinMotion.ClimbX(top, bottom, nextY) - x;
+                float dy = nextY - y;
+                var saved = g.Save();
+                g.TranslateTransform(x, y);
+                g.RotateTransform(-MathF.Atan2(dx, dy) * 180 / MathF.PI);
+                DrawTile(g, tile, new(-12, 0, 24, Math.Max(1, (int)Math.Ceiling(MathF.Sqrt(dx * dx + dy * dy) + 3))),
+                    decoration.Mirrored ^ index++ % 2 == 0, attributes);
+                g.Restore(saved);
+                y = nextY;
+            }
         }
         else DrawTile(g, tile, pixels, decoration.Mirrored, attributes);
     }

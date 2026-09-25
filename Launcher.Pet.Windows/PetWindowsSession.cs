@@ -19,6 +19,7 @@ public sealed class PetWindowsSession : IDisposable
     private readonly PetDrawing _drawing;
     private readonly WindowShake _shake;
     private readonly DesktopSurfaceProvider _surfaces;
+    private readonly DesktopWallpaperSession _wallpaper;
     private readonly System.Windows.Forms.Timer _timer = new()
     {
         Interval = TickIntervalMs
@@ -29,6 +30,7 @@ public sealed class PetWindowsSession : IDisposable
     private RuinsWindow? _ruinsWindow;
     private RuinBuilder? _ruinBuilder;
     private RuinScene? _ruins;
+    private RuinScene? _plainDesktop;
     private IReadOnlyList<DesktopSurface> _lastDesktop = Array.Empty<DesktopSurface>();
     private IReadOnlyList<DesktopSurface>? _desktopSnapshot;
     private long? _awakeningAt;
@@ -40,17 +42,18 @@ public sealed class PetWindowsSession : IDisposable
     private SpeechBubbleWindow? _speech;
     private HatCollisionDebugWindow? _debug;
     private PetColors _colors = new(Color.White, Color.White, Color.Black, Color.Gray);
-    private bool _running, _disposed, _updating, _showCollisions;
+    private bool _running, _disposed, _updating, _showCollisions, _ruinsActive;
     private int _version;
     private long _cursorAtMs, _debugAtMs;
     private Point _cursor;
     private string? _phrase;
     public event Action<string>? Problem;
-    public PetWindowsSession(Form window, PetArea area, PetWorld world)
+    public PetWindowsSession(Form window, PetArea area, PetWorld world, DesktopWallpaperSession wallpaper)
     {
         _window = window;
         _area = area;
         _world = world;
+        _wallpaper = wallpaper;
         try
         {
             _images = new();
@@ -108,6 +111,8 @@ public sealed class PetWindowsSession : IDisposable
         _hat?.SetInteractionEnabled(false);
         _desktopPet?.Hide();
         _ruinsWindow?.Hide();
+        _ruinsActive = false;
+        if (_wallpaper.Restore() is string wallpaperError) Problem?.Invoke(wallpaperError);
     }
 
     public bool TryStartEarthquake()
@@ -125,17 +130,47 @@ public sealed class PetWindowsSession : IDisposable
 
     private void WindowResize(object? sender, EventArgs args)
     {
-        if (!_running || _disposed || Outside || _window.WindowState != FormWindowState.Minimized)
+        if (!_running || _disposed)
             return;
-        if (!_world.LeaveLauncher(Environment.TickCount64))
+        if (_window.WindowState != FormWindowState.Minimized)
+        {
+            if (_ruinsActive) DeactivateRuins();
             return;
+        }
+        if (!_ruinsActive)
+        {
+            if (!Outside && !_world.LeaveLauncher(Environment.TickCount64)) return;
+            ActivateRuins();
+        }
         _version++;
         _monitor = Screen.FromPoint(_lastPetScreenPosition).DeviceName;
-        _desktopSnapshot = _lastDesktop.ToArray();
         _drawing.Enabled = false;
         _area.Invalidate();
         _shake.Stop();
         _speech?.Hide();
+    }
+
+    private void ActivateRuins()
+    {
+        _ruinsActive = true;
+        _desktopSnapshot = _lastDesktop.ToArray();
+        _ruinBuilder = null;
+        _ruins = null;
+        _ruinsMonitor = null;
+        _awakeningAt = _world.HasLanded ? Environment.TickCount64 : null;
+        if (_wallpaper.Activate() is string error) Problem?.Invoke(error);
+    }
+
+    private void DeactivateRuins()
+    {
+        _version++;
+        _ruinsActive = false;
+        _ruinsWindow?.Hide();
+        _ruinBuilder = null;
+        _ruins = null;
+        _desktopSnapshot = null;
+        _awakeningAt = null;
+        if (_wallpaper.Restore() is string error) Problem?.Invoke(error);
     }
 
     private PetEnvironment ReadEnvironment(IReadOnlyList<HatSurface> surfaces)
@@ -146,7 +181,7 @@ public sealed class PetWindowsSession : IDisposable
             ?? Screen.PrimaryScreen ?? Screen.AllScreens[0];
         _monitor = screen.DeviceName;
         _desktopBounds = screen.WorkingArea;
-        if (_ruinBuilder is null)
+        if (_ruinsActive && _ruinBuilder is null)
         {
             Rectangle Local(Rectangle bounds)
             {
@@ -161,28 +196,35 @@ public sealed class PetWindowsSession : IDisposable
             _ruinBuilder = new(_desktopBounds.Size, seed);
             _awakeningPoint = new(Math.Clamp(_lastPetScreenPosition.X - _desktopBounds.X, 0, _desktopBounds.Width), _desktopBounds.Height);
         }
-        if (_ruins is null || _ruins.Size != _desktopBounds.Size || _ruinsMonitor != screen.DeviceName)
+        if (_ruinsActive && (_ruins is null || _ruins.Size != _desktopBounds.Size || _ruinsMonitor != screen.DeviceName))
         {
-            _ruins = _ruinBuilder.Build(_desktopBounds.Size, _awakeningPoint);
+            _ruins = _ruinBuilder!.Build(_desktopBounds.Size, _awakeningPoint);
             _ruinsMonitor = screen.DeviceName;
         }
-        float seconds = _awakeningAt is long started ? Math.Max(0, Environment.TickCount64 - started) / 1000f : 0;
-        var combined = ComposeHatSurfaces(surfaces, _ruins, _desktopBounds.Location, seconds, _world.HasLanded);
+        if (_plainDesktop is null || _plainDesktop.Size != _desktopBounds.Size)
+            _plainDesktop = new(_desktopBounds.Size, new[] { new RuinPlatform("ruin:floor", 0, _desktopBounds.Width, _desktopBounds.Height, 0) },
+                Array.Empty<RuinLink>(), Array.Empty<RuinBridge>(), Array.Empty<RuinDecoration>(), 0);
+        RuinScene activeScene = _ruinsActive ? _ruins! : _plainDesktop;
+        float seconds = _ruinsActive && _awakeningAt is long started ? Math.Max(0, Environment.TickCount64 - started) / 1000f : 0;
+        var combined = ComposeHatSurfaces(surfaces, activeScene, _desktopBounds.Location, seconds, _world.HasLanded);
         return new(_desktopBounds.Location, _desktopBounds.Width,
             _desktopBounds.Height - PetLogicalGeometry.Height, _desktopBounds.Width,
             screen.Bounds, _world.IsHatDragging, _cursor,
-            Array.Empty<Rectangle>(), combined, "ruin:floor", _world.RenderScale, _ruins, seconds);
+            Array.Empty<Rectangle>(), combined, "ruin:floor", _world.RenderScale, activeScene, seconds);
     }
 
     private static IReadOnlyList<HatSurface> ComposeHatSurfaces(IReadOnlyList<HatSurface> desktop, RuinScene scene, Point origin, float seconds, bool landed)
     {
         var platforms = scene.Platforms.Where(p => p.Id == "ruin:floor" || landed && seconds >= p.RevealAt + 0.85f)
             .Select(p => new HatSurface(p.Id, HatSurfaceKind.Ruin, new Rectangle(origin.X + (int)p.Left, origin.Y + (int)p.Y, (int)(p.Right - p.Left), 1))).ToArray();
+        var bridges = scene.Bridges.Where(b => landed && seconds >= b.RevealAt + 0.85f)
+            .Select(b => new HatSurface(b.Id, HatSurfaceKind.Ruin, new Rectangle(origin.X + (int)b.Left, origin.Y + (int)b.Y, (int)(b.Right - b.Left), 1)));
         var result = new List<HatSurface>(platforms);
+        result.AddRange(bridges);
         foreach (var surface in desktop)
         {
             var pieces = new List<Rectangle> { surface.Bounds };
-            foreach (var platform in platforms.Where(p => Math.Abs(p.Bounds.Top - surface.Bounds.Top) <= 1))
+            foreach (var platform in result.Where(p => p.Kind == HatSurfaceKind.Ruin && Math.Abs(p.Bounds.Top - surface.Bounds.Top) <= 1))
             {
                 var next = new List<Rectangle>();
                 foreach (var piece in pieces)
@@ -235,15 +277,15 @@ public sealed class PetWindowsSession : IDisposable
             PetScene scene = _world.Update(nowMs, environment);
             if (Outside)
             {
-                if (_world.HasLanded && _awakeningAt is null)
+                if (_ruinsActive && _world.HasLanded && _awakeningAt is null)
                 {
                     _awakeningAt = nowMs;
                     _awakeningPoint = new(scene.SpriteBounds.Left + scene.SpriteBounds.Width / 2, _desktopBounds.Height);
                 }
-                if (_awakeningAt is long start && _ruins is not null)
+                if (_ruinsActive && _awakeningAt is long start && _ruins is not null)
                 {
                     _ruinsWindow ??= new();
-                    if (_ruinsWindow.Display(_ruins, _desktopBounds.Location, _awakeningPoint, (nowMs - start) / 1000f, nowMs))
+                    if (_ruinsWindow.Display(_ruins, _desktopBounds.Location, _awakeningPoint, (nowMs - start) / 1000f, nowMs) && !_showCollisions)
                         _ruinsWindow.RaiseWithoutActivation();
                 }
                 if (_desktopPet is null)
@@ -252,6 +294,8 @@ public sealed class PetWindowsSession : IDisposable
                     _desktopPet.MouseDown += AreaMouseDown;
                 }
                 _desktopPet.Display(scene, environment.AreaScreenPosition);
+                _lastPetScreenPosition = new(environment.AreaScreenPosition.X + scene.SpriteBounds.X + scene.SpriteBounds.Width / 2,
+                    environment.AreaScreenPosition.Y + scene.SpriteBounds.Y + scene.SpriteBounds.Height / 2);
             }
             else
             {
@@ -266,7 +310,7 @@ public sealed class PetWindowsSession : IDisposable
             if (!_running || _disposed || version != _version)
                 return;
             DisplaySpeech(scene);
-            if (Outside)
+            if (Outside && !_showCollisions)
             {
                 _desktopPet?.RaiseWithoutActivation();
                 _hat?.RaiseWithoutActivation();
@@ -281,7 +325,9 @@ public sealed class PetWindowsSession : IDisposable
                 var hatSize = new Size((int)Math.Round(HatGeometry.Width * scene.Hat.Scale), (int)Math.Round(HatGeometry.Height * scene.Hat.Scale));
                 var collision = new HatCollisionProfile(hatSize);
                 var debugSurfaces = environment.Surfaces.Select(s => new DesktopSurface(s.Bounds, new DesktopSurfaceIdentity((DesktopSurfaceType)s.Kind, IntPtr.Zero, s.Identity))).ToArray();
-                _debug.UpdateDebug(debugSurfaces, scene.HatAttached ? null : scene.Hat.ScreenPosition, hatSize, collision.Segments, collision.Connectors);
+                _debug.UpdateDebug(debugSurfaces, scene.HatAttached ? null : scene.Hat.ScreenPosition, hatSize,
+                    collision.Segments, collision.Connectors, environment.Ruins, environment.AreaScreenPosition,
+                    _world.PlannedRoute, _world.PlannedRouteStart, _world.PlannedHatTarget);
             }
         }
         catch (Exception error) when (error is ExternalException or System.ComponentModel.Win32Exception)

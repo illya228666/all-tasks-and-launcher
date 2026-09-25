@@ -71,6 +71,8 @@ public sealed class RuinPreviewWindow : Form
             float seconds = _awakeAt < 0 ? 0 : (_now - _awakeAt) / 1000f;
             var surfaces = _ruins.Platforms.Where(p => p.Id == "ruin:floor" || _world.HasLanded && seconds >= p.RevealAt + 0.85f)
                 .Select(p => new HatSurface(p.Id, HatSurfaceKind.Ruin, new((int)p.Left, (int)p.Y, (int)(p.Right - p.Left), 1))).ToArray();
+            surfaces = surfaces.Concat(_ruins.Bridges.Where(b => _world.HasLanded && seconds >= b.RevealAt + 0.85f)
+                .Select(b => new HatSurface(b.Id, HatSurfaceKind.Ruin, new((int)b.Left, (int)b.Y, (int)(b.Right - b.Left), 1)))).ToArray();
             _pet = _world.Update(_now, new(Point.Empty, _worldSize.Width, _worldSize.Height - PetLogicalGeometry.Height, _worldSize.Width,
                 new(Point.Empty, _worldSize), _world.IsHatDragging, _cursor, Array.Empty<Rectangle>(), surfaces, "ruin:floor", _world.RenderScale, _ruins, seconds));
             if (_world.HasLanded && _awakeAt < 0) _awakeAt = _now;
@@ -103,7 +105,7 @@ public sealed class RuinPreviewWindow : Form
         if (_geometry)
         {
             using var edge = new Pen(Color.FromArgb(130, 138, 224, 205), 1);
-            foreach (var link in _ruins.Links.Where(l => l.Climb && string.CompareOrdinal(l.From, l.To) < 0))
+            foreach (var link in _ruins.Links.Where(l => l.Kind == RuinLinkKind.Climb && string.CompareOrdinal(l.From, l.To) < 0))
             {
                 var from = _ruins.Platforms.First(p => p.Id == link.From); var to = _ruins.Platforms.First(p => p.Id == link.To);
                 g.DrawLine(edge, link.X, from.Y, link.X, to.Y);
@@ -122,7 +124,7 @@ public sealed class RuinPreviewWindow : Form
                 g.DrawString(_pet.Speech[..Math.Min(_pet.VisibleLetters, _pet.Speech.Length)], Font, _light ? Brushes.DarkSlateGray : Brushes.WhiteSmoke, head.X + 35, head.Y - 22);
         }
         g.Restore(saved);
-        string status = $"layout {_scenario} / seed {_variation}   {_worldSize.Width}×{_worldSize.Height}   {_ruins.Platforms.Count - 1} islands   {_ruins.Links.Count(l => !l.Climb)} jump routes   {_pet?.Mode}  {_pet?.Row}:{_pet?.Frame}   {(_paused ? "PAUSED" : "LIVE")}";
+        string status = $"layout {_scenario} / seed {_variation}   {_worldSize.Width}×{_worldSize.Height}   {_ruins.Platforms.Count - 1} islands   {_ruins.Bridges.Count} bridges   {_pet?.Mode}  {_pet?.Row}:{_pet?.Frame}   {(_paused ? "PAUSED" : "LIVE")}";
         TextRenderer.DrawText(g, _lastError.Length > 0 ? _lastError : status, Font, new Rectangle(16, ClientSize.Height - 38, ClientSize.Width - 32, 34), _lastError.Length > 0 ? Color.Salmon : Color.Silver);
     }
     protected override void OnKeyDown(KeyEventArgs e)

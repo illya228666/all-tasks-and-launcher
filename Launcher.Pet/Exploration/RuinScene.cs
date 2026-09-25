@@ -6,15 +6,24 @@ public sealed record RuinPlatform(string Id, float Left, float Right, float Y, f
 {
     public float Center => (Left + Right) / 2;
 }
-public sealed record RuinLink(string From, string To, float X, bool Climb, float? EndX = null);
+public enum RuinLinkKind { Jump, Climb, Bridge }
+public sealed record RuinLink(string From, string To, float X, RuinLinkKind Kind, float? EndX = null);
+public sealed record RuinBridge(string Id, string From, string To, float Left, float Right, float Y, float RevealAt);
 public sealed record RuinDecoration(int Tile, RectangleF Bounds, float RevealAt, bool Mirrored = false, float Opacity = 1f, float Phase = 0, PointF? RootBottom = null, PointF? RootTop = null);
 public sealed record RuinScene(Size Size, IReadOnlyList<RuinPlatform> Platforms,
-    IReadOnlyList<RuinLink> Links, IReadOnlyList<RuinDecoration> Decorations, int Revision, int Variation = 0);
+    IReadOnlyList<RuinLink> Links, IReadOnlyList<RuinBridge> Bridges, IReadOnlyList<RuinDecoration> Decorations, int Revision, int Variation = 0);
 
 public static class RuinMotion
 {
     public const float Gravity = 900, JumpSpeed = 430, WalkSpeed = 90, ClimbSpeed = 75;
     public const float HalfBody = 24;
+    public static float ClimbX(PointF top, PointF bottom, float y)
+    {
+        float t = Math.Clamp((y - top.Y) / Math.Max(1, bottom.Y - top.Y), 0, 1);
+        float bend = Math.Clamp(18 + Math.Abs(bottom.X - top.X) * 0.15f, 18, 58);
+        float direction = (((int)(top.X + bottom.X + top.Y) / 90) & 1) == 0 ? 1 : -1;
+        return top.X + (bottom.X - top.X) * (t * t * (3 - 2 * t)) + direction * bend * MathF.Sin(MathF.PI * t);
+    }
     public static float LaunchSpeed(float fromY) => Math.Min(JumpSpeed, MathF.Sqrt(Math.Max(0, 2 * Gravity * (fromY - 110))));
     public static float FlightTime(float fromY, float toY)
     {
