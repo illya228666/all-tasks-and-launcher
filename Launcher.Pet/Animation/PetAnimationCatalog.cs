@@ -3,6 +3,7 @@ public static class PetAnimationCatalog
 {
     internal const int IdleRow = 0;
     internal const int ClimbRow = 11;
+    internal const int DragRow = 12;
     internal const int MoveRightRow = 1;
     internal const int MoveLeftRow = 2;
     internal const int WaveRow = 3;

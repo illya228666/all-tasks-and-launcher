@@ -211,6 +211,12 @@ public sealed class PetWindowsSession : IDisposable
         try
         {
             _hat?.UpdateDrag();
+            if (_world.IsPetDragging)
+            {
+                _world.MovePet(Cursor.Position);
+                if ((HatMouseApi.GetAsyncKeyState(0x01) & 0x8000) == 0)
+                    _world.DropPet(Environment.TickCount64);
+            }
             int version = _version;
             IReadOnlyList<DesktopSurface> desktop = _surfaces.GetSurfaces(_hat?.WindowHandle ?? IntPtr.Zero, true);
             // RU: COM может обработать закрытие или мышь. DE: COM kann Schliessen/Mauseingaben verarbeiten.
@@ -353,6 +359,16 @@ public sealed class PetWindowsSession : IDisposable
         if (args.Clicks >= 2 && (Outside || _drawing.IsPetAtScreen(cursor, visibleBounds)))
         {
             TryStartEarthquake();
+            return;
+        }
+
+        if (Outside && _desktopPet?.IsBodyAtScreen(cursor) == true)
+        {
+            if (_world.BeginPetDrag(cursor, Environment.TickCount64))
+            {
+                _version++;
+                _speech?.Hide();
+            }
             return;
         }
 

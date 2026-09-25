@@ -13,5 +13,7 @@ public enum PetMode
     PullingUp,
     Falling,
     Traversing,
-    Earthquake
+    Earthquake,
+    Dragging,
+    Recovering
 }

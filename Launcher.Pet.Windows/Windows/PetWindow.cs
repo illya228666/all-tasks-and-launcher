@@ -23,13 +23,19 @@ internal sealed class PetWindow : TransparentOverlayWindow
         ShowAt(new Point(origin.X + scene.SpriteBounds.X, origin.Y + scene.SpriteBounds.Y));
     }
 
-    internal bool IsHeadAtScreen(Point point)
+    internal bool IsHeadAtScreen(Point point) => TryGetOpaqueCell(point, out Point cell)
+        && PetSpriteCatalog.GetFrameGeometry(_scene!.Row, _scene.Frame).HeadBounds.Contains(cell);
+
+    internal bool IsBodyAtScreen(Point point) => TryGetOpaqueCell(point, out Point cell)
+        && !PetSpriteCatalog.GetFrameGeometry(_scene!.Row, _scene.Frame).HeadBounds.Contains(cell);
+
+    private bool TryGetOpaqueCell(Point point, out Point cell)
     {
+        cell = Point.Empty;
         if (_scene is null || !Visible || !Bounds.Contains(point))
             return false;
-        Point cell = PetSpriteLayout.MapDestinationToAtlasCell(point, Bounds);
+        cell = PetSpriteLayout.MapDestinationToAtlasCell(point, Bounds);
         Rectangle source = PetSpriteCatalog.GetSourceRectangle(_scene.Row, _scene.Frame);
-        return PetSpriteCatalog.GetFrameGeometry(_scene.Row, _scene.Frame).HeadBounds.Contains(cell)
-            && (_scene.HatAttached ? _images.WithHatMask : _images.WithoutHatMask).Contains(source.X + cell.X, source.Y + cell.Y);
+        return (_scene.HatAttached ? _images.WithHatMask : _images.WithoutHatMask).Contains(source.X + cell.X, source.Y + cell.Y);
     }
 }

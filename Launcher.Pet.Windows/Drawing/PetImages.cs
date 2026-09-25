@@ -21,8 +21,11 @@ internal sealed class PetImages : IDisposable
             using var withHat = Read("spritesheet_sumrak_hat.png");
             using var withoutHat = Read("spritesheet_sumrak_no_hat.png");
             ValidateAtlases(withHat, withoutHat);
-            WithHat = AddClimbing(withHat, true);
-            WithoutHat = AddClimbing(withoutHat, false);
+            using var withHatClimbing = AddClimbing(withHat, true);
+            using var withoutHatClimbing = AddClimbing(withoutHat, false);
+            using var drag = Read("sumrak_drag.png");
+            WithHat = AddDragFrames(withHatClimbing, drag, true);
+            WithoutHat = AddDragFrames(withoutHatClimbing, drag, false);
             WithHatMask = new(WithHat);
             WithoutHatMask = new(WithoutHat);
             using var hat = Read(Path.Combine("hat", "hat.png"));
@@ -34,6 +37,23 @@ internal sealed class PetImages : IDisposable
             Dispose();
             throw;
         }
+    }
+
+    private static Bitmap AddDragFrames(Bitmap original, Bitmap drag, bool hat)
+    {
+        if (drag.Size != new Size(PetSpriteCatalog.AtlasColumns * PetSpriteCatalog.AtlasCellWidth, 2 * PetSpriteCatalog.AtlasCellHeight))
+            throw new InvalidDataException("Drag sprite atlas dimensions do not match the authored geometry.");
+        var atlas = new Bitmap(original.Width, original.Height + PetSpriteCatalog.AtlasCellHeight, PixelFormat.Format32bppArgb);
+        try
+        {
+            using var graphics = Graphics.FromImage(atlas);
+            Configure(graphics);
+            graphics.DrawImage(original, new Rectangle(Point.Empty, original.Size), new Rectangle(Point.Empty, original.Size), GraphicsUnit.Pixel);
+            graphics.DrawImage(drag, new Rectangle(0, original.Height, original.Width, PetSpriteCatalog.AtlasCellHeight),
+                new Rectangle(0, hat ? 0 : PetSpriteCatalog.AtlasCellHeight, drag.Width, PetSpriteCatalog.AtlasCellHeight), GraphicsUnit.Pixel);
+            return atlas;
+        }
+        catch { atlas.Dispose(); throw; }
     }
 
     private static Bitmap AddClimbing(Bitmap original, bool hat)

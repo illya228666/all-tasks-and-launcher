@@ -22,6 +22,7 @@ public sealed class PetWorld
     public bool HasLanded => Location == PetLocation.Desktop || _departure?.HasLanded == true;
     public PetLocation Location { get; private set; }
     public bool IsHatDragging => _hat.Scene.Mode == HatMode.Dragging;
+    public bool IsPetDragging => Location == PetLocation.Desktop && _explorer.IsDragging;
 
     public bool LeaveLauncher(long nowMs)
     {
@@ -57,6 +58,7 @@ public sealed class PetWorld
         _running = false;
         if (_hat.Scene.Mode == HatMode.Dragging)
             _hat.Drop(false);
+        _explorer.CancelRoute();
         _behavior.Reset(nowMs, _speech);
         if (_environment is not null)
             Scene = CreateScene(_environment);
@@ -97,7 +99,7 @@ public sealed class PetWorld
     public bool TryStartEarthquake(long nowMs)
     {
         float lift = _state.JumpLift;
-        bool started = _running && Location != PetLocation.LeavingLauncher && _behavior.Earthquake(nowMs, Scene?.HeadScreenPosition, _hat, _speech);
+        bool started = _running && !IsPetDragging && Location != PetLocation.LeavingLauncher && _behavior.Earthquake(nowMs, Scene?.HeadScreenPosition, _hat, _speech);
         _state.JumpLift = lift;
         if (started && Location == PetLocation.Desktop)
         {
@@ -120,6 +122,28 @@ public sealed class PetWorld
         _hat.BeginDrag(cursorScreenPosition);
         RefreshScene();
         return true;
+    }
+
+    public bool BeginPetDrag(Point cursorScreenPosition, long nowMs)
+    {
+        if (!_running || Location != PetLocation.Desktop || _state.Mode == PetMode.Earthquake || _environment is not { Ruins: not null } environment)
+            return false;
+        bool started = _explorer.BeginDrag(_state, environment, _speech, cursorScreenPosition, nowMs);
+        if (started)
+            RefreshScene();
+        return started;
+    }
+
+    public void MovePet(Point cursorScreenPosition)
+    {
+        if (IsPetDragging && _environment is not null)
+            _explorer.MoveDrag(_state, _environment, cursorScreenPosition);
+    }
+
+    public void DropPet(long nowMs)
+    {
+        if (IsPetDragging)
+            _explorer.Drop(_state, nowMs);
     }
 
     public void MoveHat(Point cursorScreenPosition)
