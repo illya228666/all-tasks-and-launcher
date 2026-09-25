@@ -16,7 +16,7 @@ internal sealed class PetWindow : TransparentOverlayWindow
         {
             using var image = new Bitmap(scene.SpriteBounds.Width, scene.SpriteBounds.Height, PixelFormat.Format32bppPArgb);
             using (Graphics graphics = Graphics.FromImage(image))
-                graphics.DrawImage(scene.HatAttached ? _images.WithHat : _images.WithoutHat, new Rectangle(Point.Empty, image.Size), PetSpriteCatalog.GetSourceRectangle(scene.Row, scene.Frame), GraphicsUnit.Pixel);
+                graphics.DrawImage(_images.GetFrame(scene.Row, scene.Frame), new Rectangle(Point.Empty, image.Size));
             SetImage(image);
         }
         _scene = scene;
@@ -35,7 +35,6 @@ internal sealed class PetWindow : TransparentOverlayWindow
         if (_scene is null || !Visible || !Bounds.Contains(point))
             return false;
         cell = PetSpriteLayout.MapDestinationToAtlasCell(point, Bounds);
-        Rectangle source = PetSpriteCatalog.GetSourceRectangle(_scene.Row, _scene.Frame);
-        return (_scene.HatAttached ? _images.WithHatMask : _images.WithoutHatMask).Contains(source.X + cell.X, source.Y + cell.Y);
+        return _images.GetMask(_scene.Row, _scene.Frame).Contains(cell.X, cell.Y);
     }
 }

@@ -10,7 +10,7 @@ internal sealed class PetBehavior
 {
     private readonly PetState _state;
     private readonly Random _random;
-    private long _jumpAtMs, _walkAtMs;
+    private long _walkAtMs;
     internal Point Shake { get; private set; }
 
     internal PetBehavior(PetState state, Random random)
@@ -22,11 +22,8 @@ internal sealed class PetBehavior
     internal void Reset(long nowMs, PetSpeech speech)
     {
         Change(PetMode.Idle, nowMs, speech);
-        ScheduleJump(nowMs);
-        ScheduleWalk(nowMs);
     }
 
-    private void ScheduleJump(long nowMs) => _jumpAtMs = nowMs + _random.Next(PetJump.MinDelayMs, PetJump.MaxDelayMs + 1);
     private void ScheduleWalk(long nowMs) => _walkAtMs = nowMs + _random.Next(PetWalk.MinDelayMs, PetWalk.MaxDelayMs + 1);
     private void Change(PetMode mode, long nowMs, PetSpeech speech)
     {
@@ -36,18 +33,13 @@ internal sealed class PetBehavior
         _state.Frame = 0;
         _state.JumpLift = 0;
         Shake = Point.Empty;
-        if (mode != PetMode.Waving && !(mode == PetMode.Idle && previous == PetMode.Waving))
-            speech.Reset(nowMs);
-        if (mode == PetMode.Jumping)
-            _jumpAtMs = long.MaxValue;
+        speech.Reset(nowMs);
         if (mode == PetMode.Walking)
             _walkAtMs = long.MaxValue;
         if (mode == PetMode.Idle)
         {
             _state.Row = PetAnimationCatalog.IdleRow;
-            if (previous != PetMode.Waving && previous != PetMode.Walking)
-                ScheduleJump(nowMs);
-            if (previous != PetMode.Waving && previous != PetMode.Jumping)
+            if (previous != PetMode.Walking)
                 ScheduleWalk(nowMs);
         }
     }
@@ -106,69 +98,37 @@ internal sealed class PetBehavior
             return;
         }
 
-        if (pickup is not null && _state.Mode != PetMode.Jumping && headVisible)
+        if (pickup is not null && headVisible)
         {
             Change(PetMode.RetrievingHat, nowMs, speech);
             PetHatPickup.Walk(_state, environment, pickup.Value, nowMs, elapsedSeconds);
             return;
         }
 
-        if (environment.CanTrackCursor && !(_state.Mode == PetMode.Jumping && pickup is not null))
-        {
-            if (_state.Mode != PetMode.Looking)
-                Change(PetMode.Looking, nowMs, speech);
-            PetLook.Update(_state, environment);
-            return;
-        }
-
-        if (_state.Mode == PetMode.Looking)
+        // Пока новых кадров нет, обычные look / jump / wave не запускаются.
+        if (_state.Mode is PetMode.Looking or PetMode.Jumping or PetMode.Waving)
             Change(PetMode.Idle, nowMs, speech);
-        bool jumpDue = environment.Ruins is null && nowMs >= _jumpAtMs, walkDue = environment.Ruins is null && nowMs >= _walkAtMs;
-        speech.Update(nowMs, _state.Mode is PetMode.Idle or PetMode.Waving, headVisible, jumpDue || walkDue);
-        if (_state.Mode == PetMode.Jumping)
-        {
-            if (PetJump.Update(_state, nowMs))
-                Change(PetMode.Idle, nowMs, speech);
-        }
-        else if (_state.Mode == PetMode.Walking)
+
+        bool walkDue = environment.Ruins is null && nowMs >= _walkAtMs;
+        speech.Update(nowMs, _state.Mode == PetMode.Idle, headVisible, walkDue);
+
+        if (_state.Mode == PetMode.Walking)
         {
             if (PetWalk.Update(_state, nowMs))
                 Change(PetMode.Idle, nowMs, speech);
         }
-        else if (_state.Mode == PetMode.Waving)
+        else if (walkDue && !speech.IsSpeaking)
         {
-            if (PetWave.Update(_state, nowMs))
+            if (PetWalk.Prepare(_state, environment, _random))
             {
-                // RU: Завершение махания сохраняет ожидающие действия и речь. DE: Warten und Sprache bleiben erhalten.
-                Change(PetMode.Idle, nowMs, speech);
-            }
-        }
-        else
-        {
-            if (environment.Ruins is null && !speech.IsSpeaking && jumpDue)
-            {
-                PetJump.Prepare(_state, environment);
-                Change(PetMode.Jumping, nowMs, speech);
-                PetJump.Update(_state, nowMs);
-            }
-            else if (environment.Ruins is null && !speech.IsSpeaking && walkDue)
-            {
-                if (PetWalk.Prepare(_state, environment, _random))
-                {
-                    Change(PetMode.Walking, nowMs, speech);
-                    PetWalk.Update(_state, nowMs);
-                }
-                else
-                    _walkAtMs = nowMs + _random.Next(PetWalk.MinDelayMs, PetWalk.MaxDelayMs + 1);
-            }
-            else if (nowMs - _state.StartedAtMs >= PetWave.DelayMs)
-            {
-                Change(PetMode.Waving, nowMs, speech);
-                PetWave.Update(_state, nowMs);
+                Change(PetMode.Walking, nowMs, speech);
+                PetWalk.Update(_state, nowMs);
             }
             else
-                PetIdle.Update(_state, nowMs);
+                ScheduleWalk(nowMs);
         }
+        else
+            PetIdle.Update(_state, nowMs);
 
         PetPlacement.Fit(_state, environment);
     }

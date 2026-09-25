@@ -1,15 +1,15 @@
 namespace Launcher.Pet.Animation;
 public static class PetAnimationCatalog
 {
-    internal const int IdleRow = 0;
-    internal const int ClimbRow = 11;
-    internal const int DragRow = 12;
-    internal const int MoveRightRow = 1;
-    internal const int MoveLeftRow = 2;
-    internal const int WaveRow = 3;
-    internal const int JumpRow = 4;
-    internal const int FailedRow = 5;
-    internal const int LookFirstRow = 9;
+    public const int IdleRow = 0;
+    public const int ClimbRow = 11;
+    public const int DragRow = 12;
+    public const int MoveRightRow = 1;
+    public const int MoveLeftRow = 2;
+    public const int WaveRow = 3;
+    public const int JumpRow = 4;
+    public const int FailedRow = 5;
+    public const int LookFirstRow = 9;
     // Землетрясение: время от начала в мс, существующие кадры потери равновесия и подъёма.
     internal static readonly (int UntilMs, int Row, int Frame)[] EarthquakeFrames =
     {
@@ -37,9 +37,9 @@ public static class PetAnimationCatalog
     // выбирает курсор. Количество значений должно совпадать с числом кадров строки.
     internal static readonly int[][] FrameDurationsByRow =
     {
-        new[] { 1680, 660, 660, 840, 840, 960, 960 },
-        new[] { 120, 120, 120, 120, 120, 120, 120, 220 },
-        new[] { 120, 120, 120, 120, 120, 120, 120, 220 },
+        new[] { 1680, 660, 660, 840, 840 },
+        new[] { 100, 100, 100, 100, 100, 100, 100 },
+        new[] { 100, 100, 100, 100, 100, 100, 100 },
         new[] { 140, 140, 140, 280 },
         new[] { 140, 140, 140, 140, 280 },
         new[] { 140, 140, 140, 140, 440, 140, 240, 440 },

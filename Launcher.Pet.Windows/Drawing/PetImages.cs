@@ -1,16 +1,24 @@
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
+using Launcher.Pet.Animation;
 using Launcher.Pet.Sprites;
 
 namespace Launcher.Pet.Windows.Drawing;
 internal sealed class PetImages : IDisposable
 {
+    private const int IdleFrameCount = 5;
+    private const int RunFrameCount = 7;
+    private static readonly Size FrameSize = new(PetSpriteCatalog.AtlasCellWidth, PetSpriteCatalog.AtlasCellHeight);
     private static readonly Size HatSize = new(Launcher.Pet.Hat.HatGeometry.Width, Launcher.Pet.Hat.HatGeometry.Height);
-    internal Bitmap WithHat { get; private set; } = null!;
-    internal Bitmap WithoutHat { get; private set; } = null!;
-    internal SpritePixelMask WithHatMask { get; private set; } = null!;
-    internal SpritePixelMask WithoutHatMask { get; private set; } = null!;
+
+    private Bitmap[] Idle { get; set; } = Array.Empty<Bitmap>();
+    private Bitmap[] RunRight { get; set; } = Array.Empty<Bitmap>();
+    private Bitmap[] RunLeft { get; set; } = Array.Empty<Bitmap>();
+    private SpritePixelMask[] IdleMasks { get; set; } = Array.Empty<SpritePixelMask>();
+    private SpritePixelMask[] RunRightMasks { get; set; } = Array.Empty<SpritePixelMask>();
+    private SpritePixelMask[] RunLeftMasks { get; set; } = Array.Empty<SpritePixelMask>();
+
     internal Bitmap Hat { get; private set; } = null!;
     internal Bitmap[] HatFalling { get; private set; } = Array.Empty<Bitmap>();
 
@@ -18,19 +26,17 @@ internal sealed class PetImages : IDisposable
     {
         try
         {
-            using var withHat = Read("spritesheet_sumrak_hat.png");
-            using var withoutHat = Read("spritesheet_sumrak_no_hat.png");
-            ValidateAtlases(withHat, withoutHat);
-            using var withHatClimbing = AddClimbing(withHat, true);
-            using var withoutHatClimbing = AddClimbing(withoutHat, false);
-            using var drag = Read("sumrak_drag.png");
-            WithHat = AddDragFrames(withHatClimbing, drag, true);
-            WithoutHat = AddDragFrames(withoutHatClimbing, drag, false);
-            WithHatMask = new(WithHat);
-            WithoutHatMask = new(WithoutHat);
+            // Main Sumrak animations use one authored PNG per frame, exactly like the existing hat-fall sequence.
+            Idle = ReadFrames("sumrak", "idle_", IdleFrameCount, FrameSize, bottomAligned: true);
+            RunRight = ReadFrames("sumrak", "run_", RunFrameCount, FrameSize, bottomAligned: true);
+            RunLeft = MirrorFrames(RunRight);
+            IdleMasks = CreateMasks(Idle);
+            RunRightMasks = CreateMasks(RunRight);
+            RunLeftMasks = CreateMasks(RunLeft);
+
             using var hat = Read(Path.Combine("hat", "hat.png"));
-            Hat = Normalize(hat, HatSize);
-            HatFalling = ReadFrames("hat", "hat_falling_", Launcher.Pet.Hat.HatAnimation.FallingFrameCount, HatSize);
+            Hat = Normalize(hat, HatSize, bottomAligned: false);
+            HatFalling = ReadFrames("hat", "hat_falling_", Launcher.Pet.Hat.HatAnimation.FallingFrameCount, HatSize, bottomAligned: false);
         }
         catch
         {
@@ -39,44 +45,49 @@ internal sealed class PetImages : IDisposable
         }
     }
 
-    private static Bitmap AddDragFrames(Bitmap original, Bitmap drag, bool hat)
+    internal Bitmap GetFrame(int row, int frame)
     {
-        if (drag.Size != new Size(PetSpriteCatalog.AtlasColumns * PetSpriteCatalog.AtlasCellWidth, 2 * PetSpriteCatalog.AtlasCellHeight))
-            throw new InvalidDataException("Drag sprite atlas dimensions do not match the authored geometry.");
-        var atlas = new Bitmap(original.Width, original.Height + PetSpriteCatalog.AtlasCellHeight, PixelFormat.Format32bppArgb);
-        try
+        return row switch
         {
-            using var graphics = Graphics.FromImage(atlas);
-            Configure(graphics);
-            graphics.DrawImage(original, new Rectangle(Point.Empty, original.Size), new Rectangle(Point.Empty, original.Size), GraphicsUnit.Pixel);
-            graphics.DrawImage(drag, new Rectangle(0, original.Height, original.Width, PetSpriteCatalog.AtlasCellHeight),
-                new Rectangle(0, hat ? 0 : PetSpriteCatalog.AtlasCellHeight, drag.Width, PetSpriteCatalog.AtlasCellHeight), GraphicsUnit.Pixel);
-            return atlas;
-        }
-        catch { atlas.Dispose(); throw; }
+            PetAnimationCatalog.IdleRow => Idle[Math.Clamp(frame, 0, Idle.Length - 1)],
+            PetAnimationCatalog.MoveRightRow => RunRight[Math.Clamp(frame, 0, RunRight.Length - 1)],
+            PetAnimationCatalog.MoveLeftRow => RunLeft[Math.Clamp(frame, 0, RunLeft.Length - 1)],
+            // No new art yet: keep every unsupported pose visually static instead of showing the legacy atlas.
+            _ => Idle[0]
+        };
     }
 
-    private static Bitmap AddClimbing(Bitmap original, bool hat)
+    internal SpritePixelMask GetMask(int row, int frame)
     {
-        using var climbing = Read(Path.Combine("ruins", "climbing.png"));
-        var atlas = new Bitmap(original.Width, original.Height + PetSpriteCatalog.AtlasCellHeight, PixelFormat.Format32bppArgb);
+        return row switch
+        {
+            PetAnimationCatalog.IdleRow => IdleMasks[Math.Clamp(frame, 0, IdleMasks.Length - 1)],
+            PetAnimationCatalog.MoveRightRow => RunRightMasks[Math.Clamp(frame, 0, RunRightMasks.Length - 1)],
+            PetAnimationCatalog.MoveLeftRow => RunLeftMasks[Math.Clamp(frame, 0, RunLeftMasks.Length - 1)],
+            _ => IdleMasks[0]
+        };
+    }
+
+    private static SpritePixelMask[] CreateMasks(IEnumerable<Bitmap> frames) =>
+        frames.Select(frame => new SpritePixelMask(frame)).ToArray();
+
+    private static Bitmap[] MirrorFrames(Bitmap[] source)
+    {
+        var frames = new Bitmap[source.Length];
         try
         {
-            using var graphics = Graphics.FromImage(atlas);
-            Configure(graphics);
-            // Atlas coordinates are pixels, irrespective of PNG DPI metadata.
-            graphics.DrawImage(original, new Rectangle(Point.Empty, original.Size), new Rectangle(Point.Empty, original.Size), GraphicsUnit.Pixel);
-            int w = climbing.Width / 4, h = climbing.Height / 2;
-            for (int i = 0; i < 4; i++)
+            for (int i = 0; i < source.Length; i++)
             {
-                Rectangle visible = VisibleBounds(climbing, new(i * w, hat ? h : 0, w, h));
-                Rectangle target = Fit(visible.Size, new(PetSpriteCatalog.AtlasCellWidth, PetSpriteCatalog.AtlasCellHeight), true);
-                target.Offset(i * PetSpriteCatalog.AtlasCellWidth, original.Height);
-                graphics.DrawImage(climbing, target, visible, GraphicsUnit.Pixel);
+                frames[i] = source[i].Clone(new Rectangle(Point.Empty, source[i].Size), PixelFormat.Format32bppArgb);
+                frames[i].RotateFlip(RotateFlipType.RotateNoneFlipX);
             }
-            return atlas;
+            return frames;
         }
-        catch { atlas.Dispose(); throw; }
+        catch
+        {
+            DisposeFrames(frames);
+            throw;
+        }
     }
 
     private static Bitmap Read(string name)
@@ -85,7 +96,7 @@ internal sealed class PetImages : IDisposable
         return source.Clone(new Rectangle(Point.Empty, source.Size), PixelFormat.Format32bppArgb);
     }
 
-    private static Bitmap[] ReadFrames(string folder, string prefix, int count, Size target)
+    private static Bitmap[] ReadFrames(string folder, string prefix, int count, Size target, bool bottomAligned)
     {
         var frames = new Bitmap[count];
         try
@@ -93,37 +104,32 @@ internal sealed class PetImages : IDisposable
             for (int frame = 0; frame < count; frame++)
             {
                 using var source = Read(Path.Combine(folder, $"{prefix}{frame + 1}.png"));
-                frames[frame] = Normalize(source, target);
+                frames[frame] = Normalize(source, target, bottomAligned);
             }
             return frames;
         }
         catch
         {
-            foreach (Bitmap? frame in frames)
-                frame?.Dispose();
+            DisposeFrames(frames);
             throw;
         }
     }
 
-    private static void ValidateAtlases(Bitmap withHat, Bitmap withoutHat)
+    private static Bitmap Normalize(Bitmap source, Size target, bool bottomAligned)
     {
-        var expected = new Size(PetSpriteCatalog.AtlasColumns * PetSpriteCatalog.AtlasCellWidth,
-            PetSpriteCatalog.AtlasRows * PetSpriteCatalog.AtlasCellHeight);
-        if (withHat.Size != expected || withoutHat.Size != expected)
-            throw new InvalidDataException("Sprite atlas dimensions do not match the authored geometry.");
-    }
+        if (source.Size == target)
+            return source.Clone(new Rectangle(Point.Empty, source.Size), PixelFormat.Format32bppArgb);
 
-    private static Bitmap Normalize(Bitmap source, Size target)
-    {
         Rectangle bounds = VisibleBounds(source, new(Point.Empty, source.Size));
         if (bounds.IsEmpty)
             throw new InvalidDataException("Das Sprite enthaelt keine sichtbaren Pixel.");
-        var result = new Bitmap(target.Width, target.Height, PixelFormat.Format32bppPArgb);
+
+        var result = new Bitmap(target.Width, target.Height, PixelFormat.Format32bppArgb);
         try
         {
             using Graphics graphics = Graphics.FromImage(result);
             Configure(graphics);
-            graphics.DrawImage(source, Fit(bounds.Size, target, bottomAligned: false), bounds, GraphicsUnit.Pixel);
+            graphics.DrawImage(source, Fit(bounds.Size, target, bottomAligned), bounds, GraphicsUnit.Pixel);
             return result;
         }
         catch
@@ -172,13 +178,18 @@ internal sealed class PetImages : IDisposable
 
     private static void Configure(Graphics graphics) => graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
 
+    private static void DisposeFrames(IEnumerable<Bitmap?> frames)
+    {
+        foreach (Bitmap? frame in frames)
+            frame?.Dispose();
+    }
+
     public void Dispose()
     {
-        foreach (Bitmap? frame in HatFalling)
-            frame?.Dispose();
+        DisposeFrames(HatFalling);
         Hat?.Dispose();
-        WithoutHat?.Dispose();
-        WithHat?.Dispose();
+        DisposeFrames(RunLeft);
+        DisposeFrames(RunRight);
+        DisposeFrames(Idle);
     }
 }
-

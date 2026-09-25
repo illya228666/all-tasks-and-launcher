@@ -118,7 +118,7 @@ public sealed class RuinPreviewWindow : Form
         }
         if (_pet is not null)
         {
-            g.DrawImage(_pet.HatAttached ? _images.WithHat : _images.WithoutHat, _pet.SpriteBounds, PetSpriteCatalog.GetSourceRectangle(_pet.Row, _pet.Frame), GraphicsUnit.Pixel);
+            g.DrawImage(_images.GetFrame(_pet.Row, _pet.Frame), _pet.SpriteBounds);
             if (!_pet.HatAttached) g.DrawImage(_images.Hat, new RectangleF(_pet.Hat.ScreenPosition.X, _pet.Hat.ScreenPosition.Y, HatGeometry.Width * _pet.Hat.Scale, HatGeometry.Height * _pet.Hat.Scale));
             if (_pet.Speech is not null && _pet.HeadScreenPosition is Point head)
                 g.DrawString(_pet.Speech[..Math.Min(_pet.VisibleLetters, _pet.Speech.Length)], Font, _light ? Brushes.DarkSlateGray : Brushes.WhiteSmoke, head.X + 35, head.Y - 22);
