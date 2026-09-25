@@ -15,6 +15,7 @@ public sealed class DeviceConnection : IAsyncDisposable
     private bool _started, _stopped, _disposed;
     public event Action<DeviceState>? StateChanged;
     public event Action<DeviceInput>? InputReceived;
+    public event Action<byte>? FadeReceived;
     public DeviceState State { get { lock (_gate) return _state; } }
     public DeviceConnection() : this(new SerialDeviceTransportFactory(), new()) { }
     internal DeviceConnection(IDeviceTransportFactory factory, DeviceConnectionTiming timing)
@@ -153,7 +154,9 @@ public sealed class DeviceConnection : IAsyncDisposable
                 }
             }
             string inputReply = transport.Exchange(protocol.PollCommand, token);
-            if (protocol.ReadInput(inputReply) is DeviceInput input) InputReceived?.Invoke(input);
+            DevicePoll poll = protocol.ReadPoll(inputReply);
+            if (poll.Input is DeviceInput input) InputReceived?.Invoke(input);
+            if (poll.Fade is byte fade) FadeReceived?.Invoke(fade);
             await Task.Delay(_timing.PollIntervalMs, token).ConfigureAwait(false);
         }
     }

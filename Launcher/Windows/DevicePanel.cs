@@ -37,6 +37,12 @@ internal sealed class DevicePanel : FlowLayoutPanel
         DeviceInput.BothButtonsPressed => "BOTH",
         _ => "?"
     });
+
+    internal void DisplayFade(byte fade)
+    {
+        int percent = (int)Math.Round(fade * 100d / 255d);
+        _input.Text = $"Input: FADE {percent}%";
+    }
     protected override void Dispose(bool disposing)
     {
         if (disposing) _detail.Dispose();

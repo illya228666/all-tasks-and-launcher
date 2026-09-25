@@ -89,6 +89,12 @@ public sealed class PetWindowsSession : IDisposable
             _debug?.Hide();
     }
 
+    public void SetHatFade(byte fade)
+    {
+        if (!_disposed)
+            _world.SetHatFade(fade);
+    }
+
     public void Start()
     {
         if (_running || _disposed)

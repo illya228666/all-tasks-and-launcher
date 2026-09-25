@@ -17,8 +17,10 @@ public sealed class PetWorld
     private long _lastMs;
     private bool _running;
     private PetDeparture? _departure;
+    private float _detachedHatFadeScale = 1f;
     private readonly PetExplorer _explorer;
     public float RenderScale => Location == PetLocation.Launcher ? 1f : _departure?.Scale ?? 0.5f;
+    private float HatRenderScale => RenderScale * (_hat.Attached ? 1f : _detachedHatFadeScale);
     public bool HasLanded => Location == PetLocation.Desktop || _departure?.HasLanded == true;
     public PetLocation Location { get; private set; }
     public bool IsHatDragging => _hat.Scene.Mode == HatMode.Dragging;
@@ -99,8 +101,14 @@ public sealed class PetWorld
 
         environment = environment with { Scale = RenderScale };
         _environment = environment;
-        _hat.SetScale(RenderScale);
+        _hat.SetScale(HatRenderScale);
         return Scene = CreateScene(environment);
+    }
+
+    public void SetHatFade(byte fade)
+    {
+        _detachedHatFadeScale = 1f + fade / 255f;
+        RefreshScene();
     }
 
     public bool TryStartEarthquake(long nowMs)
@@ -174,6 +182,7 @@ public sealed class PetWorld
 
     private void RefreshScene()
     {
+        _hat.SetScale(HatRenderScale);
         if (_environment is not null)
             Scene = CreateScene(_environment);
     }

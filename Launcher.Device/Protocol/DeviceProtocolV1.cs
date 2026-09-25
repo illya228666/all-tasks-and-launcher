@@ -14,10 +14,10 @@ internal sealed class DeviceProtocolV1 : IDeviceProtocolVersion
     public string Identity => IdentityValue;
     public string PollCommand => Poll;
 
-    public DeviceInput? ReadInput(string reply) => reply switch
+    public DevicePoll ReadPoll(string reply) => reply switch
     {
-        NoInput => null,
-        ButtonPressed => DeviceInput.PrimaryButtonPressed,
+        NoInput => new(null),
+        ButtonPressed => new(DeviceInput.PrimaryButtonPressed),
         _ => throw new DeviceProtocolException(DeviceFailure.InvalidReply, "Unexpected protocol v1 reply.")
     };
 

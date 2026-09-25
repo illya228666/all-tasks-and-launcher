@@ -16,12 +16,12 @@ internal sealed class DeviceProtocolV2 : IDeviceProtocolVersion
     public string Identity => IdentityValue;
     public string PollCommand => Poll;
 
-    public DeviceInput? ReadInput(string reply) => reply switch
+    public DevicePoll ReadPoll(string reply) => reply switch
     {
-        NoInput => null,
-        LeftPressed => DeviceInput.LeftButtonPressed,
-        RightPressed => DeviceInput.RightButtonPressed,
-        BothPressed => DeviceInput.BothButtonsPressed,
+        NoInput => new(null),
+        LeftPressed => new(DeviceInput.LeftButtonPressed),
+        RightPressed => new(DeviceInput.RightButtonPressed),
+        BothPressed => new(DeviceInput.BothButtonsPressed),
         _ => throw new DeviceProtocolException(DeviceFailure.InvalidReply, "Unexpected protocol v2 reply.")
     };
 

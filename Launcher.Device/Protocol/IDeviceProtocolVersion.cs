@@ -6,7 +6,7 @@ internal interface IDeviceProtocolVersion
     DeviceProtocolVersion Version { get; }
     string Identity { get; }
     string PollCommand { get; }
-    DeviceInput? ReadInput(string reply);
+    DevicePoll ReadPoll(string reply);
     DeviceWireCommand? Indicator(bool enabled);
     DeviceWireCommand? Lights(DeviceLights lights);
 }

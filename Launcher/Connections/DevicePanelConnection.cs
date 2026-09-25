@@ -16,6 +16,7 @@ internal sealed class DevicePanelConnection : IDisposable
         _post = post;
         device.StateChanged += StateChanged;
         device.InputReceived += InputReceived;
+        device.FadeReceived += FadeReceived;
         window.Device.IndicatorRequested += SetIndicator;
         window.Device.Display(device.State);
     }
@@ -34,12 +35,18 @@ internal sealed class DevicePanelConnection : IDisposable
     {
         if (!_disposed) _window.Device.DisplayInput(input);
     });
+
+    private void FadeReceived(byte fade) => _post(() =>
+    {
+        if (!_disposed) _window.Device.DisplayFade(fade);
+    });
     public void Dispose()
     {
         if (_disposed) return;
         _disposed = true;
         _device.StateChanged -= StateChanged;
         _device.InputReceived -= InputReceived;
+        _device.FadeReceived -= FadeReceived;
         _window.Device.IndicatorRequested -= SetIndicator;
     }
 }

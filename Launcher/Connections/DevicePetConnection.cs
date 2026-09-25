@@ -14,6 +14,8 @@ internal sealed class DevicePetConnection : IDisposable
         _pet = pet;
         _post = post;
         _device.InputReceived += InputReceived;
+        _device.FadeReceived += FadeReceived;
+        _device.StateChanged += StateChanged;
     }
 
     private void InputReceived(DeviceInput input)
@@ -22,5 +24,18 @@ internal sealed class DevicePetConnection : IDisposable
             _post(() => _pet?.TryStartEarthquake());
     }
 
-    public void Dispose() => _device.InputReceived -= InputReceived;
+    private void FadeReceived(byte fade) => _post(() => _pet?.SetHatFade(fade));
+
+    private void StateChanged(DeviceState state)
+    {
+        if (!state.IsConnected || state.ProtocolVersion != DeviceProtocolVersion.V3)
+            _post(() => _pet?.SetHatFade(0));
+    }
+
+    public void Dispose()
+    {
+        _device.InputReceived -= InputReceived;
+        _device.FadeReceived -= FadeReceived;
+        _device.StateChanged -= StateChanged;
+    }
 }
