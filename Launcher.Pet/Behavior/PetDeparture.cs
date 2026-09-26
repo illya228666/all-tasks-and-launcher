@@ -18,7 +18,7 @@ internal sealed class PetDeparture
     private const float Gravity = 1500f;
     private const float LaunchSpeed = 300f;
 
-    internal bool Update(PetState state, PetEnvironment environment, float elapsed)
+    internal bool Update(PetBody state, PetEnvironment environment, float elapsed)
     {
         _elapsed += Math.Clamp(elapsed, 0, 0.05f);
         float startX = _start.X - environment.AreaScreenPosition.X;

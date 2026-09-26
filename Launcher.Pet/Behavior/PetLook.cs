@@ -5,7 +5,7 @@ namespace Launcher.Pet.Behavior;
 internal static class PetLook
 {
     internal const int DeadzoneRadiusPixels = 12;
-    internal static void Update(PetState state, PetEnvironment environment)
+    internal static void Update(PetBody state, PetEnvironment environment)
     {
         int x = environment.CursorScreenPosition.X - environment.AreaScreenPosition.X - (int)Math.Round(state.X) - (int)(PetLogicalGeometry.Width * environment.Scale / 2);
         int y = environment.CursorScreenPosition.Y - environment.AreaScreenPosition.Y - environment.PetZoneTopY - (int)(PetLogicalGeometry.Height * (1 - environment.Scale / 2) - state.JumpLift);

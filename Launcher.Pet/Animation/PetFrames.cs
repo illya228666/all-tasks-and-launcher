@@ -3,7 +3,7 @@ using Launcher.Pet.Data;
 namespace Launcher.Pet.Animation;
 internal static class PetFrames
 {
-    internal static void Loop(PetState state, int row, long elapsedMs)
+    internal static void Loop(PetBody state, int row, long elapsedMs)
     {
         int[] durations = PetAnimationCatalog.FrameDurationsByRow[row];
         long phase = Math.Max(0, elapsedMs) % durations.Sum();

@@ -59,8 +59,10 @@ PetWindowsSession
   читает время, мышь, область, рабочий стол / liest Zeit, Maus, Bereich, Desktop
     -> PetEnvironment -> PetWorld.Update
       -> HatWorld: физика и опоры / Physik und Auflagen
-      -> PetBehavior: выбор действия / Aktionsauswahl
-      -> PetIdle / PetWave / PetWalk / PetJump / PetLook / PetHatPickup / PetEarthquake
+      -> PetActor: одно текущее PetActivity / genau eine aktuelle PetActivity
+        -> PetRoutine: расписание и приоритеты / Zeitplanung und Prioritäten
+        -> PetNavigation: опора, цель и маршрут / Auflage, Ziel und Route
+        -> Activities: собственные часы, движение и кадры / eigene Zeit, Bewegung und Frames
       -> PetSpeech: фраза и число символов / Satz und Zeichenanzahl
     <- PetScene
   PetDrawing + HatWindow + SpeechBubbleWindow + WindowShake
@@ -84,8 +86,14 @@ DE: `PetPlacement` berechnet Grenzen und Szenengeometrie. Local liegt in PetArea
 | Ожидает действие / Aktion wartet | Новая речь не начинается / kein neuer Satz |
 | Шляпу утащили / Hut weggezogen | Подбор отменяется или цель обновляется / Aufheben wird beendet oder Ziel erneuert |
 
-RU: Переходы выполняет PetBehavior. Завершение махания сохраняет речь и ожидающие действия. Начало и конец прочих действий очищают временные данные. Расчёт кадра использует прошедшее время, а не число Tick.
-DE: PetBehavior führt Übergänge aus. Winken erhält Sprache und wartende Aktionen. Frames richten sich nach vergangener Zeit statt nach Tick-Anzahl.
+RU: `PetActor.Activity` — единственный владелец текущего действия. `PetBody` хранит положение и опубликованную позу; `PetMode` остаётся совместимой меткой сцены и не выбирает поведение. Скорости падения, смещение перетаскивания, цель обычной ходьбы и часы восстановления принадлежат соответствующим activities. `PetNavigation` хранит опору, высоту стопы, посещения и маршрут, но не фазы движения. Высота стопы на рабочем столе преобразуется в `PetBody.JumpLift` для существующего рендера.
+DE: `PetActor.Activity` besitzt als einzige Instanz die aktuelle Aktion. `PetBody` enthält Position und veröffentlichte Pose; `PetMode` bleibt ein kompatibles Szenenlabel ohne Verhaltenssteuerung. Fallgeschwindigkeit, Ziehabstand, Gehziel und Erholungszeit gehören zur jeweiligen Activity. `PetNavigation` verwaltet Auflage, Fußhöhe, Besuche und Route, aber keine Bewegungsphasen. Die Fußhöhe wird für den bestehenden Renderer in `PetBody.JumpLift` umgerechnet.
+
+RU: `Change` начинает обычное действие со сбросом позы; `ContinueWith` сохраняет последний кадр до следующего Tick. `IdleContinuation` сохраняет правила ожидающих таймеров исходящего действия до публикации новой позы. Это важно при остановке между подходом и полётом. Завершение махания сохраняет речь и ожидающие действия. Все подсистемы используют один переданный `Random`; даже дополнительные вызовы планирования при Reset сохранены. Восстановление после отпускания длится 1260 мс. Землетрясение при переносе отклоняется, на опоре выполняется, а в воздухе сбивает шляпу и заменяет движение свободным падением.
+DE: `Change` beginnt eine normale Aktion mit zurückgesetzter Pose; `ContinueWith` erhält das letzte Bild bis zum nächsten Tick. `IdleContinuation` erhält bis zur neuen Pose die Timerregeln der vorigen Aktion, auch beim Stoppen zwischen Anlauf und Flug. Winken erhält Sprache und wartende Aktionen. Alle Teilsysteme nutzen denselben übergebenen `Random`, einschließlich der zusätzlichen Planung beim Reset. Erholung nach dem Loslassen dauert 1260 ms. Erdbeben werden beim Ziehen abgelehnt, auf einer Auflage ausgeführt und ersetzen in der Luft die Bewegung durch freien Fall mit abgeschlagenem Hut.
+
+RU: Windows использует `PetScene.HatInteractionEnabled` и `ShakeWindow`, а не условия по `PetMode`. Выбор кадров остаётся в activity/каталоге; геометрия спрайтов, попадание мыши, физика шляпы и Windows-ресурсы сохраняют свои границы. `dotnet run --project Launcher.Pet.Checks` проверяет переходы и 14 эталонных трасс исходной реализации: кадры, геометрию, шляпу, речь, маршруты, результаты команд и порядок вызовов Random. `--trace-directory <path>` сохраняет трассы для разбора расхождений; исходный commit указан в `BehaviorTraces.sha256`.
+DE: Windows verwendet `PetScene.HatInteractionEnabled` und `ShakeWindow` statt `PetMode`-Abfragen. Frames gehören zur Activity/zum Katalog; Spritegeometrie, Treffertests, Hutphysik und Windows-Ressourcen behalten ihre Grenzen. `dotnet run --project Launcher.Pet.Checks` prüft Übergänge und 14 Referenzabläufe der ursprünglichen Implementierung einschließlich Frames, Geometrie, Hut, Sprache, Routen, Befehlen und Random-Reihenfolge. `--trace-directory <path>` speichert Abläufe zur Diagnose; `BehaviorTraces.sha256` nennt den ursprünglichen Commit.
 
 RU: Таймер Windows имеет интервал 10 мс; курсор считывается раз в 50 мс, снимок значков кэшируется на 500 мс, отладочное окно обновляется раз в 100 мс. Это не обещание точности Windows-таймера. Физика ограничивает шаг 50 мс. Сканирование рабочего стола включается только для снятой шляпы или отладочного показа.
 DE: Windows-Timer: 10 ms, Maus: 50 ms, Symbolaufnahme: 500 ms, Diagnoseanzeige: 100 ms. Die Timerpräzision wird nicht garantiert. Der Physikschritt ist auf 50 ms begrenzt; Desktop-Abfragen laufen nur bei abgenommenem Hut oder Diagnoseanzeige.
@@ -141,7 +149,7 @@ DE: Erwartbare externe Fehler werden Ergebnisse oder sichtbare Hinweise. Stilles
 ## 7. Как расширять / Erweiterungswege
 
 1. **Действие каталога / Listenaktion:** добавить смысл в AppCardAction, обработать в AppListConnection; правило — в Launcher.Apps, системный вызов — в Launcher.Apps.Windows. / Bedeutung verbinden, Regel und Systemaufruf getrennt halten.
-2. **Поведение питомца / Begleiteraktion:** добавить режим, класс расчёта и переходы в PetBehavior; кадры — в каталоге анимаций. Windows не решает приоритеты. / Modus, Berechnung und Übergänge hinzufügen; Windows wählt keine Priorität.
+2. **Поведение питомца / Begleiteraktion:** добавить `PetActivity` с собственным состоянием, Update и визуальным определением; запускать через `Change` или `ContinueWith` из нужного триггера/правила выбора. Новому самостоятельному действию не нужен элемент `PetMode` или ветка центрального Tick. Обычные прерывания подключаются через `UsesRoutine`, правила перемещения по опорам — через `UsesGroundPolicy`; завершение и продолжение задаёт само действие. `ActivityChecks` содержит тестовый пример композиции без изменения координаторов. / Eine `PetActivity` mit eigenem Zustand, Update und visueller Definition hinzufügen und über den passenden Auslöser mit `Change` oder `ContinueWith` starten. Kein neuer `PetMode` und kein zentraler Tick-Zweig sind erforderlich. `UsesRoutine` und `UsesGroundPolicy` binden vorhandene Prioritäten ein; die Activity bestimmt Ende und Fortsetzung. `ActivityChecks` demonstriert die Komposition ohne Koordinatoränderungen.
 3. **Версия платы / Geräteversion:** добавить реализацию IDeviceProtocolVersion, зарегистрировать её и согласовать прошивку; явно описать возможности. Несовместимые форматы получают новую версию. / Versionsimplementierung registrieren, Firmware und Fähigkeiten abstimmen; inkompatible Formate erhalten eine neue Version.
 4. **Связь возможностей / Verbindung:** добавить конкретную подписку в Connections и её снятие в Dispose. Например, событие устройства вызывает метод PetWindowsSession; прямой ссылки Device → Pet нет. / Konkrete Verbindung anlegen und wieder lösen; keine direkte Geräteabhängigkeit zum Begleiter.
 

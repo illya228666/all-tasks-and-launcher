@@ -5,4 +5,5 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup><ProjectReference Include="..\Launcher.Pet\Launcher.Pet.csproj" /></ItemGroup>
+  <ItemGroup><EmbeddedResource Include="BehaviorTraces.sha256" /></ItemGroup>
 </Project>

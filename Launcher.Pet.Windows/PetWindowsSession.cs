@@ -309,7 +309,7 @@ public sealed class PetWindowsSession : IDisposable
                     environment.AreaScreenPosition.Y + scene.SpriteBounds.Y + scene.SpriteBounds.Height / 2);
                 _drawing.Display(scene);
             }
-            _shake.Apply(!Outside && scene.Mode == PetMode.Earthquake, scene.WindowShake);
+            _shake.Apply(!Outside && scene.ShakeWindow, scene.WindowShake);
             if (!_running || _disposed || version != _version)
                 return;
             DisplayHat(scene, version);
@@ -377,7 +377,7 @@ public sealed class PetWindowsSession : IDisposable
 
         HatWindow hat = EnsureHat();
         hat.SetScale(scene.Hat.Scale);
-        hat.SetInteractionEnabled(scene.Mode != PetMode.Earthquake);
+        hat.SetInteractionEnabled(scene.HatInteractionEnabled);
         if (scene.Hat.Mode != HatMode.Dragging)
             hat.MoveTo(scene.Hat.ScreenPosition);
         if (_running && !_disposed && version == _version)

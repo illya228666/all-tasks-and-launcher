@@ -9,19 +9,19 @@ internal static class PetHatPickup
     internal const float RunSpeedPixelsPerSecond = 220f;
     internal const int RunFrameMs = 80;
     internal static float TargetX(Point screenPoint, PetEnvironment environment) => Math.Clamp(screenPoint.X - environment.AreaScreenPosition.X - PetLogicalGeometry.Width / 2f, PetLogicalGeometry.EdgePadding, Math.Max(PetLogicalGeometry.EdgePadding, environment.AreaWidth - PetLogicalGeometry.Width - PetLogicalGeometry.EdgePadding));
-    internal static bool Walk(PetState state, PetEnvironment environment, Point target, long nowMs, float elapsedSeconds)
+    internal static bool Walk(PetBody state, PetEnvironment environment, Point target, long nowMs, float elapsedSeconds)
     {
         float distance = TargetX(target, environment) - state.X;
         float step = PetHatPickup.RunSpeedPixelsPerSecond * Math.Clamp(elapsedSeconds, 0, 0.05f);
         state.X += Math.Clamp(distance, -step, step);
         state.Row = distance >= 0 ? PetAnimationCatalog.MoveRightRow : PetAnimationCatalog.MoveLeftRow;
-        state.Frame = (int)((nowMs - state.StartedAtMs) / PetHatPickup.RunFrameMs % PetAnimationCatalog.FrameDurationsByRow[state.Row].Length);
+        state.Frame = (int)(nowMs / PetHatPickup.RunFrameMs % PetAnimationCatalog.FrameDurationsByRow[state.Row].Length);
         return Math.Abs(distance) <= step;
     }
 
-    internal static bool PutOn(PetState state, HatWorld hat, long nowMs)
+    internal static bool PutOn(PetBody state, HatWorld hat, long nowMs)
     {
-        long elapsed = nowMs - state.StartedAtMs;
+        long elapsed = nowMs;
         foreach (var frame in PetAnimationCatalog.HatPickupFrames)
         {
             if (frame.PutOn)

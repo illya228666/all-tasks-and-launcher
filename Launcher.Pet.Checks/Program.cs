@@ -9,6 +9,8 @@ CheckLanding(250, true);
 CheckLanding(500, false);
 CheckRuinLayout();
 CheckHatRoute();
+BehaviorTraces.Check(args);
+ActivityChecks.Check();
 Console.WriteLine("Pet checks passed.");
 
 static void CheckLauncher()
@@ -62,7 +64,14 @@ static void CheckLanding(int expectedY, bool withHat)
         world.Update(now += 10, environment);
     if (world.Scene!.Mode != PetMode.Recovering || Math.Abs(world.Scene.SpriteBounds.Bottom - expectedY) > 1)
         throw new Exception($"Expected landing at {expectedY}, got {world.Scene.SpriteBounds.Bottom}.");
-    world.Update(now + 1300, environment);
+    long landedAt = now;
+    foreach (var (offset, frame) in new[] { (119, 4), (120, 5), (819, 5), (820, 6), (1039, 6), (1040, 7), (1259, 7) })
+    {
+        var recovery = world.Update(landedAt + offset, environment);
+        if (recovery.Mode != PetMode.Recovering || recovery.Frame != frame || recovery.HatAttached != withHat)
+            throw new Exception($"Recovery frame/hat changed at {offset} ms.");
+    }
+    world.Update(landedAt + 1260, environment);
     if (world.Scene!.Mode != PetMode.Idle)
         throw new Exception("Pet did not stand up after landing.");
     world.Stop(now + 1300);
