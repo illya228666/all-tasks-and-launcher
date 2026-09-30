@@ -5,7 +5,8 @@ namespace Launcher.Pet.Windows.Windows;
 public sealed class PetArea : FlowLayoutPanel
 {
     public int PetZoneTopY { get; private set; }
-    public int RequiredExtraHeight => Launcher.Pet.Sprites.PetSpriteCatalog.RequiredRenderAreaHeight;
+    internal Launcher.Pet.Sprites.PetAppearance Appearance = Launcher.Pet.Sprites.PetAppearance.Original;
+    public int RequiredExtraHeight => Appearance.RequiredRenderAreaHeight;
     public IReadOnlyList<Rectangle> ObstaclesLocal { get; private set; } = Array.Empty<Rectangle>();
 
     public PetArea()

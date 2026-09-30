@@ -1032,6 +1032,183 @@
         "hat-trick/hat-trick-15.png",
         "hat-trick/hat-trick-16.png"
       ]
+    },
+    {
+      "name": "failed",
+      "frame_count": 8,
+      "frame_duration_ms": 180,
+      "loop": false,
+      "gif_repeats_for_review": true,
+      "cell_size": 362,
+      "origin": [
+        181,
+        335
+      ],
+      "empty_frames": [],
+      "output_edge_touch_frames": [],
+      "paste_clamped_frames": [],
+      "despilled_edge_pixels": 6497,
+      "alignment": "feet",
+      "source_motion_export": [],
+      "frames": [
+        "failed/failed-1.png",
+        "failed/failed-2.png",
+        "failed/failed-3.png",
+        "failed/failed-4.png",
+        "failed/failed-5.png",
+        "failed/failed-6.png",
+        "failed/failed-7.png",
+        "failed/failed-8.png"
+      ]
+    },
+    {
+      "name": "look",
+      "frame_count": 16,
+      "frame_duration_ms": 140,
+      "loop": false,
+      "gif_repeats_for_review": true,
+      "cell_size": 362,
+      "origin": [
+        181,
+        335
+      ],
+      "empty_frames": [],
+      "output_edge_touch_frames": [],
+      "paste_clamped_frames": [],
+      "despilled_edge_pixels": 15462,
+      "alignment": "feet",
+      "source_motion_export": [],
+      "frames": [
+        "look/look-1.png",
+        "look/look-2.png",
+        "look/look-3.png",
+        "look/look-4.png",
+        "look/look-5.png",
+        "look/look-6.png",
+        "look/look-7.png",
+        "look/look-8.png",
+        "look/look-9.png",
+        "look/look-10.png",
+        "look/look-11.png",
+        "look/look-12.png",
+        "look/look-13.png",
+        "look/look-14.png",
+        "look/look-15.png",
+        "look/look-16.png"
+      ]
+    },
+    {
+      "name": "climb",
+      "frame_count": 4,
+      "frame_duration_ms": 180,
+      "loop": false,
+      "gif_repeats_for_review": true,
+      "cell_size": 362,
+      "origin": [
+        181,
+        335
+      ],
+      "empty_frames": [],
+      "output_edge_touch_frames": [],
+      "paste_clamped_frames": [],
+      "despilled_edge_pixels": 5966,
+      "alignment": "feet",
+      "source_motion_export": [
+        {
+          "frame": 1,
+          "source_bbox": [
+            219,
+            39,
+            552,
+            591
+          ],
+          "source_top_overscan_offset": 0,
+          "source_to_output_scale": 0.49709208400646204,
+          "paste_position": [
+            82,
+            78
+          ]
+        },
+        {
+          "frame": 2,
+          "source_bbox": [
+            93,
+            47,
+            412,
+            609
+          ],
+          "source_top_overscan_offset": 0,
+          "source_to_output_scale": 0.49709208400646204,
+          "paste_position": [
+            104,
+            68
+          ]
+        },
+        {
+          "frame": 3,
+          "source_bbox": [
+            211,
+            20,
+            534,
+            579
+          ],
+          "source_top_overscan_offset": -24,
+          "source_to_output_scale": 0.49709208400646204,
+          "paste_position": [
+            88,
+            71
+          ]
+        },
+        {
+          "frame": 4,
+          "source_bbox": [
+            158,
+            52,
+            472,
+            580
+          ],
+          "source_top_overscan_offset": -24,
+          "source_to_output_scale": 0.49709208400646204,
+          "paste_position": [
+            137,
+            86
+          ]
+        }
+      ],
+      "frames": [
+        "climb/climb-1.png",
+        "climb/climb-2.png",
+        "climb/climb-3.png",
+        "climb/climb-4.png"
+      ]
+    },
+    {
+      "name": "drag",
+      "frame_count": 8,
+      "frame_duration_ms": 180,
+      "loop": false,
+      "gif_repeats_for_review": true,
+      "cell_size": 362,
+      "origin": [
+        181,
+        335
+      ],
+      "empty_frames": [],
+      "output_edge_touch_frames": [],
+      "paste_clamped_frames": [],
+      "despilled_edge_pixels": 7804,
+      "alignment": "feet",
+      "source_motion_export": [],
+      "frames": [
+        "drag/drag-1.png",
+        "drag/drag-2.png",
+        "drag/drag-3.png",
+        "drag/drag-4.png",
+        "drag/drag-5.png",
+        "drag/drag-6.png",
+        "drag/drag-7.png",
+        "drag/drag-8.png"
+      ]
     }
   ]
 }

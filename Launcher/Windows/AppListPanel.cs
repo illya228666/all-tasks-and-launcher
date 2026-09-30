@@ -87,6 +87,7 @@ internal sealed class AppListPanel : UserControl
     }
 
     private void Forward(AppInfo app, AppCardAction action) => Requested?.Invoke(app, action);
+    internal void RefreshPetGeometry() => Arrange();
     private void Arrange()
     {
         if (_layingOut)

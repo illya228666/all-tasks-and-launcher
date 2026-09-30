@@ -25,9 +25,9 @@ internal sealed class JumpActivity : PetActivity
     internal override void Update(PetActivityContext c)
     {
         long elapsed = c.Now - StartedAtMs;
-        foreach (var frame in _failed ? PetAnimationCatalog.FailedJumpFrames : PetAnimationCatalog.SuccessfulJumpFrames)
+        foreach (var frame in c.Body.Appearance.GetJumpFrames(_failed))
         {
-            int duration = PetAnimationCatalog.FrameDurationsByRow[frame.Row][frame.Frame];
+            int duration = c.Body.Appearance.GetFrameDurations(frame.Row)[frame.Frame];
             if (elapsed < duration)
             {
                 c.Body.Row = frame.Row;

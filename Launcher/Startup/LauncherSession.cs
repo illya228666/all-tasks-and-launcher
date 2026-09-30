@@ -41,6 +41,9 @@ internal sealed class LauncherSession : IDisposable
         Window.FormClosing += Closing;
         Window.ThemeRequested += ChangeTheme;
         Window.CollisionsChanged += ChangeCollisions;
+        Window.PetChanged += ChangePet;
+        _settings.PetId = _pet?.PetId ?? Launcher.Pet.Sprites.PetAppearance.Original.Id;
+        Window.SetPet(_settings.PetId, _pet is not null);
         ApplyTheme();
         _pet?.ShowCollisions(settings.ShowCollisions);
     }
@@ -73,6 +76,24 @@ internal sealed class LauncherSession : IDisposable
         var theme = new WindowTheme(_settings.DarkTheme);
         Window.SetTheme(theme);
         _pet?.SetColors(new PetColors(theme.SurfaceAlt, theme.Surface, theme.Text, theme.Border));
+    }
+
+    private void ChangePet(string petId)
+    {
+        if (_pet is null) return;
+        try
+        {
+            _pet.SetPet(petId);
+            _settings.PetId = _pet.PetId;
+            Window.SetPet(_settings.PetId);
+            Window.Apps.RefreshPetGeometry();
+            Save();
+        }
+        catch (Exception error) when (error is IOException or UnauthorizedAccessException or ArgumentException or System.Runtime.InteropServices.ExternalException)
+        {
+            Window.SetPet(_settings.PetId);
+            ShowProblem("Begleiter konnte nicht gewechselt werden: " + error.Message);
+        }
     }
 
     private void ShowProblem(string message) => Window.Status.ShowHint(message);
@@ -161,6 +182,7 @@ internal sealed class LauncherSession : IDisposable
         Window.FormClosing -= Closing;
         Window.ThemeRequested -= ChangeTheme;
         Window.CollisionsChanged -= ChangeCollisions;
+        Window.PetChanged -= ChangePet;
         Window.Dispose();
     }
 }

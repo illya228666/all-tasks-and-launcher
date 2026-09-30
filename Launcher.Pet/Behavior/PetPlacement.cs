@@ -6,10 +6,10 @@ namespace Launcher.Pet.Behavior;
 internal static class PetPlacement
 {
     internal static Rectangle SpriteBounds(PetBody body, PetEnvironment environment, Point shake) =>
-        PetSpriteLayout.GetBounds(LogicalPosition(body, environment), PetSpriteCatalog.GetFrameGeometry(body.Row, body.Frame), shake, environment.Scale);
+        PetSpriteLayout.GetBounds(LogicalPosition(body, environment), body.Appearance.GetFrameGeometry(body.Row, body.Frame), shake, environment.Scale, body.Appearance);
 
     internal static Point? VisibleHead(PetBody body, PetEnvironment environment, Rectangle bounds) =>
-        PetSpriteLayout.VisibleHead(bounds, PetSpriteCatalog.GetFrameGeometry(body.Row, body.Frame), environment.AreaScreenPosition, environment.VisibleScreenBounds);
+        PetSpriteLayout.VisibleHead(bounds, body.Appearance.GetFrameGeometry(body.Row, body.Frame), environment.AreaScreenPosition, environment.VisibleScreenBounds, body.Appearance);
 
     internal static void Fit(PetBody state, PetEnvironment environment)
     {

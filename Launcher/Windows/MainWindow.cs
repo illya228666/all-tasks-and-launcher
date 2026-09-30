@@ -1,3 +1,5 @@
+using Launcher.Pet.Sprites;
+
 namespace Launcher.Windows;
 internal sealed class MainWindow : Form
 {
@@ -23,6 +25,13 @@ internal sealed class MainWindow : Form
         AutoSize = true,
         Text = "Kollisionen anzeigen"
     };
+    private readonly ComboBox _pet = new()
+    {
+        DropDownStyle = ComboBoxStyle.DropDownList,
+        Width = 190,
+        DisplayMember = nameof(PetAppearance.Name),
+        AccessibleName = "Begleiter"
+    };
     private readonly TableLayoutPanel _layout = new()
     {
         Dock = DockStyle.Fill,
@@ -36,6 +45,7 @@ internal sealed class MainWindow : Form
 
     internal event Action? ThemeRequested;
     internal event Action<bool>? CollisionsChanged;
+    internal event Action<string>? PetChanged;
     internal event Action? RefreshRequested;
     internal event Action? RandomRequested;
     internal MainWindow(bool showCollisions)
@@ -62,7 +72,10 @@ internal sealed class MainWindow : Form
             WrapContents = true
         };
         _collisions.Checked = showCollisions;
-        options.Controls.AddRange(new Control[] { _theme, _collisions });
+        _pet.Items.AddRange(PetAppearance.Available.Cast<object>().ToArray());
+        _pet.SelectedItem = PetAppearance.Original;
+        options.Controls.AddRange(new Control[] { _theme, _collisions,
+            new Label { AutoSize = true, Text = "Begleiter:", Margin = new Padding(12, 7, 3, 0) }, _pet });
         _header.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
         for (int row = 0; row < 3; row++) _header.RowStyles.Add(new RowStyle(SizeType.AutoSize));
         _header.Controls.Add(_title, 0, 0);
@@ -79,9 +92,19 @@ internal sealed class MainWindow : Form
         Controls.Add(_layout);
         _theme.Click += (_, _) => ThemeRequested?.Invoke();
         _collisions.CheckedChanged += (_, _) => CollisionsChanged?.Invoke(_collisions.Checked);
+        _pet.SelectionChangeCommitted += (_, _) =>
+        {
+            if (_pet.SelectedItem is PetAppearance appearance) PetChanged?.Invoke(appearance.Id);
+        };
         using var resourceIcon = new System.ComponentModel.ComponentResourceManager(typeof(MainWindow)).GetObject("$this.Icon") as Icon;
         _windowIcon = (Icon)(resourceIcon ?? SystemIcons.Application).Clone();
         Icon = _windowIcon;
+    }
+
+    internal void SetPet(string petId, bool enabled = true)
+    {
+        _pet.SelectedItem = PetAppearance.Find(petId);
+        _pet.Enabled = enabled;
     }
 
     internal void SetTheme(WindowTheme theme)

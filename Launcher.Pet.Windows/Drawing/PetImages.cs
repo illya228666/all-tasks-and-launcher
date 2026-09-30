@@ -13,21 +13,13 @@ internal sealed class PetImages : IDisposable
     internal SpritePixelMask WithoutHatMask { get; private set; } = null!;
     internal Bitmap Hat { get; private set; } = null!;
     internal Bitmap[] HatFalling { get; private set; } = Array.Empty<Bitmap>();
+    internal PetAppearance Appearance { get; private set; } = PetAppearance.Original;
 
-    internal PetImages()
+    internal PetImages(string? petId = null)
     {
         try
         {
-            using var withHat = Read("spritesheet_sumrak_hat.png");
-            using var withoutHat = Read("spritesheet_sumrak_no_hat.png");
-            ValidateAtlases(withHat, withoutHat);
-            using var withHatClimbing = AddClimbing(withHat, true);
-            using var withoutHatClimbing = AddClimbing(withoutHat, false);
-            using var drag = Read("sumrak_drag.png");
-            WithHat = AddDragFrames(withHatClimbing, drag, true);
-            WithoutHat = AddDragFrames(withoutHatClimbing, drag, false);
-            WithHatMask = new(WithHat);
-            WithoutHatMask = new(WithoutHat);
+            ChangeAppearance(PetAppearance.Find(petId));
             using var hat = Read(Path.Combine("hat", "hat.png"));
             Hat = Normalize(hat, HatSize);
             HatFalling = ReadFrames("hat", "hat_falling_", Launcher.Pet.Hat.HatAnimation.FallingFrameCount, HatSize);
@@ -37,6 +29,101 @@ internal sealed class PetImages : IDisposable
             Dispose();
             throw;
         }
+    }
+
+    /// <summary>
+    /// Load and validate the complete replacement before releasing live images.
+    /// The original hat is shared by every pet. Missing no-hat artwork uses the
+    /// same atlas and alpha mask, so drawing/hit testing need no special branch.
+    /// </summary>
+    internal void ChangeAppearance(PetAppearance appearance)
+    {
+        Bitmap? withHat = null, withoutHat = null;
+        try
+        {
+            if (appearance.UsesSeparateFrames)
+            {
+                (withHat, appearance) = ReadFrameAtlas(appearance);
+                withoutHat = withHat;
+            }
+            else
+            {
+                using var originalHat = Read("spritesheet_sumrak_hat.png");
+                using var originalNoHat = Read("spritesheet_sumrak_no_hat.png");
+                ValidateAtlases(originalHat, originalNoHat);
+                using var climbingHat = AddClimbing(originalHat, true);
+                using var climbingNoHat = AddClimbing(originalNoHat, false);
+                using var drag = Read("sumrak_drag.png");
+                withHat = AddDragFrames(climbingHat, drag, true);
+                withoutHat = AddDragFrames(climbingNoHat, drag, false);
+            }
+            var withHatMask = new SpritePixelMask(withHat);
+            var withoutHatMask = ReferenceEquals(withHat, withoutHat) ? withHatMask : new SpritePixelMask(withoutHat);
+            DisposeAtlases();
+            WithHat = withHat;
+            WithoutHat = withoutHat;
+            WithHatMask = withHatMask;
+            WithoutHatMask = withoutHatMask;
+            Appearance = appearance;
+        }
+        catch
+        {
+            if (!ReferenceEquals(withHat, withoutHat)) withoutHat?.Dispose();
+            withHat?.Dispose();
+            throw;
+        }
+    }
+
+    private static (Bitmap Atlas, PetAppearance Appearance) ReadFrameAtlas(PetAppearance appearance)
+    {
+        // Only behaviors already present in the engine are authored here.
+        // Leftward walking mirrors the rightward sequence, including its mask.
+        // Legacy rows 6–8 are unused expressions, not new runtime behaviors.
+        string?[] actions = { "idle", "walk", "walk", "wave", "jump", "failed",
+            null, null, null, "look", "look", "climb", "drag" };
+        var geometry = new PetFrameGeometry[appearance.AuthoredRows][];
+        var atlas = new Bitmap(appearance.Columns * appearance.CellSize.Width,
+            appearance.AuthoredRows * appearance.CellSize.Height, PixelFormat.Format32bppArgb);
+        try
+        {
+            using var graphics = Graphics.FromImage(atlas);
+            Configure(graphics);
+            for (int row = 0; row < appearance.AuthoredRows; row++)
+            {
+                if (actions[row] is null)
+                {
+                    geometry[row] = new[] { geometry[0][0] };
+                    continue;
+                }
+                geometry[row] = new PetFrameGeometry[appearance.GetFrameCount(row)];
+                for (int index = 0; index < geometry[row].Length; index++)
+                {
+                    int sourceIndex = index + 1 + (row == 10 ? 8 : 0);
+                    using var frame = Read(Path.Combine(appearance.Id, actions[row]!, $"{actions[row]}-{sourceIndex}.png"));
+                    if (frame.Size != appearance.CellSize)
+                        throw new InvalidDataException("Sprite frame dimensions do not match the selected pet.");
+                    if (row == 2) frame.RotateFlip(RotateFlipType.RotateNoneFlipX);
+                    Rectangle visible = VisibleBounds(frame, new(Point.Empty, frame.Size));
+                    if (visible.IsEmpty) throw new InvalidDataException("Das Sprite enthaelt keine sichtbaren Pixel.");
+                    // ponytail: approximate head region from the silhouette; use
+                    // authored per-frame head bounds if future pets need precision.
+                    int headHeight = Math.Max(1, (int)Math.Round(visible.Height * .47));
+                    int headWidth = Math.Min(visible.Width, (int)Math.Round(headHeight * 1.25));
+                    int center = appearance.CellSize.Width / 2;
+                    geometry[row][index] = new(center, 335, new(center, visible.Top + headHeight / 2),
+                        new(center - headWidth / 2, visible.Top, headWidth, headHeight));
+                    graphics.DrawImage(frame, appearance.GetSourceRectangle(row, index), new Rectangle(Point.Empty, frame.Size), GraphicsUnit.Pixel);
+                }
+            }
+            return (atlas, appearance.WithGeometry(geometry));
+        }
+        catch { atlas.Dispose(); throw; }
+    }
+
+    private void DisposeAtlases()
+    {
+        if (!ReferenceEquals(WithoutHat, WithHat)) WithoutHat?.Dispose();
+        WithHat?.Dispose();
     }
 
     private static Bitmap AddDragFrames(Bitmap original, Bitmap drag, bool hat)
@@ -177,8 +264,7 @@ internal sealed class PetImages : IDisposable
         foreach (Bitmap? frame in HatFalling)
             frame?.Dispose();
         Hat?.Dispose();
-        WithoutHat?.Dispose();
-        WithHat?.Dispose();
+        DisposeAtlases();
     }
 }
 

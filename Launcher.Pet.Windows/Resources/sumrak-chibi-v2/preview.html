@@ -8,7 +8,7 @@ body{margin:24px;font:15px system-ui;background:#18202a;color:#eaf0f6}h1{font-si
 </style>
 <header>
 <h1>Sumrak · chibi v2</h1>
-<p>11 действий · 148 кадров · однократные действия здесь повторяются для просмотра</p>
+<p>15 наборов · 184 кадра · последовательности поз здесь повторяются для просмотра</p>
 <button id="play">Пауза</button><button id="restart">Сначала</button>
 <label>Фон <select id="background"><option value="light">Светлый</option><option value="dark">Тёмный</option><option value="checker">Шахматный</option></select></label>
 <label>Скорость <select id="speed"><option value="0.5">0,5×</option><option value="1" selected>1×</option><option value="1.5">1,5×</option></select></label>
@@ -17,11 +17,11 @@ body{margin:24px;font:15px system-ui;background:#18202a;color:#eaf0f6}h1{font-si
 <main id="cards"></main>
 <p id="status">Загрузка изображений…</p>
 <script>
-const names={idle:'Ожидание',walk:'Ходьба',run:'Бег',jump:'Прыжок','sit-down':'Усаживание','seated-idle':'Сидячее ожидание',sleep:'Сон','wake-up':'Пробуждение',wave:'Приветствие',surprise:'Удивление','hat-trick':'Трюк со шляпой'};
+const names={idle:'Ожидание',walk:'Ходьба',run:'Бег',jump:'Прыжок','sit-down':'Усаживание','seated-idle':'Сидячее ожидание',sleep:'Сон','wake-up':'Пробуждение',wave:'Приветствие',surprise:'Удивление','hat-trick':'Трюк со шляпой',failed:'Потеря равновесия и подъём',look:'Взгляд по направлениям',climb:'Лазание',drag:'Перетаскивание, падение и подъём'};
 let playing=true,lastTime=0;const views=[];
 async function start(){
  // No fetch: works when opened directly from the filesystem.
- const specs=[['idle',12,140,true],['walk',16,80,true],['run',16,60,true],['jump',16,80,false],['sit-down',12,100,false],['seated-idle',12,140,true],['sleep',12,180,true],['wake-up',12,110,false],['wave',12,100,false],['surprise',12,100,false],['hat-trick',16,90,false]];
+ const specs=[['idle',12,140,true],['walk',16,80,true],['run',16,60,true],['jump',16,80,false],['sit-down',12,100,false],['seated-idle',12,140,true],['sleep',12,180,true],['wake-up',12,110,false],['wave',12,100,false],['surprise',12,100,false],['hat-trick',16,90,false],['failed',8,180,false],['look',16,140,false],['climb',4,180,false],['drag',8,180,false]];
  for(const [name,frame_count,frame_duration_ms,loop] of specs){
   const action={name,frame_count,frame_duration_ms,loop,frames:Array.from({length:frame_count},(_,i)=>`${name}/${name}-${i+1}.png`)};
   const article=document.createElement('article');
@@ -32,7 +32,7 @@ async function start(){
   view.slider.oninput=()=>{playing=false;document.querySelector('#play').textContent='Играть';view.index=Number(view.slider.value);view.elapsed=0;render(view);};
   views.push(view);render(view);
  }
- document.querySelector('#status').textContent='Все 148 PNG-кадров загружены. Масштаб просмотра общий; позы не нормализуются по высоте.';
+ document.querySelector('#status').textContent='Все 184 PNG-кадра загружены. Масштаб просмотра общий; позы не нормализуются по высоте. В игре взгляд выбирает курсор, а лазание/падение используют существующие фазы, не этот демонстрационный цикл.';
  requestAnimationFrame(tick);
 }
 function render(view){view.image.src=view.action.frames[view.index];view.slider.value=view.index;view.info.textContent=`Кадр ${view.index+1} / ${view.action.frame_count}`;view.article.dataset.frame=view.index+1;}

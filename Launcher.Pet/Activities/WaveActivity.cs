@@ -17,7 +17,7 @@ internal sealed class WaveActivity : PetActivity
     {
         long elapsed = c.Now - StartedAtMs;
         PetFrames.Loop(c.Body, PetAnimationCatalog.WaveRow, elapsed);
-        if (elapsed >= PetAnimationCatalog.FrameDurationsByRow[PetAnimationCatalog.WaveRow].Sum() * WaveActivity.LoopCount)
+        if (elapsed >= c.Body.Appearance.GetFrameDurations(PetAnimationCatalog.WaveRow).Sum() * WaveActivity.LoopCount)
             c.Actor.Change(new IdleActivity(), c.Now);
     }
 }

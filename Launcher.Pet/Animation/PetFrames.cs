@@ -5,7 +5,7 @@ internal static class PetFrames
 {
     internal static void Loop(PetBody state, int row, long elapsedMs)
     {
-        int[] durations = PetAnimationCatalog.FrameDurationsByRow[row];
+        int[] durations = state.Appearance.GetFrameDurations(row);
         long phase = Math.Max(0, elapsedMs) % durations.Sum();
         int frame = 0;
         while (phase >= durations[frame])

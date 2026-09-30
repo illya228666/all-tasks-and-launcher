@@ -1,0 +1,78 @@
+{
+  "frame_count": 4,
+  "frame_duration_ms": 180,
+  "loop": false,
+  "gif_repeats_for_review": true,
+  "cell_size": 362,
+  "origin": [
+    181,
+    335
+  ],
+  "empty_frames": [],
+  "output_edge_touch_frames": [],
+  "paste_clamped_frames": [],
+  "despilled_edge_pixels": 5966,
+  "alignment": "feet",
+  "source_motion_export": [
+    {
+      "frame": 1,
+      "source_bbox": [
+        219,
+        39,
+        552,
+        591
+      ],
+      "source_top_overscan_offset": 0,
+      "source_to_output_scale": 0.49709208400646204,
+      "paste_position": [
+        82,
+        78
+      ]
+    },
+    {
+      "frame": 2,
+      "source_bbox": [
+        93,
+        47,
+        412,
+        609
+      ],
+      "source_top_overscan_offset": 0,
+      "source_to_output_scale": 0.49709208400646204,
+      "paste_position": [
+        104,
+        68
+      ]
+    },
+    {
+      "frame": 3,
+      "source_bbox": [
+        211,
+        20,
+        534,
+        579
+      ],
+      "source_top_overscan_offset": -24,
+      "source_to_output_scale": 0.49709208400646204,
+      "paste_position": [
+        88,
+        71
+      ]
+    },
+    {
+      "frame": 4,
+      "source_bbox": [
+        158,
+        52,
+        472,
+        580
+      ],
+      "source_top_overscan_offset": -24,
+      "source_to_output_scale": 0.49709208400646204,
+      "paste_position": [
+        137,
+        86
+      ]
+    }
+  ]
+}

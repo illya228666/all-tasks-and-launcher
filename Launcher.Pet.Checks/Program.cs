@@ -11,6 +11,7 @@ CheckRuinLayout();
 CheckHatRoute();
 BehaviorTraces.Check(args);
 ActivityChecks.Check();
+AppearanceChecks.Check();
 Console.WriteLine("Pet checks passed.");
 
 static void CheckLauncher()

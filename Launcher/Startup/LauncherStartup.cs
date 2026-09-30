@@ -28,7 +28,7 @@ internal static class LauncherStartup
         string? petWarning = null;
         try
         {
-            pet = new PetWindowsSession(window, window.Apps.PetArea, new PetWorld(new Random()), wallpaper);
+            pet = new PetWindowsSession(window, window.Apps.PetArea, new PetWorld(new Random()), wallpaper, read.Settings.PetId);
         }
         catch (Exception error) when (error is IOException or UnauthorizedAccessException or ArgumentException or System.Runtime.InteropServices.ExternalException)
         {

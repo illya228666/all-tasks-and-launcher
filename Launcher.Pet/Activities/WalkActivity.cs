@@ -25,7 +25,7 @@ internal sealed class WalkActivity : PetActivity
         bool moveRight = right && (!left || random.Next(2) == 0);
         float available = moveRight ? max - body.X : body.X - min;
         distance += (float)random.NextDouble() * (available - distance);
-        int cycle = PetAnimationCatalog.FrameDurationsByRow[PetAnimationCatalog.MoveRightRow].Sum();
+        int cycle = body.Appearance.GetFrameDurations(PetAnimationCatalog.MoveRightRow).Sum();
         return new(body.X, body.X + (moveRight ? distance : -distance), Math.Max(1, (int)Math.Round(distance / WalkActivity.PixelsPerCycle)) * cycle);
     }
     internal override void Update(PetActivityContext c)

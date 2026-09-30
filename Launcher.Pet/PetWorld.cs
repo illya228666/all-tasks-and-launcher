@@ -43,6 +43,14 @@ public sealed class PetWorld
         return true;
     }
     public PetScene? Scene { get; private set; }
+    public void SetAppearance(Sprites.PetAppearance appearance, long nowMs)
+    {
+        ArgumentNullException.ThrowIfNull(appearance);
+        if (ReferenceEquals(Body.Appearance, appearance)) return;
+        Body.Appearance = appearance;
+        _actor.ResetSession(nowMs);
+        RefreshScene();
+    }
 
     public PetWorld(Random random)
     {
@@ -162,7 +170,7 @@ public sealed class PetWorld
         Point shake = _actor.Shake;
         Rectangle bounds = PetPlacement.SpriteBounds(Body, environment, shake);
         Point? head = PetPlacement.VisibleHead(Body, environment, bounds);
-        return new(Body.Mode, Body.Row, Body.Frame, bounds, head, shake, _hat.Attached, _hat.Scene, _speech.Phrase, _speech.VisibleLetters, RenderScale, _actor.Activity.AllowsHatDrag, _actor.Activity.ShakeWindow);
+        return new(Body.Mode, Body.Row, Body.Frame, bounds, head, shake, _hat.Attached, _hat.Scene, _speech.Phrase, _speech.VisibleLetters, RenderScale, _actor.Activity.AllowsHatDrag, _actor.Activity.ShakeWindow) { Appearance = Body.Appearance };
     }
 
 }

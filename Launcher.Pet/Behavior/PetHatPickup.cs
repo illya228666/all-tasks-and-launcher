@@ -15,7 +15,7 @@ internal static class PetHatPickup
         float step = PetHatPickup.RunSpeedPixelsPerSecond * Math.Clamp(elapsedSeconds, 0, 0.05f);
         state.X += Math.Clamp(distance, -step, step);
         state.Row = distance >= 0 ? PetAnimationCatalog.MoveRightRow : PetAnimationCatalog.MoveLeftRow;
-        state.Frame = (int)(nowMs / PetHatPickup.RunFrameMs % PetAnimationCatalog.FrameDurationsByRow[state.Row].Length);
+        state.Frame = (int)(nowMs / PetHatPickup.RunFrameMs % state.Appearance.GetFrameDurations(state.Row).Length);
         return Math.Abs(distance) <= step;
     }
 

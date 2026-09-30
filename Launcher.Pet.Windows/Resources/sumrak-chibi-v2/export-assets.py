@@ -20,6 +20,8 @@ ACTIONS = {
     'sleep': (12, 180, True), 'wake-up': (12, 110, False),
     'wave': (12, 100, False), 'surprise': (12, 100, False),
     'hat-trick': (16, 90, False),
+    'failed': (8, 180, False), 'look': (16, 140, False),
+    'climb': (4, 180, False), 'drag': (8, 180, False),
 }
 
 
@@ -58,8 +60,8 @@ def source_motion_frames(action, processor, metadata):
     for row in range(rows):
         for col in range(cols):
             x0, y0 = col * width, row * height
-            top = max(0, y0 - 24) if action == 'wake-up' else y0
-            bottom = min(raw.height, y0 + height + 24) if action == 'wake-up' else y0 + height
+            top = max(0, y0 - 24) if action in {'wake-up', 'climb'} else y0
+            bottom = min(raw.height, y0 + height + 24) if action in {'wake-up', 'climb'} else y0 + height
             source = cleaned.crop((x0, top, x0 + width, bottom))
             components = processor.connected_components(source, min_area=24)
             if action != 'hat-trick':
@@ -78,11 +80,11 @@ def source_motion_frames(action, processor, metadata):
     first_anchor = parts[0][2]
     frames, records = [], []
     for index, (source, bbox, anchor, top_offset) in enumerate(parts):
-        reference_anchor = anchor if action == 'wake-up' else first_anchor
+        reference_anchor = anchor if action in {'wake-up', 'climb'} else first_anchor
         target = (cell / 2, 335)
         # Overscan changes source coordinate origin, not anatomical scale.
         paste_x = round(target[0] - (reference_anchor[0] - bbox[0]) * scale)
-        anchor_y = reference_anchor[1] if action == 'wake-up' else reference_anchor[1] - top_offset
+        anchor_y = reference_anchor[1] if action in {'wake-up', 'climb'} else reference_anchor[1] - top_offset
         paste_y = round(target[1] - (anchor_y - bbox[1]) * scale)
         subject = source.crop(bbox)
         subject = subject.resize((round(subject.width * scale), round(subject.height * scale)), Image.Resampling.LANCZOS)
@@ -101,7 +103,7 @@ def source_motion_frames(action, processor, metadata):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--processor', required=True, help='Path to generate2dsprite.py from the installed skill')
-    parser.add_argument('--action', choices=ACTIONS, help='Re-export only one newly processed action')
+    parser.add_argument('--action', choices=ACTIONS, nargs='+', help='Re-export only selected newly processed actions')
     arguments = parser.parse_args()
     spec = importlib.util.spec_from_file_location('sprite_processor', arguments.processor)
     processor = importlib.util.module_from_spec(spec)
@@ -111,13 +113,13 @@ def main():
         folder = ROOT / action
         metadata = json.loads((folder / 'pipeline-meta.json').read_text(encoding='utf-8'))
         assert len(metadata['frame_labels']) == count
-        if arguments.action and action != arguments.action:
+        if arguments.action and action not in arguments.action:
             export = json.loads((folder / 'export-meta.json').read_text(encoding='utf-8'))
             manifest['actions'].append({'name': action, **export,
                                        'frames': [f'{action}/{label}.png' for label in metadata['frame_labels']]})
             continue
         records = []
-        if action in {'jump', 'hat-trick', 'wake-up'}:
+        if action in {'jump', 'hat-trick', 'wake-up', 'climb'}:
             frames, records = source_motion_frames(action, processor, metadata)
         else:
             frames = [Image.open(folder / f'{label}.png').convert('RGBA') for label in metadata['frame_labels']]

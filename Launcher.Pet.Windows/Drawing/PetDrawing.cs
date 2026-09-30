@@ -19,7 +19,7 @@ internal sealed class PetDrawing : IDisposable
 
     internal void Display(PetScene scene)
     {
-        bool changed = _scene is null || _scene.Row != scene.Row || _scene.Frame != scene.Frame || _scene.SpriteBounds != scene.SpriteBounds || _scene.HatAttached != scene.HatAttached;
+        bool changed = _scene is null || _scene.Appearance != scene.Appearance || _scene.Row != scene.Row || _scene.Frame != scene.Frame || _scene.SpriteBounds != scene.SpriteBounds || _scene.HatAttached != scene.HatAttached;
         _scene = scene;
         if (changed)
             _area.Invalidate();
@@ -38,7 +38,7 @@ internal sealed class PetDrawing : IDisposable
         args.Graphics.DrawRectangle(pen, 0, _area.PetZoneTopY, Math.Max(1, _area.ClientSize.Width - 1), PetLogicalGeometry.Height - 1);
         if (!Enabled || _scene is null)
             return;
-        args.Graphics.DrawImage(_scene.HatAttached ? _images.WithHat : _images.WithoutHat, _scene.SpriteBounds, PetSpriteCatalog.GetSourceRectangle(_scene.Row, _scene.Frame), GraphicsUnit.Pixel);
+        args.Graphics.DrawImage(_scene.HatAttached ? _images.WithHat : _images.WithoutHat, _scene.SpriteBounds, _scene.Appearance.GetSourceRectangle(_scene.Row, _scene.Frame), GraphicsUnit.Pixel);
     }
 
     internal bool IsPetAtScreen(Point screenPoint, Rectangle visibleScreenBounds) =>
@@ -47,7 +47,7 @@ internal sealed class PetDrawing : IDisposable
     internal bool IsHeadAtScreen(Point screenPoint, Rectangle visibleScreenBounds)
     {
         return TryGetPetPixel(screenPoint, visibleScreenBounds, out int x, out int y, out _, out _)
-            && PetSpriteCatalog.GetFrameGeometry(_scene!.Row, _scene.Frame).HeadBounds.Contains(x, y);
+            && _scene!.Appearance.GetFrameGeometry(_scene.Row, _scene.Frame).HeadBounds.Contains(x, y);
     }
 
     private bool TryGetPetPixel(Point screenPoint, Rectangle visibleScreenBounds, out int x, out int y, out Rectangle source, out Bitmap atlas)
@@ -60,8 +60,8 @@ internal sealed class PetDrawing : IDisposable
         Point local = _area.PointToClient(screenPoint);
         if (_area.GetChildAtPoint(local, GetChildAtPointSkip.Invisible) is not null || !_scene.SpriteBounds.Contains(local))
             return false;
-        source = PetSpriteCatalog.GetSourceRectangle(_scene.Row, _scene.Frame);
-        Point cell = PetSpriteLayout.MapDestinationToAtlasCell(local, _scene.SpriteBounds);
+        source = _scene.Appearance.GetSourceRectangle(_scene.Row, _scene.Frame);
+        Point cell = PetSpriteLayout.MapDestinationToAtlasCell(local, _scene.SpriteBounds, _scene.Appearance);
         x = cell.X;
         y = cell.Y;
         atlas = _scene.HatAttached ? _images.WithHat : _images.WithoutHat;

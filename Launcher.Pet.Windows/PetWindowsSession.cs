@@ -48,7 +48,7 @@ public sealed class PetWindowsSession : IDisposable
     private Point _cursor;
     private string? _phrase;
     public event Action<string>? Problem;
-    public PetWindowsSession(Form window, PetArea area, PetWorld world, DesktopWallpaperSession wallpaper)
+    public PetWindowsSession(Form window, PetArea area, PetWorld world, DesktopWallpaperSession wallpaper, string? petId = null)
     {
         _window = window;
         _area = area;
@@ -56,7 +56,9 @@ public sealed class PetWindowsSession : IDisposable
         _wallpaper = wallpaper;
         try
         {
-            _images = new();
+            _images = new(petId);
+            _world.SetAppearance(_images.Appearance, Environment.TickCount64);
+            _area.Appearance = _images.Appearance;
             _drawing = new(area, _images);
             _shake = new(window);
             _surfaces = new(() => Outside ? null : area.GroundScreenBounds(window));
@@ -80,6 +82,22 @@ public sealed class PetWindowsSession : IDisposable
     {
         _colors = colors;
         _drawing.SetColors(colors);
+    }
+
+    public string PetId => _images.Appearance.Id;
+    public void SetPet(string petId)
+    {
+        if (_disposed || PetId == petId) return;
+        _images.ChangeAppearance(Launcher.Pet.Sprites.PetAppearance.Find(petId));
+        _version++;
+        _area.Appearance = _images.Appearance;
+        _world.SetAppearance(_images.Appearance, Environment.TickCount64);
+        if (_world.Scene is PetScene scene)
+        {
+            if (Outside) _desktopPet?.Display(scene, _desktopBounds.Location);
+            else _drawing.Display(scene);
+        }
+        _area.Invalidate();
     }
 
     public void ShowCollisions(bool enabled)
