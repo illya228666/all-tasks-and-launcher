@@ -1,0 +1,198 @@
+{
+  "frame_count": 12,
+  "frame_duration_ms": 110,
+  "loop": false,
+  "gif_repeats_for_review": true,
+  "cell_size": 362,
+  "origin": [
+    181,
+    335
+  ],
+  "empty_frames": [],
+  "output_edge_touch_frames": [],
+  "paste_clamped_frames": [],
+  "despilled_edge_pixels": 18754,
+  "alignment": "feet",
+  "source_motion_export": [
+    {
+      "frame": 1,
+      "source_bbox": [
+        98,
+        155,
+        332,
+        317
+      ],
+      "source_top_overscan_offset": 0,
+      "source_to_output_scale": 0.8692090395480225,
+      "paste_position": [
+        68,
+        202
+      ]
+    },
+    {
+      "frame": 2,
+      "source_bbox": [
+        75,
+        152,
+        313,
+        317
+      ],
+      "source_top_overscan_offset": 0,
+      "source_to_output_scale": 0.8692090395480225,
+      "paste_position": [
+        53,
+        199
+      ]
+    },
+    {
+      "frame": 3,
+      "source_bbox": [
+        50,
+        152,
+        287,
+        317
+      ],
+      "source_top_overscan_offset": 0,
+      "source_to_output_scale": 0.8692090395480225,
+      "paste_position": [
+        41,
+        198
+      ]
+    },
+    {
+      "frame": 4,
+      "source_bbox": [
+        55,
+        121,
+        269,
+        324
+      ],
+      "source_top_overscan_offset": 0,
+      "source_to_output_scale": 0.8692090395480225,
+      "paste_position": [
+        68,
+        166
+      ]
+    },
+    {
+      "frame": 5,
+      "source_bbox": [
+        130,
+        83,
+        339,
+        312
+      ],
+      "source_top_overscan_offset": -24,
+      "source_to_output_scale": 0.8692090395480225,
+      "paste_position": [
+        93,
+        144
+      ]
+    },
+    {
+      "frame": 6,
+      "source_bbox": [
+        111,
+        81,
+        293,
+        313
+      ],
+      "source_top_overscan_offset": -24,
+      "source_to_output_scale": 0.8692090395480225,
+      "paste_position": [
+        91,
+        139
+      ]
+    },
+    {
+      "frame": 7,
+      "source_bbox": [
+        70,
+        80,
+        282,
+        313
+      ],
+      "source_top_overscan_offset": -24,
+      "source_to_output_scale": 0.8692090395480225,
+      "paste_position": [
+        84,
+        139
+      ]
+    },
+    {
+      "frame": 8,
+      "source_bbox": [
+        58,
+        104,
+        243,
+        314
+      ],
+      "source_top_overscan_offset": -24,
+      "source_to_output_scale": 0.8692090395480225,
+      "paste_position": [
+        116,
+        159
+      ]
+    },
+    {
+      "frame": 9,
+      "source_bbox": [
+        145,
+        56,
+        331,
+        289
+      ],
+      "source_top_overscan_offset": -24,
+      "source_to_output_scale": 0.8692090395480225,
+      "paste_position": [
+        123,
+        141
+      ]
+    },
+    {
+      "frame": 10,
+      "source_bbox": [
+        120,
+        32,
+        305,
+        290
+      ],
+      "source_top_overscan_offset": -24,
+      "source_to_output_scale": 0.8692090395480225,
+      "paste_position": [
+        131,
+        118
+      ]
+    },
+    {
+      "frame": 11,
+      "source_bbox": [
+        89,
+        23,
+        257,
+        290
+      ],
+      "source_top_overscan_offset": -24,
+      "source_to_output_scale": 0.8692090395480225,
+      "paste_position": [
+        109,
+        110
+      ]
+    },
+    {
+      "frame": 12,
+      "source_bbox": [
+        58,
+        22,
+        225,
+        293
+      ],
+      "source_top_overscan_offset": -24,
+      "source_to_output_scale": 0.8692090395480225,
+      "paste_position": [
+        107,
+        107
+      ]
+    }
+  ]
+}

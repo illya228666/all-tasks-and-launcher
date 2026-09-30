@@ -1,0 +1,17 @@
+{
+  "frame_count": 16,
+  "frame_duration_ms": 60,
+  "loop": true,
+  "gif_repeats_for_review": true,
+  "cell_size": 362,
+  "origin": [
+    181,
+    335
+  ],
+  "empty_frames": [],
+  "output_edge_touch_frames": [],
+  "paste_clamped_frames": [],
+  "despilled_edge_pixels": 22272,
+  "alignment": "feet",
+  "source_motion_export": []
+}

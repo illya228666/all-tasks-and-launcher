@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="ru">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sumrak chibi v2 — просмотр анимаций</title>
+<style>
+body{margin:24px;font:15px system-ui;background:#18202a;color:#eaf0f6}h1{font-size:24px;margin-bottom:8px}p{color:#aebdca}header{position:sticky;top:0;background:#18202af5;padding:12px 0;z-index:1}button,select,input{font:inherit;margin:4px;padding:7px}#cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px}article{border:1px solid #435363;border-radius:10px;padding:12px}h2{font-size:17px;margin:0 0 8px}.stage{background:#f4f1e9;display:flex;align-items:end;justify-content:center;border-radius:6px;min-height:302px;overflow:hidden}.stage.dark{background:#11171e}.stage.checker{background:conic-gradient(#eee 25%,#ccc 0 50%,#eee 0 75%,#ccc 0) 0 0/24px 24px}.sprite{display:block;width:292px;height:292px;object-fit:contain}.frame-info{font-variant-numeric:tabular-nums;margin:8px 0}.scrub{width:95%}a{color:#9fcaff}label{white-space:nowrap}
+</style>
+<header>
+<h1>Sumrak · chibi v2</h1>
+<p>11 действий · 148 кадров · однократные действия здесь повторяются для просмотра</p>
+<button id="play">Пауза</button><button id="restart">Сначала</button>
+<label>Фон <select id="background"><option value="light">Светлый</option><option value="dark">Тёмный</option><option value="checker">Шахматный</option></select></label>
+<label>Скорость <select id="speed"><option value="0.5">0,5×</option><option value="1" selected>1×</option><option value="1.5">1,5×</option></select></label>
+<label>Высота стоящего персонажа <select id="size"><option value="160">160 px</option><option value="200" selected>200 px</option><option value="220">220 px</option><option value="248">Оригинал</option></select></label>
+</header>
+<main id="cards"></main>
+<p id="status">Загрузка изображений…</p>
+<script>
+const names={idle:'Ожидание',walk:'Ходьба',run:'Бег',jump:'Прыжок','sit-down':'Усаживание','seated-idle':'Сидячее ожидание',sleep:'Сон','wake-up':'Пробуждение',wave:'Приветствие',surprise:'Удивление','hat-trick':'Трюк со шляпой'};
+let playing=true,lastTime=0;const views=[];
+async function start(){
+ // No fetch: works when opened directly from the filesystem.
+ const specs=[['idle',12,140,true],['walk',16,80,true],['run',16,60,true],['jump',16,80,false],['sit-down',12,100,false],['seated-idle',12,140,true],['sleep',12,180,true],['wake-up',12,110,false],['wave',12,100,false],['surprise',12,100,false],['hat-trick',16,90,false]];
+ for(const [name,frame_count,frame_duration_ms,loop] of specs){
+  const action={name,frame_count,frame_duration_ms,loop,frames:Array.from({length:frame_count},(_,i)=>`${name}/${name}-${i+1}.png`)};
+  const article=document.createElement('article');
+  article.innerHTML=`<h2>${names[action.name]}</h2><div class="stage"><img class="sprite" alt="${names[action.name]}"></div><div class="frame-info"></div><input class="scrub" type="range" min="0" max="${action.frame_count-1}" value="0" aria-label="Кадр: ${names[action.name]}"><p>${action.loop?'Цикл':'Однократно'} · ${action.frame_count} кадров · ${action.frame_duration_ms} мс/кадр · <a href="${action.name}/sheet-transparent.png">PNG-лист</a> · <a href="${action.name}/animation.gif">GIF</a></p>`;
+  document.querySelector('#cards').append(article);
+  const view={action,article,image:article.querySelector('img'),slider:article.querySelector('input'),info:article.querySelector('.frame-info'),index:0,elapsed:0};
+  for(const path of action.frames){const image=new Image();image.src=path;await image.decode();}
+  view.slider.oninput=()=>{playing=false;document.querySelector('#play').textContent='Играть';view.index=Number(view.slider.value);view.elapsed=0;render(view);};
+  views.push(view);render(view);
+ }
+ document.querySelector('#status').textContent='Все 148 PNG-кадров загружены. Масштаб просмотра общий; позы не нормализуются по высоте.';
+ requestAnimationFrame(tick);
+}
+function render(view){view.image.src=view.action.frames[view.index];view.slider.value=view.index;view.info.textContent=`Кадр ${view.index+1} / ${view.action.frame_count}`;view.article.dataset.frame=view.index+1;}
+function tick(time){
+ const delta=lastTime?Math.min(time-lastTime,100):0;lastTime=time;
+ if(playing)for(const view of views){view.elapsed+=delta*Number(document.querySelector('#speed').value);let delay=view.action.frame_duration_ms;if(!view.action.loop&&view.index===view.action.frame_count-1)delay+=500;if(view.elapsed>=delay){view.elapsed-=delay;view.index=(view.index+1)%view.action.frame_count;render(view);}}
+ requestAnimationFrame(tick);
+}
+document.querySelector('#play').onclick=()=>{playing=!playing;document.querySelector('#play').textContent=playing?'Пауза':'Играть';};
+document.querySelector('#restart').onclick=()=>{for(const view of views){view.index=0;view.elapsed=0;render(view);}};
+document.querySelector('#background').onchange=event=>{for(const stage of document.querySelectorAll('.stage'))stage.className='stage '+event.target.value;};
+document.querySelector('#size').onchange=event=>{const size=Number(event.target.value)*362/248;for(const image of document.querySelectorAll('.sprite'))image.style.width=image.style.height=size+'px';};
+start().catch(error=>{document.querySelector('#status').textContent='Ошибка загрузки: '+error.message;});
+</script>
+</html>

@@ -1,0 +1,258 @@
+{
+  "frame_count": 16,
+  "frame_duration_ms": 80,
+  "loop": false,
+  "gif_repeats_for_review": true,
+  "cell_size": 362,
+  "origin": [
+    181,
+    335
+  ],
+  "empty_frames": [],
+  "output_edge_touch_frames": [],
+  "paste_clamped_frames": [],
+  "despilled_edge_pixels": 30154,
+  "alignment": "fixed-source-root",
+  "source_motion_export": [
+    {
+      "frame": 1,
+      "source_bbox": [
+        99,
+        57,
+        250,
+        285
+      ],
+      "source_top_overscan_offset": 0,
+      "source_to_output_scale": 1.0088524590163934,
+      "paste_position": [
+        104,
+        112
+      ]
+    },
+    {
+      "frame": 2,
+      "source_bbox": [
+        102,
+        73,
+        256,
+        285
+      ],
+      "source_top_overscan_offset": 0,
+      "source_to_output_scale": 1.0088524590163934,
+      "paste_position": [
+        107,
+        128
+      ]
+    },
+    {
+      "frame": 3,
+      "source_bbox": [
+        67,
+        103,
+        264,
+        285
+      ],
+      "source_top_overscan_offset": 0,
+      "source_to_output_scale": 1.0088524590163934,
+      "paste_position": [
+        72,
+        158
+      ]
+    },
+    {
+      "frame": 4,
+      "source_bbox": [
+        86,
+        48,
+        245,
+        284
+      ],
+      "source_top_overscan_offset": 0,
+      "source_to_output_scale": 1.0088524590163934,
+      "paste_position": [
+        91,
+        103
+      ]
+    },
+    {
+      "frame": 5,
+      "source_bbox": [
+        93,
+        47,
+        256,
+        280
+      ],
+      "source_top_overscan_offset": 0,
+      "source_to_output_scale": 1.0088524590163934,
+      "paste_position": [
+        98,
+        102
+      ]
+    },
+    {
+      "frame": 6,
+      "source_bbox": [
+        89,
+        37,
+        255,
+        276
+      ],
+      "source_top_overscan_offset": 0,
+      "source_to_output_scale": 1.0088524590163934,
+      "paste_position": [
+        94,
+        92
+      ]
+    },
+    {
+      "frame": 7,
+      "source_bbox": [
+        72,
+        35,
+        245,
+        245
+      ],
+      "source_top_overscan_offset": 0,
+      "source_to_output_scale": 1.0088524590163934,
+      "paste_position": [
+        77,
+        90
+      ]
+    },
+    {
+      "frame": 8,
+      "source_bbox": [
+        55,
+        45,
+        251,
+        268
+      ],
+      "source_top_overscan_offset": 0,
+      "source_to_output_scale": 1.0088524590163934,
+      "paste_position": [
+        60,
+        100
+      ]
+    },
+    {
+      "frame": 9,
+      "source_bbox": [
+        63,
+        37,
+        264,
+        263
+      ],
+      "source_top_overscan_offset": 0,
+      "source_to_output_scale": 1.0088524590163934,
+      "paste_position": [
+        68,
+        92
+      ]
+    },
+    {
+      "frame": 10,
+      "source_bbox": [
+        66,
+        47,
+        265,
+        267
+      ],
+      "source_top_overscan_offset": 0,
+      "source_to_output_scale": 1.0088524590163934,
+      "paste_position": [
+        71,
+        102
+      ]
+    },
+    {
+      "frame": 11,
+      "source_bbox": [
+        52,
+        48,
+        248,
+        272
+      ],
+      "source_top_overscan_offset": 0,
+      "source_to_output_scale": 1.0088524590163934,
+      "paste_position": [
+        57,
+        103
+      ]
+    },
+    {
+      "frame": 12,
+      "source_bbox": [
+        52,
+        75,
+        251,
+        272
+      ],
+      "source_top_overscan_offset": 0,
+      "source_to_output_scale": 1.0088524590163934,
+      "paste_position": [
+        57,
+        130
+      ]
+    },
+    {
+      "frame": 13,
+      "source_bbox": [
+        71,
+        46,
+        258,
+        250
+      ],
+      "source_top_overscan_offset": 0,
+      "source_to_output_scale": 1.0088524590163934,
+      "paste_position": [
+        76,
+        101
+      ]
+    },
+    {
+      "frame": 14,
+      "source_bbox": [
+        73,
+        26,
+        257,
+        251
+      ],
+      "source_top_overscan_offset": 0,
+      "source_to_output_scale": 1.0088524590163934,
+      "paste_position": [
+        78,
+        81
+      ]
+    },
+    {
+      "frame": 15,
+      "source_bbox": [
+        82,
+        22,
+        236,
+        255
+      ],
+      "source_top_overscan_offset": 0,
+      "source_to_output_scale": 1.0088524590163934,
+      "paste_position": [
+        87,
+        77
+      ]
+    },
+    {
+      "frame": 16,
+      "source_bbox": [
+        86,
+        18,
+        239,
+        255
+      ],
+      "source_top_overscan_offset": 0,
+      "source_to_output_scale": 1.0088524590163934,
+      "paste_position": [
+        91,
+        73
+      ]
+    }
+  ]
+}
