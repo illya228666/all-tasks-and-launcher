@@ -49,7 +49,7 @@ internal sealed class PetNavigation
         if (point is null) return null;
         float x = point.Value.X - c.Environment.AreaScreenPosition.X;
         float y = point.Value.Y - c.Environment.AreaScreenPosition.Y;
-        var platform = Available.Values.FirstOrDefault(p => Math.Abs(p.Y - y) <= 3 && x >= p.Left + RuinMotion.HalfBody && x <= p.Right - RuinMotion.HalfBody);
+        var platform = Available.Values.FirstOrDefault(p => Math.Abs(p.Y - y) <= 3 && x >= p.Left + c.Metrics.HalfBody && x <= p.Right - c.Metrics.HalfBody);
         if (platform is not null) return platform;
         var bridge = c.Environment.Ruins!.Bridges.FirstOrDefault(b => c.Environment.AwakeningSeconds >= b.RevealAt + 0.85f
             && Math.Abs(b.Y - y) <= 3 && x >= b.Left && x <= b.Right);
@@ -95,6 +95,13 @@ internal sealed class PetNavigation
             CancelRoute();
             reconsider = true;
         }
+        if (hatPlatform is null && actor.Life is not null)
+        {
+            if (actor.Life.UpdateGround(c)) return true;
+            if (actor.Activity is ApproachActivity or LifeActivity) actor.Reset(c.Now);
+            c.Body.JumpLift = 0;
+            return false;
+        }
         if ((reconsider || actor.Activity is not ApproachActivity) && (Goal is not null || c.Now >= NextTrip))
         {
             Goal ??= Available.Values.Where(p => p.Id != Support).OrderBy(p => _visits.GetValueOrDefault(p.Id) + _random.NextDouble()).Select(p => p.Id).FirstOrDefault();
@@ -126,6 +133,31 @@ internal sealed class PetNavigation
         if (Goal == Support) Goal = null;
         c.Actor.Reset(c.Now);
         NextTrip = c.Now + _random.Next(3500, 8000);
+    }
+
+    internal bool CanReach(PetActivityContext c, string platform) => Available.ContainsKey(platform)
+        && (platform == Support || FindRoute(c.Environment.Ruins!, Available, Support, platform, c.Environment.AwakeningSeconds).Length > 0);
+
+    internal void RestoreSupport(string platform, RuinScene scene)
+    {
+        Support = Available.ContainsKey(platform) ? platform : "ruin:floor";
+        FootY = Available[Support].Y;
+        CancelRoute();
+    }
+
+    internal bool ApproachGoal(PetActivityContext c, string platform)
+    {
+        Goal = platform;
+        SeekingHat = false;
+        var route = FindRoute(c.Environment.Ruins!, Available, Support, platform, c.Environment.AwakeningSeconds);
+        if (route.Length == 0) return false;
+        if (Link != route[0] || c.Actor.Activity is not ApproachActivity)
+        {
+            Link = route[0];
+            c.Actor.ContinueWith(new ApproachActivity(Link), c.Now);
+        }
+        c.Actor.Activity.Update(c);
+        return true;
     }
 
     internal IReadOnlyList<RuinLink> PlannedRoute(RuinScene scene, float seconds, PetActivity activity)

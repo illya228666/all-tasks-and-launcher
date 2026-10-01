@@ -4,6 +4,7 @@ using Launcher.Pet.Data;
 using Launcher.Pet.Exploration;
 using Launcher.Pet.Hat;
 using Launcher.Pet.Sprites;
+using Launcher.Pet.Life;
 using Launcher.Pet.Windows.Drawing;
 
 namespace Launcher.Pet.Windows.Debug;
@@ -13,6 +14,7 @@ public sealed class RuinPreviewWindow : Form
 {
     private readonly RuinRenderer _renderer = new();
     private readonly PetImages _images = new();
+    private readonly Bitmap _wallpaper = new(Path.Combine(AppContext.BaseDirectory,"Resources","ruins","wallpaper.png"));
     private readonly System.Windows.Forms.Timer _timer = new() { Interval = 16 };
     private readonly Stopwatch _clock = Stopwatch.StartNew();
     private PetWorld _world = null!;
@@ -53,8 +55,10 @@ public sealed class RuinPreviewWindow : Form
         }
         _seed = seed.ToArray();
         _ruins = new RuinBuilder(_worldSize, _seed, _variation).Build(_worldSize, new(_worldSize.Width / 2, _worldSize.Height));
+        _ruins = LifeGeometry.Reflow(_ruins,_worldSize,DesktopWorldMetrics.ForWorkArea(_worldSize));
         _world = new(new Random(_variation));
         _world.Start(_now);
+        _world.SetAppearance(_images.Appearance,_now);
         _world.Update(_now, new(Point.Empty, _worldSize.Width, _worldSize.Height / 2, _worldSize.Width, new(Point.Empty, _worldSize), false, Point.Empty, Array.Empty<Rectangle>(), Array.Empty<HatSurface>()));
         _world.LeaveLauncher(_now);
         _awakeAt = -1; _pet = null; _lastError = "";
@@ -69,6 +73,7 @@ public sealed class RuinPreviewWindow : Form
         try
         {
             float seconds = _awakeAt < 0 ? 0 : (_now - _awakeAt) / 1000f;
+            if (seconds >= 3.5f && !_world.HasLife) _world.CreateLife(_ruins,(ulong)(uint)_variation+1);
             var surfaces = _ruins.Platforms.Where(p => p.Id == "ruin:floor" || _world.HasLanded && seconds >= p.RevealAt + 0.85f)
                 .Select(p => new HatSurface(p.Id, HatSurfaceKind.Ruin, new((int)p.Left, (int)p.Y, (int)(p.Right - p.Left), 1))).ToArray();
             surfaces = surfaces.Concat(_ruins.Bridges.Where(b => _world.HasLanded && seconds >= b.RevealAt + 0.85f)
@@ -76,7 +81,7 @@ public sealed class RuinPreviewWindow : Form
             _pet = _world.Update(_now, new(Point.Empty, _worldSize.Width, _worldSize.Height - PetLogicalGeometry.Height, _worldSize.Width,
                 new(Point.Empty, _worldSize), _world.IsHatDragging, _cursor, Array.Empty<Rectangle>(), surfaces, "ruin:floor", _world.RenderScale, _ruins, seconds));
             if (_world.HasLanded && _awakeAt < 0) _awakeAt = _now;
-            _layer = _awakeAt < 0 ? null : _renderer.Render(_ruins, new(_worldSize.Width / 2, _worldSize.Height), seconds);
+            _layer = _awakeAt < 0 ? null : _renderer.Render(_ruins, new(_worldSize.Width / 2, _worldSize.Height), seconds,_pet.Life);
         }
         catch (Exception error) { _lastError = error.ToString(); _paused = true; }
         Invalidate();
@@ -86,7 +91,7 @@ public sealed class RuinPreviewWindow : Form
         base.OnPaint(e);
         Graphics g = e.Graphics;
         g.Clear(Color.FromArgb(20, 26, 34));
-        TextRenderer.DrawText(g, "R replay   V variation   C layout   B light/dark   D paths   H toss hat   E earthquake   Space pause", Font, new Point(16, 12), Color.Gainsboro);
+        TextRenderer.DrawText(g, "R replay   V variation   C layout   M monitor size   B light/dark   D paths   H toss hat   E earthquake   Space pause", Font, new Point(16, 12), Color.Gainsboro);
         float scale = Math.Min((ClientSize.Width - 32f) / _worldSize.Width, (ClientSize.Height - 94f) / _worldSize.Height);
         _viewport = new((ClientSize.Width - _worldSize.Width * scale) / 2, 42, _worldSize.Width * scale, _worldSize.Height * scale);
         var saved = g.Save();
@@ -94,6 +99,7 @@ public sealed class RuinPreviewWindow : Form
         g.InterpolationMode = InterpolationMode.HighQualityBicubic;
         using (var background = new LinearGradientBrush(new Rectangle(Point.Empty, _worldSize), _light ? Color.FromArgb(231, 238, 242) : Color.FromArgb(12, 23, 36), _light ? Color.FromArgb(200, 211, 220) : Color.FromArgb(22, 43, 57), 90))
             g.FillRectangle(background, new Rectangle(Point.Empty, _worldSize));
+        if (!_light) g.DrawImage(_wallpaper,new Rectangle(Point.Empty,_worldSize));
         foreach (var seed in _seed)
         {
             using var surface = new SolidBrush(seed.IsIcon ? Color.FromArgb(90, 139, 163) : _light ? Color.WhiteSmoke : Color.FromArgb(34, 46, 60));
@@ -118,7 +124,15 @@ public sealed class RuinPreviewWindow : Form
         }
         if (_pet is not null)
         {
-            g.DrawImage(_pet.HatAttached ? _images.WithHat : _images.WithoutHat, _pet.SpriteBounds, PetSpriteCatalog.GetSourceRectangle(_pet.Row, _pet.Frame), GraphicsUnit.Pixel);
+            var frame = _images.Frame(_pet);
+            g.DrawImage(frame.Image,_pet.SpriteBounds,frame.Source,GraphicsUnit.Pixel);
+            foreach (var item in _pet.Life?.Items ?? Array.Empty<LifeItemView>())
+            {
+                float diameter=_ruins.WorldMetrics.ItemDiameter;
+                float lift=item.Holder==LifeHolder.World?item.Kind==LifeItemKind.Spore?diameter*.8f:diameter*.22f:0;
+                LifeDrawing.DrawItem(g,item.Kind,new(item.Position.X,item.Position.Y-lift),item.Mass,_now/1000f,diameter,
+                    item.Holder==LifeHolder.Pet && _pet.Life?.Activity==LifeTaskKind.Recycle?_pet.Life.ActionSeconds/2:0);
+            }
             if (!_pet.HatAttached) g.DrawImage(_images.Hat, new RectangleF(_pet.Hat.ScreenPosition.X, _pet.Hat.ScreenPosition.Y, HatGeometry.Width * _pet.Hat.Scale, HatGeometry.Height * _pet.Hat.Scale));
             if (_pet.Speech is not null && _pet.HeadScreenPosition is Point head)
                 g.DrawString(_pet.Speech[..Math.Min(_pet.VisibleLetters, _pet.Speech.Length)], Font, _light ? Brushes.DarkSlateGray : Brushes.WhiteSmoke, head.X + 35, head.Y - 22);
@@ -135,6 +149,10 @@ public sealed class RuinPreviewWindow : Form
             case Keys.R: ResetScene(); break;
             case Keys.V: _variation++; ResetScene(); break;
             case Keys.C: _scenario = (_scenario + 1) % 4; ResetScene(); break;
+            case Keys.M:
+                _worldSize = _worldSize.Width == 1920 ? new(2560,1400) : _worldSize.Width == 2560 ? new(3840,2080) : new(1920,1040);
+                _ruins = LifeGeometry.Reflow(_ruins,_worldSize,DesktopWorldMetrics.ForWorkArea(_worldSize));
+                break;
             case Keys.B: _light = !_light; break;
             case Keys.D: _geometry = !_geometry; break;
             case Keys.Space: _paused = !_paused; break;
@@ -152,20 +170,25 @@ public sealed class RuinPreviewWindow : Form
         base.OnMouseDown(e);
         if (!_viewport.Contains(e.Location)) return;
         _cursor = ToWorld(e.Location);
+        var item = _pet?.Life?.Items.Where(i=>i.Holder!=LifeHolder.Pet).OrderBy(i=>Math.Abs(i.Position.X-_cursor.X)+Math.Abs(i.Position.Y-_cursor.Y)).FirstOrDefault();
+        if (item is not null && Math.Abs(item.Position.X-_cursor.X)<_ruins.WorldMetrics.ItemDiameter && Math.Abs(item.Position.Y-_cursor.Y)<_ruins.WorldMetrics.ItemDiameter*1.5f)
+        { Capture=_world.BeginWorldItemDrag(item.Id,_cursor); return; }
         if (_pet is not null && ((_pet.HatAttached && _pet.HeadScreenPosition is Point head && Math.Abs(head.X - _cursor.X) < 30 && Math.Abs(head.Y - _cursor.Y) < 35)
             || (!_pet.HatAttached && new Rectangle(_pet.Hat.ScreenPosition, new((int)(HatGeometry.Width * _pet.Scale), (int)(HatGeometry.Height * _pet.Scale))).Contains(_cursor))))
             Capture = _world.BeginHatDrag(_cursor);
     }
-    protected override void OnMouseMove(MouseEventArgs e) { base.OnMouseMove(e); _cursor = ToWorld(e.Location); if (Capture) _world.MoveHat(_cursor); }
+    protected override void OnMouseMove(MouseEventArgs e)
+    { base.OnMouseMove(e); _cursor = ToWorld(e.Location); if (Capture) { if (_world.IsWorldItemDragging) _world.MoveWorldItem(_cursor); else _world.MoveHat(_cursor); } }
     protected override void OnMouseUp(MouseEventArgs e)
     {
         base.OnMouseUp(e); if (!Capture) return; Capture = false;
+        if (_world.IsWorldItemDragging) { _world.DropWorldItem(); return; }
         _world.DropHat(_pet?.HeadScreenPosition is Point head && Math.Abs(head.X - _cursor.X) < 25 && Math.Abs(head.Y - _cursor.Y) < 30);
     }
     private Point ToWorld(Point point) => new((int)((point.X - _viewport.X) * _worldSize.Width / Math.Max(1, _viewport.Width)), (int)((point.Y - _viewport.Y) * _worldSize.Height / Math.Max(1, _viewport.Height)));
     protected override void Dispose(bool disposing)
     {
-        if (disposing) { _timer.Stop(); _timer.Dispose(); _renderer.Dispose(); _images.Dispose(); }
+        if (disposing) { _timer.Stop(); _timer.Dispose(); _renderer.Dispose(); _images.Dispose(); _wallpaper.Dispose(); }
         base.Dispose(disposing);
     }
 }

@@ -1,0 +1,396 @@
+{
+  "name": "look-upper",
+  "row": 9,
+  "loop": false,
+  "durations": [
+    140,
+    140,
+    140,
+    140,
+    140,
+    140,
+    140,
+    140
+  ],
+  "hatFrames": [
+    "look-upper/hat/look-upper-1.png",
+    "look-upper/hat/look-upper-2.png",
+    "look-upper/hat/look-upper-3.png",
+    "look-upper/hat/look-upper-4.png",
+    "look-upper/hat/look-upper-5.png",
+    "look-upper/hat/look-upper-6.png",
+    "look-upper/hat/look-upper-7.png",
+    "look-upper/hat/look-upper-8.png"
+  ],
+  "noHatFrames": [
+    "look-upper/no-hat/look-upper-1.png",
+    "look-upper/no-hat/look-upper-2.png",
+    "look-upper/no-hat/look-upper-3.png",
+    "look-upper/no-hat/look-upper-4.png",
+    "look-upper/no-hat/look-upper-5.png",
+    "look-upper/no-hat/look-upper-6.png",
+    "look-upper/no-hat/look-upper-7.png",
+    "look-upper/no-hat/look-upper-8.png"
+  ],
+  "geometry": [
+    {
+      "bodyAnchorX": 384,
+      "groundAnchorY": 711,
+      "headAnchor": {
+        "x": 414,
+        "y": 375
+      },
+      "headBounds": {
+        "x": 294,
+        "y": 213,
+        "width": 241,
+        "height": 232
+      },
+      "itemAnchor": {
+        "x": 516,
+        "y": 532
+      },
+      "hatAnchor": {
+        "x": 414,
+        "y": 271
+      }
+    },
+    {
+      "bodyAnchorX": 384,
+      "groundAnchorY": 711,
+      "headAnchor": {
+        "x": 430,
+        "y": 373
+      },
+      "headBounds": {
+        "x": 329,
+        "y": 202,
+        "width": 203,
+        "height": 244
+      },
+      "itemAnchor": {
+        "x": 507,
+        "y": 529
+      },
+      "hatAnchor": {
+        "x": 430,
+        "y": 263
+      }
+    },
+    {
+      "bodyAnchorX": 384,
+      "groundAnchorY": 711,
+      "headAnchor": {
+        "x": 427,
+        "y": 374
+      },
+      "headBounds": {
+        "x": 338,
+        "y": 205,
+        "width": 179,
+        "height": 242
+      },
+      "itemAnchor": {
+        "x": 506,
+        "y": 529
+      },
+      "hatAnchor": {
+        "x": 427,
+        "y": 266
+      }
+    },
+    {
+      "bodyAnchorX": 384,
+      "groundAnchorY": 711,
+      "headAnchor": {
+        "x": 448,
+        "y": 373
+      },
+      "headBounds": {
+        "x": 387,
+        "y": 211,
+        "width": 122,
+        "height": 232
+      },
+      "itemAnchor": {
+        "x": 497,
+        "y": 532
+      },
+      "hatAnchor": {
+        "x": 448,
+        "y": 269
+      }
+    },
+    {
+      "bodyAnchorX": 384,
+      "groundAnchorY": 711,
+      "headAnchor": {
+        "x": 454,
+        "y": 385
+      },
+      "headBounds": {
+        "x": 354,
+        "y": 228,
+        "width": 200,
+        "height": 224
+      },
+      "itemAnchor": {
+        "x": 516,
+        "y": 528
+      },
+      "hatAnchor": {
+        "x": 454,
+        "y": 284
+      }
+    },
+    {
+      "bodyAnchorX": 384,
+      "groundAnchorY": 711,
+      "headAnchor": {
+        "x": 444,
+        "y": 390
+      },
+      "headBounds": {
+        "x": 336,
+        "y": 242,
+        "width": 215,
+        "height": 210
+      },
+      "itemAnchor": {
+        "x": 517,
+        "y": 528
+      },
+      "hatAnchor": {
+        "x": 444,
+        "y": 295
+      }
+    },
+    {
+      "bodyAnchorX": 384,
+      "groundAnchorY": 711,
+      "headAnchor": {
+        "x": 442,
+        "y": 406
+      },
+      "headBounds": {
+        "x": 336,
+        "y": 286,
+        "width": 211,
+        "height": 172
+      },
+      "itemAnchor": {
+        "x": 514,
+        "y": 533
+      },
+      "hatAnchor": {
+        "x": 442,
+        "y": 329
+      }
+    },
+    {
+      "bodyAnchorX": 384,
+      "groundAnchorY": 711,
+      "headAnchor": {
+        "x": 466,
+        "y": 436
+      },
+      "headBounds": {
+        "x": 371,
+        "y": 348,
+        "width": 190,
+        "height": 126
+      },
+      "itemAnchor": {
+        "x": 526,
+        "y": 538
+      },
+      "hatAnchor": {
+        "x": 466,
+        "y": 380
+      }
+    }
+  ],
+  "noHatGeometry": [
+    {
+      "bodyAnchorX": 384,
+      "groundAnchorY": 711,
+      "headAnchor": {
+        "x": 417,
+        "y": 378
+      },
+      "headBounds": {
+        "x": 290,
+        "y": 214,
+        "width": 255,
+        "height": 234
+      },
+      "itemAnchor": {
+        "x": 518,
+        "y": 539
+      },
+      "hatAnchor": {
+        "x": 417,
+        "y": 272
+      }
+    },
+    {
+      "bodyAnchorX": 384,
+      "groundAnchorY": 711,
+      "headAnchor": {
+        "x": 432,
+        "y": 375
+      },
+      "headBounds": {
+        "x": 326,
+        "y": 199,
+        "width": 211,
+        "height": 252
+      },
+      "itemAnchor": {
+        "x": 508,
+        "y": 539
+      },
+      "hatAnchor": {
+        "x": 432,
+        "y": 262
+      }
+    },
+    {
+      "bodyAnchorX": 384,
+      "groundAnchorY": 711,
+      "headAnchor": {
+        "x": 429,
+        "y": 374
+      },
+      "headBounds": {
+        "x": 338,
+        "y": 195,
+        "width": 182,
+        "height": 256
+      },
+      "itemAnchor": {
+        "x": 508,
+        "y": 539
+      },
+      "hatAnchor": {
+        "x": 429,
+        "y": 259
+      }
+    },
+    {
+      "bodyAnchorX": 384,
+      "groundAnchorY": 711,
+      "headAnchor": {
+        "x": 444,
+        "y": 372
+      },
+      "headBounds": {
+        "x": 373,
+        "y": 196,
+        "width": 142,
+        "height": 250
+      },
+      "itemAnchor": {
+        "x": 508,
+        "y": 539
+      },
+      "hatAnchor": {
+        "x": 444,
+        "y": 259
+      }
+    },
+    {
+      "bodyAnchorX": 384,
+      "groundAnchorY": 711,
+      "headAnchor": {
+        "x": 450,
+        "y": 364
+      },
+      "headBounds": {
+        "x": 344,
+        "y": 197,
+        "width": 213,
+        "height": 238
+      },
+      "itemAnchor": {
+        "x": 514,
+        "y": 530
+      },
+      "hatAnchor": {
+        "x": 450,
+        "y": 256
+      }
+    },
+    {
+      "bodyAnchorX": 384,
+      "groundAnchorY": 711,
+      "headAnchor": {
+        "x": 444,
+        "y": 370
+      },
+      "headBounds": {
+        "x": 332,
+        "y": 210,
+        "width": 224,
+        "height": 228
+      },
+      "itemAnchor": {
+        "x": 512,
+        "y": 531
+      },
+      "hatAnchor": {
+        "x": 444,
+        "y": 267
+      }
+    },
+    {
+      "bodyAnchorX": 384,
+      "groundAnchorY": 711,
+      "headAnchor": {
+        "x": 444,
+        "y": 382
+      },
+      "headBounds": {
+        "x": 336,
+        "y": 236,
+        "width": 217,
+        "height": 208
+      },
+      "itemAnchor": {
+        "x": 507,
+        "y": 533
+      },
+      "hatAnchor": {
+        "x": 444,
+        "y": 288
+      }
+    },
+    {
+      "bodyAnchorX": 384,
+      "groundAnchorY": 711,
+      "headAnchor": {
+        "x": 469,
+        "y": 406
+      },
+      "headBounds": {
+        "x": 372,
+        "y": 279,
+        "width": 194,
+        "height": 182
+      },
+      "itemAnchor": {
+        "x": 508,
+        "y": 538
+      },
+      "hatAnchor": {
+        "x": 469,
+        "y": 325
+      }
+    }
+  ],
+  "phases": {
+    "begin": 0,
+    "commit": 7,
+    "finish": 7
+  }
+}

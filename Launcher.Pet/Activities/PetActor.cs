@@ -13,11 +13,13 @@ internal sealed class PetActor
     internal PetActivity Activity { get; private set; } = new IdleActivity();
     internal PetRoutine Routine { get; }
     internal PetNavigation Navigation { get; }
+    internal Life.PetLifeBrain? Life { get; set; }
     internal HatWorld Hat { get; }
     internal PetSpeech Speech { get; }
     internal Point Shake { get; set; }
     internal PetLocation Location { get; set; }
-    internal float RenderScale => Location == PetLocation.Launcher ? 1 : Activity is DepartureActivity departure ? departure.Scale : 0.5f;
+    internal float DesktopScale { get; set; } = .5f;
+    internal float RenderScale => Location == PetLocation.Launcher ? 1 : Activity is DepartureActivity departure ? departure.Scale : DesktopScale;
     internal bool HasLanded => Location == PetLocation.Desktop || Activity is DepartureActivity { HasLanded: true };
 
     internal PetActor(Random random, HatWorld hat, PetSpeech speech)

@@ -38,7 +38,8 @@ internal sealed class PetDrawing : IDisposable
         args.Graphics.DrawRectangle(pen, 0, _area.PetZoneTopY, Math.Max(1, _area.ClientSize.Width - 1), PetLogicalGeometry.Height - 1);
         if (!Enabled || _scene is null)
             return;
-        args.Graphics.DrawImage(_scene.HatAttached ? _images.WithHat : _images.WithoutHat, _scene.SpriteBounds, _scene.Appearance.GetSourceRectangle(_scene.Row, _scene.Frame), GraphicsUnit.Pixel);
+        var frame = _images.Frame(_scene);
+        args.Graphics.DrawImage(frame.Image, _scene.SpriteBounds, frame.Source, GraphicsUnit.Pixel);
     }
 
     internal bool IsPetAtScreen(Point screenPoint, Rectangle visibleScreenBounds) =>
@@ -47,7 +48,7 @@ internal sealed class PetDrawing : IDisposable
     internal bool IsHeadAtScreen(Point screenPoint, Rectangle visibleScreenBounds)
     {
         return TryGetPetPixel(screenPoint, visibleScreenBounds, out int x, out int y, out _, out _)
-            && _scene!.Appearance.GetFrameGeometry(_scene.Row, _scene.Frame).HeadBounds.Contains(x, y);
+            && _scene!.Appearance.GetFrameGeometry(_scene.Row, _scene.Frame, _scene.HatAttached).HeadBounds.Contains(x, y);
     }
 
     private bool TryGetPetPixel(Point screenPoint, Rectangle visibleScreenBounds, out int x, out int y, out Rectangle source, out Bitmap atlas)
@@ -60,12 +61,13 @@ internal sealed class PetDrawing : IDisposable
         Point local = _area.PointToClient(screenPoint);
         if (_area.GetChildAtPoint(local, GetChildAtPointSkip.Invisible) is not null || !_scene.SpriteBounds.Contains(local))
             return false;
-        source = _scene.Appearance.GetSourceRectangle(_scene.Row, _scene.Frame);
+        var frame = _images.Frame(_scene);
+        source = frame.Source;
         Point cell = PetSpriteLayout.MapDestinationToAtlasCell(local, _scene.SpriteBounds, _scene.Appearance);
         x = cell.X;
         y = cell.Y;
-        atlas = _scene.HatAttached ? _images.WithHat : _images.WithoutHat;
-        return (_scene.HatAttached ? _images.WithHatMask : _images.WithoutHatMask).Contains(source.X + x, source.Y + y);
+        atlas = frame.Image;
+        return frame.Mask.Contains(source.X + x, source.Y + y);
     }
 
     public void Dispose()

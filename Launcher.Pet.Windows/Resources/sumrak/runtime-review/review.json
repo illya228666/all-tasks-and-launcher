@@ -1,0 +1,7 @@
+{
+  "source": "PetWorld + production RuinRenderer/PetImages/LifeDrawing",
+  "stepMs": 20,
+  "captureMs": 100,
+  "sequences": 4,
+  "framesPerSequence": 27
+}

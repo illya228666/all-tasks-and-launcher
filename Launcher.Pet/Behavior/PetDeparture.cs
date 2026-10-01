@@ -9,11 +9,14 @@ internal sealed class PetDeparture
     private readonly Point _start;
     internal PetDeparture(Point start) => _start = start;
     private float _elapsed;
+    internal float TargetScale { get; set; } = .5f;
     private float? _landedAt;
     internal bool HasLanded => _landedAt is not null;
+    internal float RecoveryProgress => _landedAt is float landed ? Math.Clamp((_elapsed-landed)/1.4f,0,1) : 0;
+    internal float FlightProgress { get; private set; }
     internal float Scale
     {
-        get { float t = Math.Clamp(_elapsed / 0.65f, 0, 1); return 1 - 0.5f * t * t * (3 - 2 * t); }
+        get { float t = Math.Clamp(_elapsed / 0.65f, 0, 1); return 1 + (TargetScale - 1) * t * t * (3 - 2 * t); }
     }
     private const float Gravity = 1500f;
     private const float LaunchSpeed = 300f;
@@ -28,10 +31,13 @@ internal sealed class PetDeparture
         float targetX = Math.Clamp(startX + Math.Sign(environment.AreaWidth / 2f - startX - PetLogicalGeometry.Width / 2f) * PetLogicalGeometry.Width, min, max);
         float floor = environment.PetZoneTopY;
         float distance = Math.Max(0, floor - startY);
-        float flightDuration = (LaunchSpeed + MathF.Sqrt(LaunchSpeed * LaunchSpeed + 2 * Gravity * distance)) / Gravity;
+        float gravity = environment.Ruins?.Metrics?.Gravity ?? Gravity;
+        float launchSpeed = environment.Ruins?.Metrics?.JumpSpeed ?? LaunchSpeed;
+        float flightDuration = (launchSpeed + MathF.Sqrt(launchSpeed * launchSpeed + 2 * gravity * distance)) / gravity;
         float flight = Math.Max(0, _elapsed - 0.14f);
         state.X = startX + (targetX - startX) * Math.Clamp(flight / flightDuration, 0, 1) + PetLogicalGeometry.Width * (1 - Scale) / 2;
-        float y = startY - LaunchSpeed * flight + Gravity * flight * flight / 2;
+        FlightProgress = Math.Clamp(flight / flightDuration,0,1);
+        float y = startY - launchSpeed * flight + gravity * flight * flight / 2;
         if (_landedAt is null && flight >= flightDuration)
             _landedAt = _elapsed;
         if (_landedAt is float landed)
@@ -45,7 +51,7 @@ internal sealed class PetDeparture
         }
         state.JumpLift = floor - y;
         state.Row = PetAnimationCatalog.JumpRow;
-        state.Frame = _elapsed < 0.14f ? 0 : flight < LaunchSpeed / Gravity ? 1 : 3;
+        state.Frame = _elapsed < 0.14f ? 0 : flight < launchSpeed / gravity ? 1 : 3;
         return false;
     }
 }

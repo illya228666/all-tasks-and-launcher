@@ -40,6 +40,7 @@ internal readonly record struct IdleContinuation(bool Speech, bool Jump, bool Wa
 internal readonly record struct PetActivityContext(PetActor Actor, PetEnvironment Environment, long Now, float Elapsed, bool HeadVisible = true)
 {
     internal PetBody Body => Actor.Body;
+    internal Launcher.Pet.Exploration.DesktopWorldMetrics Metrics => Environment.Ruins?.WorldMetrics ?? Launcher.Pet.Exploration.DesktopWorldMetrics.Legacy;
     internal float Step => Math.Clamp(Elapsed, 0, 0.04f);
     internal float HalfWidth => PetLogicalGeometry.Width * Environment.Scale / 2;
 }

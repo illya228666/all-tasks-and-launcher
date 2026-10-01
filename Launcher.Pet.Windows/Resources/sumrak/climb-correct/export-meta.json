@@ -1,0 +1,21 @@
+{
+  "frameCount": 12,
+  "paired": false,
+  "strictQcPassed": true,
+  "sharedScaleProfile": "../character-scale-profile.json",
+  "standingOutlineGate": false,
+  "qc": {
+    "frame_count": 12,
+    "valid_frame_count": 12,
+    "empty_count": 0,
+    "edge_touch_count": 0,
+    "paste_clamped_count": 0,
+    "body_scale_mean": 0.4264347538901201,
+    "output_subject_height_mean": 433.4166666666667,
+    "body_scale_cv": 0.018835363555323396,
+    "anchor_x_std": 0.01322234522058516,
+    "anchor_y_std": 0.0022790965946211036,
+    "anchor_y_mean": 0.8227612433862429,
+    "profile_body_scale_drift": 0.024545550302241592
+  }
+}

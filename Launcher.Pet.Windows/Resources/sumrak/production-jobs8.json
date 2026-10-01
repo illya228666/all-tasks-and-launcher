@@ -1,0 +1,7 @@
+[
+  {
+    "name": "carry-left-glove",
+    "path": "C:\\Users\\illya\\.codex\\generated_images\\01a0f42e-65e9-7d62-80b8-d78ee371eb16\\exec-15d5da64-2a7c-4503-a751-588f800d3a7c.png",
+    "prompt": "Edit ONLY the skin-colored white open palm in all SIXTEEN sprite cells of this referenced 4 columns by 4 rows character animation sheet. Cover that complete open hand, fingers and palm with the same dark brown-black leather glove that the character wears on the other hand. Maintain the exact hand shape and cupped carrying pose. The ONLY changed pixels belong to the pale carrying hand; preserve EVERY pose, every character scale, face, clothing, blade, hair and hat condition exactly. Keep 16 cells and pure solid #FF00FF magenta background. Do not add props or objects. This is a consistency repair, not a redesign."
+  }
+]

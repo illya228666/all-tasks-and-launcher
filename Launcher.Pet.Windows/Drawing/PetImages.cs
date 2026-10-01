@@ -2,6 +2,8 @@ using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
 using Launcher.Pet.Sprites;
+using Launcher.Pet.Data;
+using System.Text.Json;
 
 namespace Launcher.Pet.Windows.Drawing;
 internal sealed class PetImages : IDisposable
@@ -14,15 +16,43 @@ internal sealed class PetImages : IDisposable
     internal Bitmap Hat { get; private set; } = null!;
     internal Bitmap[] HatFalling { get; private set; } = Array.Empty<Bitmap>();
     internal PetAppearance Appearance { get; private set; } = PetAppearance.Original;
+    private const long CacheLimit = 128L * 1024 * 1024;
+    private readonly Dictionary<string, (Bitmap Image, SpritePixelMask Mask, long Touch)> _frames = new();
+    private long _touch, _cacheBytes;
+    internal long CachedBytes => _cacheBytes;
+    internal (Bitmap Image, Rectangle Source, SpritePixelMask Mask) Frame(PetScene scene)
+    {
+        if (!Appearance.UsesClipFiles)
+            return (scene.HatAttached ? WithHat : WithoutHat, scene.Appearance.GetSourceRectangle(scene.Row, scene.Frame), scene.HatAttached ? WithHatMask : WithoutHatMask);
+        var clip = Appearance.Clip(scene.Row) ?? Appearance.Clip("idle")!;
+        int index = Math.Clamp(scene.Frame, 0, clip.Durations.Length - 1);
+        string file = (scene.HatAttached ? clip.HatFrames : clip.NoHatFrames)[index];
+        string root = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "Resources", Appearance.Id)) + Path.DirectorySeparatorChar;
+        string path = Path.GetFullPath(Path.Combine(root, file));
+        if (!path.StartsWith(root, StringComparison.OrdinalIgnoreCase)) throw new InvalidDataException("Animation frame escapes its bundle.");
+        if (!_frames.TryGetValue(path, out var entry))
+        {
+            var frame = Read(Path.Combine(Appearance.Id, file));
+            if (frame.Size != Appearance.CellSize) { frame.Dispose(); throw new InvalidDataException("Animation frame has wrong dimensions."); }
+            entry = (frame, new SpritePixelMask(frame), ++_touch);
+            long bytes = frame.Width * (long)frame.Height * 5;
+            while (_cacheBytes + bytes > CacheLimit && _frames.Count > 0)
+            {
+                var oldest = _frames.MinBy(pair => pair.Value.Touch);
+                _cacheBytes -= oldest.Value.Image.Width * (long)oldest.Value.Image.Height * 5;
+                oldest.Value.Image.Dispose(); _frames.Remove(oldest.Key);
+            }
+            _frames.Add(path, entry); _cacheBytes += bytes;
+        }
+        else { entry.Touch = ++_touch; _frames[path] = entry; }
+        return (entry.Image, new(Point.Empty, entry.Image.Size), entry.Mask);
+    }
 
     internal PetImages(string? petId = null)
     {
         try
         {
             ChangeAppearance(PetAppearance.Find(petId));
-            using var hat = Read(Path.Combine("hat", "hat.png"));
-            Hat = Normalize(hat, HatSize);
-            HatFalling = ReadFrames("hat", "hat_falling_", Launcher.Pet.Hat.HatAnimation.FallingFrameCount, HatSize);
         }
         catch
         {
@@ -33,14 +63,32 @@ internal sealed class PetImages : IDisposable
 
     /// <summary>
     /// Load and validate the complete replacement before releasing live images.
-    /// The original hat is shared by every pet. Missing no-hat artwork uses the
-    /// same atlas and alpha mask, so drawing/hit testing need no special branch.
+    /// Classic clips and hats have their own resources; the second version keeps
+    /// its existing atlas and hat. Validate replacements before releasing caches.
     /// </summary>
     internal void ChangeAppearance(PetAppearance appearance)
     {
         Bitmap? withHat = null, withoutHat = null;
         try
         {
+            string bundlePath = Path.Combine(AppContext.BaseDirectory, "Resources", appearance.Id, "bundle.json");
+            if (appearance.Id == "sumrak" && File.Exists(bundlePath))
+            {
+                var definition = JsonSerializer.Deserialize<PetAppearanceDefinition>(File.ReadAllText(bundlePath), new JsonSerializerOptions { PropertyNameCaseInsensitive = true })
+                    ?? throw new InvalidDataException("Empty animation bundle.");
+                var replacement = PetAppearance.FromDefinition(definition);
+                foreach (var clip in replacement.Clips.Values)
+                    foreach (var file in clip.HatFrames.Concat(clip.NoHatFrames))
+                    {
+                        string root = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "Resources", appearance.Id)) + Path.DirectorySeparatorChar;
+                        string path = Path.GetFullPath(Path.Combine(root, file));
+                        if (!path.StartsWith(root, StringComparison.OrdinalIgnoreCase) || !File.Exists(path))
+                            throw new InvalidDataException("Animation bundle contains an unavailable frame.");
+                    }
+                ReplaceHats(appearance.Id);
+                DisposeAtlases(); ClearFrames(); Appearance = replacement;
+                return;
+            }
             if (appearance.UsesSeparateFrames)
             {
                 (withHat, appearance) = ReadFrameAtlas(appearance);
@@ -59,7 +107,8 @@ internal sealed class PetImages : IDisposable
             }
             var withHatMask = new SpritePixelMask(withHat);
             var withoutHatMask = ReferenceEquals(withHat, withoutHat) ? withHatMask : new SpritePixelMask(withoutHat);
-            DisposeAtlases();
+            ReplaceHats(appearance.Id);
+            DisposeAtlases(); ClearFrames();
             WithHat = withHat;
             WithoutHat = withoutHat;
             WithHatMask = withHatMask;
@@ -124,6 +173,35 @@ internal sealed class PetImages : IDisposable
     {
         if (!ReferenceEquals(WithoutHat, WithHat)) WithoutHat?.Dispose();
         WithHat?.Dispose();
+        WithHat = WithoutHat = null!;
+    }
+    private void ClearFrames()
+    {
+        foreach (var entry in _frames.Values) entry.Image.Dispose();
+        _frames.Clear(); _cacheBytes = 0;
+    }
+    private void ReplaceHats(string id)
+    {
+        string folder = id == "sumrak" && File.Exists(Path.Combine(AppContext.BaseDirectory,"Resources","sumrak","hat","hat","hat-1.png"))
+            ? Path.Combine("sumrak","hat","hat") : "hat";
+        Bitmap? neutral = null;
+        Bitmap[] frames = Array.Empty<Bitmap>();
+        try
+        {
+            using var source = Read(Path.Combine(folder, folder == "hat" ? "hat.png" : "hat-1.png"));
+            neutral = Normalize(source,HatSize);
+            if (folder == "hat") frames = ReadFrames(folder,"hat_falling_",Launcher.Pet.Hat.HatAnimation.FallingFrameCount,HatSize);
+            else
+            {
+                var loaded = new List<Bitmap>();
+                try { for (int i=2;i<=8;i++) { using var image=Read(Path.Combine(folder,$"hat-{i}.png")); loaded.Add(Normalize(image,HatSize)); } }
+                catch { foreach (var image in loaded) image.Dispose(); throw; }
+                frames = loaded.ToArray();
+            }
+        }
+        catch { neutral?.Dispose(); foreach (var frame in frames) frame.Dispose(); throw; }
+        Hat?.Dispose(); foreach (var frame in HatFalling) frame.Dispose();
+        Hat=neutral; HatFalling=frames;
     }
 
     private static Bitmap AddDragFrames(Bitmap original, Bitmap drag, bool hat)
@@ -261,6 +339,7 @@ internal sealed class PetImages : IDisposable
 
     public void Dispose()
     {
+        ClearFrames();
         foreach (Bitmap? frame in HatFalling)
             frame?.Dispose();
         Hat?.Dispose();

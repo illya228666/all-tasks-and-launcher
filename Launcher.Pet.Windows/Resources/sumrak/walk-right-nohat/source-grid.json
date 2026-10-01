@@ -1,0 +1,222 @@
+{
+  "raw": "C:\\Users\\illya\\source\\repos\\illya228666\\all-tasks-and-launcher\\Launcher.Pet.Windows\\Resources\\sumrak\\walk-right-nohat\\raw-sheet.png",
+  "rows": 4,
+  "cols": 4,
+  "sourceSize": [
+    1254,
+    1254
+  ],
+  "cell": 512,
+  "referenceFrame": null,
+  "sameScaleAs": "C:\\Users\\illya\\source\\repos\\illya228666\\all-tasks-and-launcher\\Launcher.Pet.Windows\\Resources\\sumrak\\walk-right-correction\\source-grid.json",
+  "cuts": [
+    {
+      "source": [
+        43,
+        25,
+        250,
+        299
+      ],
+      "commonScale": 1.2248803827751196,
+      "destination": [
+        129,
+        114
+      ]
+    },
+    {
+      "source": [
+        362,
+        25,
+        563,
+        299
+      ],
+      "commonScale": 1.2248803827751196,
+      "destination": [
+        645,
+        114
+      ]
+    },
+    {
+      "source": [
+        685,
+        26,
+        862,
+        299
+      ],
+      "commonScale": 1.2248803827751196,
+      "destination": [
+        1171,
+        116
+      ]
+    },
+    {
+      "source": [
+        976,
+        26,
+        1173,
+        299
+      ],
+      "commonScale": 1.2248803827751196,
+      "destination": [
+        1671,
+        116
+      ]
+    },
+    {
+      "source": [
+        47,
+        330,
+        260,
+        609
+      ],
+      "commonScale": 1.2248803827751196,
+      "destination": [
+        125,
+        620
+      ]
+    },
+    {
+      "source": [
+        357,
+        330,
+        569,
+        609
+      ],
+      "commonScale": 1.2248803827751196,
+      "destination": [
+        638,
+        620
+      ]
+    },
+    {
+      "source": [
+        676,
+        330,
+        874,
+        609
+      ],
+      "commonScale": 1.2248803827751196,
+      "destination": [
+        1158,
+        620
+      ]
+    },
+    {
+      "source": [
+        976,
+        330,
+        1192,
+        608
+      ],
+      "commonScale": 1.2248803827751196,
+      "destination": [
+        1659,
+        621
+      ]
+    },
+    {
+      "source": [
+        37,
+        639,
+        248,
+        921
+      ],
+      "commonScale": 1.2248803827751196,
+      "destination": [
+        127,
+        1129
+      ]
+    },
+    {
+      "source": [
+        357,
+        638,
+        572,
+        921
+      ],
+      "commonScale": 1.2248803827751196,
+      "destination": [
+        636,
+        1127
+      ]
+    },
+    {
+      "source": [
+        684,
+        640,
+        863,
+        921
+      ],
+      "commonScale": 1.2248803827751196,
+      "destination": [
+        1170,
+        1130
+      ]
+    },
+    {
+      "source": [
+        977,
+        640,
+        1175,
+        921
+      ],
+      "commonScale": 1.2248803827751196,
+      "destination": [
+        1670,
+        1130
+      ]
+    },
+    {
+      "source": [
+        43,
+        946,
+        255,
+        1230
+      ],
+      "commonScale": 1.2248803827751196,
+      "destination": [
+        126,
+        1638
+      ]
+    },
+    {
+      "source": [
+        355,
+        945,
+        569,
+        1229
+      ],
+      "commonScale": 1.2248803827751196,
+      "destination": [
+        637,
+        1638
+      ]
+    },
+    {
+      "source": [
+        668,
+        947,
+        870,
+        1230
+      ],
+      "commonScale": 1.2248803827751196,
+      "destination": [
+        1156,
+        1639
+      ]
+    },
+    {
+      "source": [
+        974,
+        947,
+        1188,
+        1230
+      ],
+      "commonScale": 1.2248803827751196,
+      "destination": [
+        1661,
+        1639
+      ]
+    }
+  ]
+}

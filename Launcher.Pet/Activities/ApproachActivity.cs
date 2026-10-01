@@ -21,8 +21,8 @@ internal sealed class ApproachActivity : PetActivity
         else
         {
             var target = nav.Available[_link.To];
-            float duration = RuinMotion.FlightTime(nav.FootY, target.Y);
-            next = new FlightActivity((target.Center - (c.Body.X + c.HalfWidth)) / duration, -RuinMotion.LaunchSpeed(nav.FootY));
+            float duration = RuinMotion.FlightTime(nav.FootY, target.Y, c.Metrics);
+            next = new FlightActivity((target.Center - (c.Body.X + c.HalfWidth)) / duration, -RuinMotion.LaunchSpeed(nav.FootY, c.Metrics));
         }
         c.Actor.ContinueWith(next, c.Now);
     }

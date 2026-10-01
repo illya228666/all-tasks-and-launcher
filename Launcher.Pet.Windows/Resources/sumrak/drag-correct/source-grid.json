@@ -1,0 +1,170 @@
+{
+  "raw": "C:\\Users\\illya\\source\\repos\\illya228666\\all-tasks-and-launcher\\Launcher.Pet.Windows\\Resources\\sumrak\\drag-correct\\raw-sheet.png",
+  "rows": 3,
+  "cols": 4,
+  "sourceSize": [
+    1448,
+    1086
+  ],
+  "cell": 512,
+  "referenceFrame": 0,
+  "sameScaleAs": null,
+  "cuts": [
+    {
+      "source": [
+        0,
+        14,
+        269,
+        349
+      ],
+      "commonScale": 1.0298507462686568,
+      "destination": [
+        117,
+        105
+      ]
+    },
+    {
+      "source": [
+        362,
+        14,
+        627,
+        335
+      ],
+      "commonScale": 1.0298507462686568,
+      "destination": [
+        631,
+        119
+      ]
+    },
+    {
+      "source": [
+        724,
+        14,
+        1013,
+        348
+      ],
+      "commonScale": 1.0298507462686568,
+      "destination": [
+        1131,
+        106
+      ]
+    },
+    {
+      "source": [
+        1086,
+        14,
+        1360,
+        347
+      ],
+      "commonScale": 1.0298507462686568,
+      "destination": [
+        1651,
+        107
+      ]
+    },
+    {
+      "source": [
+        0,
+        365,
+        279,
+        693
+      ],
+      "commonScale": 1.0298507462686568,
+      "destination": [
+        112,
+        624
+      ]
+    },
+    {
+      "source": [
+        362,
+        365,
+        637,
+        692
+      ],
+      "commonScale": 1.0298507462686568,
+      "destination": [
+        626,
+        625
+      ]
+    },
+    {
+      "source": [
+        724,
+        365,
+        1011,
+        692
+      ],
+      "commonScale": 1.0298507462686568,
+      "destination": [
+        1132,
+        625
+      ]
+    },
+    {
+      "source": [
+        1086,
+        365,
+        1364,
+        694
+      ],
+      "commonScale": 1.0298507462686568,
+      "destination": [
+        1649,
+        623
+      ]
+    },
+    {
+      "source": [
+        0,
+        709,
+        275,
+        1055
+      ],
+      "commonScale": 1.0298507462686568,
+      "destination": [
+        114,
+        1118
+      ]
+    },
+    {
+      "source": [
+        362,
+        709,
+        638,
+        1030
+      ],
+      "commonScale": 1.0298507462686568,
+      "destination": [
+        626,
+        1143
+      ]
+    },
+    {
+      "source": [
+        724,
+        709,
+        1025,
+        1051
+      ],
+      "commonScale": 1.0298507462686568,
+      "destination": [
+        1125,
+        1122
+      ]
+    },
+    {
+      "source": [
+        1086,
+        709,
+        1364,
+        1040
+      ],
+      "commonScale": 1.0298507462686568,
+      "destination": [
+        1649,
+        1133
+      ]
+    }
+  ]
+}

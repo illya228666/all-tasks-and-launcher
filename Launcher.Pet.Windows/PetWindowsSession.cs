@@ -6,6 +6,8 @@ using Launcher.Pet.Windows.Debug;
 using Launcher.Pet.Windows.Desktop;
 using Launcher.Pet.Windows.Drawing;
 using Launcher.Pet.Windows.Windows;
+using Launcher.Pet.Life;
+using Launcher.Pet.Windows.Life;
 
 namespace Launcher.Pet.Windows;
 public sealed class PetWindowsSession : IDisposable
@@ -19,7 +21,7 @@ public sealed class PetWindowsSession : IDisposable
     private readonly PetDrawing _drawing;
     private readonly WindowShake _shake;
     private readonly DesktopSurfaceProvider _surfaces;
-    private readonly DesktopWallpaperSession _wallpaper;
+    private readonly IDesktopWallpaperSession _wallpaper;
     private readonly System.Windows.Forms.Timer _timer = new()
     {
         Interval = TickIntervalMs
@@ -47,13 +49,20 @@ public sealed class PetWindowsSession : IDisposable
     private long _cursorAtMs, _debugAtMs;
     private Point _cursor;
     private string? _phrase;
+    private readonly LifeSaveFile _lifeFile;
+    private PetLifeSave? _savedLife;
+    private string? _lifeWarning, _lastSaveError;
+    private long _saveAtMs, _itemFrameAtMs;
+    private readonly Dictionary<long, LifeItemWindow> _lifeItems = new();
     public event Action<string>? Problem;
-    public PetWindowsSession(Form window, PetArea area, PetWorld world, DesktopWallpaperSession wallpaper, string? petId = null)
+    public PetWindowsSession(Form window, PetArea area, PetWorld world, IDesktopWallpaperSession wallpaper, string? petId = null, string? lifeFilePath = null)
     {
         _window = window;
         _area = area;
         _world = world;
         _wallpaper = wallpaper;
+        _lifeFile = new(lifeFilePath ?? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "zahlen-launcher", "pet-life.json"));
+        _savedLife = _lifeFile.Read(out _lifeWarning);
         try
         {
             _images = new(petId);
@@ -89,6 +98,7 @@ public sealed class PetWindowsSession : IDisposable
     {
         if (_disposed || PetId == petId) return;
         _images.ChangeAppearance(Launcher.Pet.Sprites.PetAppearance.Find(petId));
+        DisposeHat(); _hatFrames?.Dispose(); _hatFrames = null;
         _version++;
         _area.Appearance = _images.Appearance;
         _world.SetAppearance(_images.Appearance, Environment.TickCount64);
@@ -119,16 +129,38 @@ public sealed class PetWindowsSession : IDisposable
             return;
         _running = true;
         _world.Start(Environment.TickCount64);
-        _timer.Start();
+        if (_savedLife is { } saved)
+        {
+            _world.RestoreLife(saved, Environment.TickCount64);
+            _ruins = saved.Geometry;
+            _monitor = saved.Monitor;
+            _ruinsActive = true;
+            _awakeningAt = Environment.TickCount64 - 4000;
+            _drawing.Enabled = false;
+            if (_wallpaper.Activate() is string error) Problem?.Invoke(error);
+            _savedLife = null;
+        }
+        else if (_world.HasLife)
+        {
+            _ruinsActive = true;
+            _awakeningAt = Environment.TickCount64 - 4000;
+            if (_wallpaper.Activate() is string error) Problem?.Invoke(error);
+        }
+        if (_lifeWarning is { } warning) { _lifeWarning = null; Problem?.Invoke(warning); }
+        _saveAtMs = Environment.TickCount64 + 30000;
+        if (_running && !_disposed) _timer.Start();
     }
 
     public void Stop()
     {
+        if (!_running) return;
         _version++;
         _running = false;
         _timer.Stop();
         _hat?.CancelDrag();
         _world.Stop(Environment.TickCount64);
+        SaveLife();
+        foreach (var item in _lifeItems.Values) item.Hide();
         _shake.Stop();
         _speech?.Hide();
         _debug?.Hide();
@@ -157,10 +189,7 @@ public sealed class PetWindowsSession : IDisposable
         if (!_running || _disposed)
             return;
         if (_window.WindowState != FormWindowState.Minimized)
-        {
-            if (_ruinsActive) DeactivateRuins();
             return;
-        }
         if (!_ruinsActive)
         {
             if (!Outside && !_world.LeaveLauncher(Environment.TickCount64)) return;
@@ -185,18 +214,6 @@ public sealed class PetWindowsSession : IDisposable
         if (_wallpaper.Activate() is string error) Problem?.Invoke(error);
     }
 
-    private void DeactivateRuins()
-    {
-        _version++;
-        _ruinsActive = false;
-        _ruinsWindow?.Hide();
-        _ruinBuilder = null;
-        _ruins = null;
-        _desktopSnapshot = null;
-        _awakeningAt = null;
-        if (_wallpaper.Restore() is string error) Problem?.Invoke(error);
-    }
-
     private PetEnvironment ReadEnvironment(IReadOnlyList<HatSurface> surfaces)
     {
         if (!Outside)
@@ -205,7 +222,8 @@ public sealed class PetWindowsSession : IDisposable
             ?? Screen.PrimaryScreen ?? Screen.AllScreens[0];
         _monitor = screen.DeviceName;
         _desktopBounds = screen.WorkingArea;
-        if (_ruinsActive && _ruinBuilder is null)
+        var metrics = DesktopWorldMetrics.ForWorkArea(_desktopBounds.Size);
+        if (_ruinsActive && _ruinBuilder is null && _ruins is null)
         {
             Rectangle Local(Rectangle bounds)
             {
@@ -220,14 +238,14 @@ public sealed class PetWindowsSession : IDisposable
             _ruinBuilder = new(_desktopBounds.Size, seed);
             _awakeningPoint = new(Math.Clamp(_lastPetScreenPosition.X - _desktopBounds.X, 0, _desktopBounds.Width), _desktopBounds.Height);
         }
-        if (_ruinsActive && (_ruins is null || _ruins.Size != _desktopBounds.Size || _ruinsMonitor != screen.DeviceName))
+        if (_ruinsActive && (_ruins is null || _ruins.Size != _desktopBounds.Size || _ruinsMonitor != screen.DeviceName || _ruins.Metrics != metrics))
         {
-            _ruins = _ruinBuilder!.Build(_desktopBounds.Size, _awakeningPoint);
+            _ruins = LifeGeometry.Reflow(_ruins ?? _ruinBuilder!.Build(_desktopBounds.Size, _awakeningPoint), _desktopBounds.Size, metrics);
             _ruinsMonitor = screen.DeviceName;
         }
         if (_plainDesktop is null || _plainDesktop.Size != _desktopBounds.Size)
             _plainDesktop = new(_desktopBounds.Size, new[] { new RuinPlatform("ruin:floor", 0, _desktopBounds.Width, _desktopBounds.Height, 0) },
-                Array.Empty<RuinLink>(), Array.Empty<RuinBridge>(), Array.Empty<RuinDecoration>(), 0);
+                Array.Empty<RuinLink>(), Array.Empty<RuinBridge>(), Array.Empty<RuinDecoration>(), 0) { Metrics = metrics };
         RuinScene activeScene = _ruinsActive ? _ruins! : _plainDesktop;
         float seconds = _ruinsActive && _awakeningAt is long started ? Math.Max(0, Environment.TickCount64 - started) / 1000f : 0;
         var combined = ComposeHatSurfaces(surfaces, activeScene, _desktopBounds.Location, seconds, _world.HasLanded);
@@ -277,6 +295,11 @@ public sealed class PetWindowsSession : IDisposable
         try
         {
             _hat?.UpdateDrag();
+            if (_world.IsWorldItemDragging)
+            {
+                _world.MoveWorldItem(Cursor.Position);
+                if ((HatMouseApi.GetAsyncKeyState(0x01) & 0x8000) == 0) _world.DropWorldItem();
+            }
             if (_world.IsPetDragging)
             {
                 _world.MovePet(Cursor.Position);
@@ -298,7 +321,14 @@ public sealed class PetWindowsSession : IDisposable
 
             var surfaces = desktop.Select(surface => new HatSurface($"{surface.Identity.Type}:{surface.Identity.WindowHandle}:{surface.Identity.ItemKey}", (HatSurfaceKind)surface.Type, surface.Bounds)).ToArray();
             PetEnvironment environment = ReadEnvironment(surfaces);
+            if (_ruinsActive && _world.HasLanded && _awakeningAt is long awake && nowMs - awake >= 3500 && _ruins is not null && !_world.HasLife)
+            {
+                _world.CreateLife(_ruins, unchecked((ulong)(uint)_ruins.Variation) + 1);
+                SaveLife();
+            }
             PetScene scene = _world.Update(nowMs, environment);
+            if (nowMs >= _saveAtMs) { SaveLife(); _saveAtMs = nowMs + 30000; }
+            if (!_running || _disposed || version != _version) return;
             if (Outside)
             {
                 if (_ruinsActive && _world.HasLanded && _awakeningAt is null)
@@ -309,7 +339,7 @@ public sealed class PetWindowsSession : IDisposable
                 if (_ruinsActive && _awakeningAt is long start && _ruins is not null)
                 {
                     _ruinsWindow ??= new();
-                    if (_ruinsWindow.Display(_ruins, _desktopBounds.Location, _awakeningPoint, (nowMs - start) / 1000f, nowMs) && !_showCollisions)
+                    if (_ruinsWindow.Display(_ruins, _desktopBounds.Location, _awakeningPoint, (nowMs - start) / 1000f, nowMs, scene.Life) && !_showCollisions)
                         _ruinsWindow.RaiseWithoutActivation();
                 }
                 if (_desktopPet is null)
@@ -318,6 +348,11 @@ public sealed class PetWindowsSession : IDisposable
                     _desktopPet.MouseDown += AreaMouseDown;
                 }
                 _desktopPet.Display(scene, environment.AreaScreenPosition);
+                if (scene.Life is not null && nowMs >= _itemFrameAtMs)
+                {
+                    DisplayLifeItems(scene.Life, environment.AreaScreenPosition);
+                    _itemFrameAtMs = nowMs + 34;
+                }
                 _lastPetScreenPosition = new(environment.AreaScreenPosition.X + scene.SpriteBounds.X + scene.SpriteBounds.Width / 2,
                     environment.AreaScreenPosition.Y + scene.SpriteBounds.Y + scene.SpriteBounds.Height / 2);
             }
@@ -385,9 +420,44 @@ public sealed class PetWindowsSession : IDisposable
         return _hat;
     }
 
+    private void SaveLife()
+    {
+        var saved = _world.CaptureLife(_monitor);
+        if (saved is null) return;
+        string? error = _lifeFile.Write(saved);
+        if (error is not null && error != _lastSaveError) Problem?.Invoke(error);
+        _lastSaveError = error;
+    }
+
+    private void DisplayLifeItems(LifeScene scene, Point origin)
+    {
+        var visible = scene.Items.ToDictionary(i => i.Id);
+        foreach (long id in _lifeItems.Keys.Where(id => !visible.ContainsKey(id)).ToArray())
+        {
+            _lifeItems[id].Dispose();
+            _lifeItems.Remove(id);
+        }
+        foreach (var item in visible.Values)
+        {
+            bool interactive = item.Holder != LifeHolder.Pet;
+            if (_lifeItems.TryGetValue(item.Id, out var previous) && previous.Interactive != interactive)
+            {
+                previous.Dispose(); _lifeItems.Remove(item.Id);
+            }
+            if (!_lifeItems.TryGetValue(item.Id, out var window))
+            {
+                window = new(item.Id, interactive);
+                window.DragStarted += (id, position) => _world.BeginWorldItemDrag(id, position);
+                _lifeItems.Add(item.Id, window);
+            }
+            float decomposition = item.Holder == LifeHolder.Pet && scene.Activity == LifeTaskKind.Recycle ? scene.ActionSeconds / 2 : 0;
+            window.Display(item, origin, scene.Seconds + scene.Fraction, (_ruins?.WorldMetrics ?? DesktopWorldMetrics.Legacy).ItemDiameter, decomposition);
+        }
+    }
+
     private void DisplayHat(PetScene scene, int version)
     {
-        if (scene.HatAttached)
+        if (scene.HatAttached || scene.Appearance.UsesClipFiles && scene.Appearance.Clip(scene.Row)?.Name == "hat-pickup" && scene.Frame >= 3)
         {
             DisposeHat();
             return;
@@ -508,6 +578,8 @@ public sealed class PetWindowsSession : IDisposable
             _desktopPet.Dispose();
         }
         _ruinsWindow?.Dispose();
+        foreach (var item in _lifeItems.Values) item.Dispose();
+        _lifeItems.Clear();
         _drawing.Dispose();
         _hatFrames?.Dispose();
         _images.Dispose();

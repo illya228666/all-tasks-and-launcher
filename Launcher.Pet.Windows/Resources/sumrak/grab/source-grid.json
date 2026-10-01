@@ -1,0 +1,118 @@
+{
+  "raw": "C:\\Users\\illya\\source\\repos\\illya228666\\all-tasks-and-launcher\\Launcher.Pet.Windows\\Resources\\sumrak\\grab\\raw-sheet.png",
+  "rows": 2,
+  "cols": 4,
+  "sourceSize": [
+    1024,
+    1536
+  ],
+  "cell": 512,
+  "referenceFrame": 0,
+  "sameScaleAs": null,
+  "cuts": [
+    {
+      "source": [
+        34,
+        209,
+        245,
+        590
+      ],
+      "commonScale": 0.905511811023622,
+      "destination": [
+        160,
+        105
+      ]
+    },
+    {
+      "source": [
+        284,
+        210,
+        512,
+        592
+      ],
+      "commonScale": 0.905511811023622,
+      "destination": [
+        665,
+        104
+      ]
+    },
+    {
+      "source": [
+        512,
+        205,
+        763,
+        592
+      ],
+      "commonScale": 0.905511811023622,
+      "destination": [
+        1166,
+        100
+      ]
+    },
+    {
+      "source": [
+        793,
+        131,
+        988,
+        561
+      ],
+      "commonScale": 0.905511811023622,
+      "destination": [
+        1703,
+        61
+      ]
+    },
+    {
+      "source": [
+        34,
+        799,
+        245,
+        1169
+      ],
+      "commonScale": 0.905511811023622,
+      "destination": [
+        160,
+        627
+      ]
+    },
+    {
+      "source": [
+        282,
+        794,
+        512,
+        1170
+      ],
+      "commonScale": 0.905511811023622,
+      "destination": [
+        664,
+        622
+      ]
+    },
+    {
+      "source": [
+        512,
+        785,
+        763,
+        1171
+      ],
+      "commonScale": 0.905511811023622,
+      "destination": [
+        1166,
+        612
+      ]
+    },
+    {
+      "source": [
+        794,
+        703,
+        989,
+        1138
+      ],
+      "commonScale": 0.905511811023622,
+      "destination": [
+        1703,
+        568
+      ]
+    }
+  ]
+}

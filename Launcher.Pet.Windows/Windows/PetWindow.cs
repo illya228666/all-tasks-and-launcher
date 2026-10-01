@@ -16,7 +16,11 @@ internal sealed class PetWindow : TransparentOverlayWindow
         {
             using var image = new Bitmap(scene.SpriteBounds.Width, scene.SpriteBounds.Height, PixelFormat.Format32bppPArgb);
             using (Graphics graphics = Graphics.FromImage(image))
-                graphics.DrawImage(scene.HatAttached ? _images.WithHat : _images.WithoutHat, new Rectangle(Point.Empty, image.Size), scene.Appearance.GetSourceRectangle(scene.Row, scene.Frame), GraphicsUnit.Pixel);
+            {
+                var frame = _images.Frame(scene);
+                graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+                graphics.DrawImage(frame.Image, new Rectangle(Point.Empty, image.Size), frame.Source, GraphicsUnit.Pixel);
+            }
             SetImage(image);
         }
         _scene = scene;
@@ -24,10 +28,10 @@ internal sealed class PetWindow : TransparentOverlayWindow
     }
 
     internal bool IsHeadAtScreen(Point point) => TryGetOpaqueCell(point, out Point cell)
-        && _scene!.Appearance.GetFrameGeometry(_scene.Row, _scene.Frame).HeadBounds.Contains(cell);
+        && _scene!.Appearance.GetFrameGeometry(_scene.Row, _scene.Frame, _scene.HatAttached).HeadBounds.Contains(cell);
 
     internal bool IsBodyAtScreen(Point point) => TryGetOpaqueCell(point, out Point cell)
-        && !_scene!.Appearance.GetFrameGeometry(_scene.Row, _scene.Frame).HeadBounds.Contains(cell);
+        && !_scene!.Appearance.GetFrameGeometry(_scene.Row, _scene.Frame, _scene.HatAttached).HeadBounds.Contains(cell);
 
     private bool TryGetOpaqueCell(Point point, out Point cell)
     {
@@ -35,7 +39,7 @@ internal sealed class PetWindow : TransparentOverlayWindow
         if (_scene is null || !Visible || !Bounds.Contains(point))
             return false;
         cell = PetSpriteLayout.MapDestinationToAtlasCell(point, Bounds, _scene.Appearance);
-        Rectangle source = _scene.Appearance.GetSourceRectangle(_scene.Row, _scene.Frame);
-        return (_scene.HatAttached ? _images.WithHatMask : _images.WithoutHatMask).Contains(source.X + cell.X, source.Y + cell.Y);
+        var frame = _images.Frame(_scene);
+        return frame.Mask.Contains(frame.Source.X + cell.X, frame.Source.Y + cell.Y);
     }
 }

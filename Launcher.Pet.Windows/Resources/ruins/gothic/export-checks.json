@@ -1,0 +1,382 @@
+[
+  {
+    "id": "platform:0",
+    "size": [
+      1448,
+      347
+    ],
+    "nonempty": true,
+    "contactY": 117,
+    "magentaPixels": 0
+  },
+  {
+    "id": "platform:1",
+    "size": [
+      1471,
+      318
+    ],
+    "nonempty": true,
+    "contactY": 92,
+    "magentaPixels": 0
+  },
+  {
+    "id": "platform:2",
+    "size": [
+      1469,
+      345
+    ],
+    "nonempty": true,
+    "contactY": 132,
+    "magentaPixels": 0
+  },
+  {
+    "id": "platform:3",
+    "size": [
+      1375,
+      348
+    ],
+    "nonempty": true,
+    "contactY": 92,
+    "magentaPixels": 0
+  },
+  {
+    "id": "platform:4",
+    "size": [
+      1444,
+      239
+    ],
+    "nonempty": true,
+    "contactY": 67,
+    "magentaPixels": 0
+  },
+  {
+    "id": "platform:5",
+    "size": [
+      1360,
+      315
+    ],
+    "nonempty": true,
+    "contactY": 43,
+    "magentaPixels": 0
+  },
+  {
+    "id": "platform:6",
+    "size": [
+      1493,
+      301
+    ],
+    "nonempty": true,
+    "contactY": 165,
+    "magentaPixels": 0
+  },
+  {
+    "id": "platform:7",
+    "size": [
+      1506,
+      301
+    ],
+    "nonempty": true,
+    "contactY": 160,
+    "magentaPixels": 0
+  },
+  {
+    "id": "platform:8",
+    "size": [
+      1488,
+      320
+    ],
+    "nonempty": true,
+    "contactY": 111,
+    "magentaPixels": 0
+  },
+  {
+    "id": "platform:9",
+    "size": [
+      1424,
+      302
+    ],
+    "nonempty": true,
+    "contactY": 29,
+    "magentaPixels": 0
+  },
+  {
+    "id": "platform:10",
+    "size": [
+      1457,
+      270
+    ],
+    "nonempty": true,
+    "contactY": 27,
+    "magentaPixels": 0
+  },
+  {
+    "id": "platform:11",
+    "size": [
+      1492,
+      300
+    ],
+    "nonempty": true,
+    "contactY": 76,
+    "magentaPixels": 0
+  },
+  {
+    "id": "arch:0",
+    "size": [
+      386,
+      866
+    ],
+    "nonempty": true,
+    "contactY": 231,
+    "magentaPixels": 0
+  },
+  {
+    "id": "arch:1",
+    "size": [
+      266,
+      909
+    ],
+    "nonempty": true,
+    "contactY": 886,
+    "magentaPixels": 0
+  },
+  {
+    "id": "arch:2",
+    "size": [
+      464,
+      889
+    ],
+    "nonempty": true,
+    "contactY": 349,
+    "magentaPixels": 0
+  },
+  {
+    "id": "arch:3",
+    "size": [
+      341,
+      913
+    ],
+    "nonempty": true,
+    "contactY": 814,
+    "magentaPixels": 0
+  },
+  {
+    "id": "root:0",
+    "size": [
+      239,
+      975
+    ],
+    "nonempty": true,
+    "contactY": 901,
+    "magentaPixels": 0
+  },
+  {
+    "id": "root:1",
+    "size": [
+      232,
+      976
+    ],
+    "nonempty": true,
+    "contactY": 903,
+    "magentaPixels": 0
+  },
+  {
+    "id": "root:2",
+    "size": [
+      248,
+      976
+    ],
+    "nonempty": true,
+    "contactY": 0,
+    "magentaPixels": 0
+  },
+  {
+    "id": "bridge:0",
+    "size": [
+      1817,
+      260
+    ],
+    "nonempty": true,
+    "contactY": 95,
+    "magentaPixels": 0
+  },
+  {
+    "id": "bridge:1",
+    "size": [
+      1791,
+      287
+    ],
+    "nonempty": true,
+    "contactY": 124,
+    "magentaPixels": 0
+  },
+  {
+    "id": "bridge:2",
+    "size": [
+      784,
+      203
+    ],
+    "nonempty": true,
+    "contactY": 5,
+    "magentaPixels": 0
+  },
+  {
+    "id": "prop:0",
+    "size": [
+      208,
+      370
+    ],
+    "nonempty": true,
+    "contactY": 145,
+    "magentaPixels": 0
+  },
+  {
+    "id": "prop:1",
+    "size": [
+      320,
+      315
+    ],
+    "nonempty": true,
+    "contactY": 44,
+    "magentaPixels": 0
+  },
+  {
+    "id": "prop:2",
+    "size": [
+      321,
+      378
+    ],
+    "nonempty": true,
+    "contactY": 0,
+    "magentaPixels": 0
+  },
+  {
+    "id": "prop:3",
+    "size": [
+      372,
+      284
+    ],
+    "nonempty": true,
+    "contactY": 54,
+    "magentaPixels": 0
+  },
+  {
+    "id": "prop:4",
+    "size": [
+      286,
+      370
+    ],
+    "nonempty": true,
+    "contactY": 113,
+    "magentaPixels": 0
+  },
+  {
+    "id": "prop:5",
+    "size": [
+      344,
+      367
+    ],
+    "nonempty": true,
+    "contactY": 0,
+    "magentaPixels": 0
+  },
+  {
+    "id": "prop:6",
+    "size": [
+      343,
+      376
+    ],
+    "nonempty": true,
+    "contactY": 279,
+    "magentaPixels": 0
+  },
+  {
+    "id": "prop:7",
+    "size": [
+      346,
+      360
+    ],
+    "nonempty": true,
+    "contactY": 95,
+    "magentaPixels": 0
+  },
+  {
+    "id": "life:germinating",
+    "size": [
+      291,
+      208
+    ],
+    "nonempty": true,
+    "contactY": 133,
+    "magentaPixels": 0
+  },
+  {
+    "id": "life:growing",
+    "size": [
+      315,
+      248
+    ],
+    "nonempty": true,
+    "contactY": 174,
+    "magentaPixels": 0
+  },
+  {
+    "id": "life:mature",
+    "size": [
+      330,
+      336
+    ],
+    "nonempty": true,
+    "contactY": 195,
+    "magentaPixels": 0
+  },
+  {
+    "id": "life:exhausted",
+    "size": [
+      312,
+      299
+    ],
+    "nonempty": true,
+    "contactY": 219,
+    "magentaPixels": 0
+  },
+  {
+    "id": "life:soil-poor",
+    "size": [
+      315,
+      183
+    ],
+    "nonempty": true,
+    "contactY": 60,
+    "magentaPixels": 0
+  },
+  {
+    "id": "life:soil-rich",
+    "size": [
+      327,
+      187
+    ],
+    "nonempty": true,
+    "contactY": 74,
+    "magentaPixels": 0
+  },
+  {
+    "id": "life:spore",
+    "size": [
+      230,
+      261
+    ],
+    "nonempty": true,
+    "contactY": 0,
+    "magentaPixels": 0
+  },
+  {
+    "id": "life:remains",
+    "size": [
+      332,
+      202
+    ],
+    "nonempty": true,
+    "contactY": 113,
+    "magentaPixels": 0
+  }
+]

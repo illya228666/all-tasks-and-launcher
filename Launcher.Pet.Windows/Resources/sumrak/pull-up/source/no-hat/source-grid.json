@@ -1,0 +1,118 @@
+{
+  "raw": "C:\\Users\\illya\\source\\repos\\illya228666\\all-tasks-and-launcher\\Launcher.Pet.Windows\\Resources\\sumrak\\pull-up-correct-nohat\\raw-sheet.png",
+  "rows": 2,
+  "cols": 4,
+  "sourceSize": [
+    1536,
+    1024
+  ],
+  "cell": 512,
+  "referenceFrame": null,
+  "sameScaleAs": "Launcher.Pet.Windows\\Resources\\sumrak\\pull-up-correct\\source-grid.json",
+  "cuts": [
+    {
+      "source": [
+        0,
+        62,
+        269,
+        497
+      ],
+      "commonScale": 0.8455882352941176,
+      "destination": [
+        142,
+        82
+      ]
+    },
+    {
+      "source": [
+        384,
+        62,
+        638,
+        482
+      ],
+      "commonScale": 0.8455882352941176,
+      "destination": [
+        660,
+        95
+      ]
+    },
+    {
+      "source": [
+        768,
+        62,
+        1034,
+        457
+      ],
+      "commonScale": 0.8455882352941176,
+      "destination": [
+        1167,
+        116
+      ]
+    },
+    {
+      "source": [
+        1152,
+        62,
+        1413,
+        454
+      ],
+      "commonScale": 0.8455882352941176,
+      "destination": [
+        1681,
+        119
+      ]
+    },
+    {
+      "source": [
+        0,
+        538,
+        302,
+        849
+      ],
+      "commonScale": 0.8455882352941176,
+      "destination": [
+        128,
+        699
+      ]
+    },
+    {
+      "source": [
+        384,
+        538,
+        685,
+        856
+      ],
+      "commonScale": 0.8455882352941176,
+      "destination": [
+        640,
+        693
+      ]
+    },
+    {
+      "source": [
+        768,
+        538,
+        1062,
+        912
+      ],
+      "commonScale": 0.8455882352941176,
+      "destination": [
+        1155,
+        646
+      ]
+    },
+    {
+      "source": [
+        1152,
+        538,
+        1403,
+        939
+      ],
+      "commonScale": 0.8455882352941176,
+      "destination": [
+        1686,
+        623
+      ]
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+[
+  {
+    "name": "pull-up-correct-nohat",
+    "path": "C:\\Users\\illya\\.codex\\generated_images\\01a0f42e-65e9-7d62-80b8-d78ee371eb16\\exec-48518a0c-3e3e-473a-8250-379db832aa97.png",
+    "prompt": "Remove ONLY hats from this EXACT eight pose Sumrak sheet and restore full copper hair. Preserve all8poses, same skull/head/limb dimensions, blade hand ownership, cape shape, clothing, camera and cell placement. Exact4columns2rows, unchanged dimensions. Solid #FF00FF. No other changes."
+  },
+  {
+    "name": "walk-left-nohat-fixed",
+    "path": "C:\\Users\\illya\\.codex\\generated_images\\01a0f42e-65e9-7d62-80b8-d78ee371eb16\\exec-dd7847cc-7298-442c-8ff3-4536e8a9c380.png",
+    "prompt": "Edit this EXACT16pose sheet walkingLEFT. REMOVEONLYthehat,revealcanonicalcopperhair. Preserveblade in EXACTSAME anatomical RIGHT hand for each correspondingframe of suppliedsheet; NEVERswap bladehand. Preservefull16poses,head/body/limbdimensions,camera,clothes andpure#FF00FF;exact4columns4rows,sameimage dimensions. Nootherchanges."
+  },
+  {
+    "name": "fx-plant-fixed",
+    "path": "C:\\Users\\illya\\.codex\\generated_images\\01a0f42e-65e9-7d62-80b8-d78ee371eb16\\exec-167cadae-359a-45a3-ba82-feaa6836b9ef.png",
+    "prompt": "Edit ONLY the leaf colors of the provided eight-frame planting effect: replace all green foliage with luminous turquoise/cyan and dark navy, matching the glowing moss art in these ruins. Preserve all8phases exactly, geometry, soil, glow, chronology, scale,4columns2rows and pure #FF00FF background. Nootherchanges."
+  }
+]

@@ -10,10 +10,12 @@ internal sealed class DepartureActivity : PetActivity
     internal DepartureActivity(Point start) => _motion = new(start);
     internal float Scale => _motion.Scale;
     internal bool HasLanded => _motion.HasLanded;
+    internal float VisualProgress => HasLanded ? _motion.RecoveryProgress : _motion.FlightProgress;
     internal override bool AllowsEarthquake => false;
     internal override bool AllowsPetDrag => false;
     internal override void Update(PetActivityContext c)
     {
+        _motion.TargetScale = c.Actor.DesktopScale;
         if (!_motion.Update(c.Body, c.Environment, c.Elapsed)) return;
         c.Actor.Location = PetLocation.Desktop;
         c.Actor.Reset(c.Now);

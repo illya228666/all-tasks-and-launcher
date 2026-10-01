@@ -5,4 +5,5 @@ namespace Launcher.Pet.Data;
 public sealed record PetScene(PetMode Mode, int Row, int Frame, Rectangle SpriteBounds, Point? HeadScreenPosition, Point WindowShake, bool HatAttached, HatScene Hat, string? Speech, int VisibleLetters, float Scale = 1f, bool HatInteractionEnabled = true, bool ShakeWindow = false)
 {
     public Launcher.Pet.Sprites.PetAppearance Appearance { get; init; } = Launcher.Pet.Sprites.PetAppearance.Original;
+    public Launcher.Pet.Life.LifeScene? Life { get; init; }
 }

@@ -1,0 +1,1 @@
+Edit ONLY the leaf colors of the provided eight-frame planting effect: replace all green foliage with luminous turquoise/cyan and dark navy, matching the glowing moss art in these ruins. Preserve all8phases exactly, geometry, soil, glow, chronology, scale,4columns2rows and pure #FF00FF background. Nootherchanges.

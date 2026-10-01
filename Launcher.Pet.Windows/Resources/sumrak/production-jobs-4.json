@@ -1,0 +1,42 @@
+[
+  {
+    "name": "carry-right-nohat",
+    "path": "C:\\Users\\illya\\.codex\\generated_images\\01a0f42e-65e9-7d62-80b8-d78ee371eb16\\exec-e813a54d-14d8-493c-a36c-d38b973971dc.png",
+    "prompt": "Edit this EXACT sixteen-frame 4 columns x4 rows Sumrak animation sheet: REMOVE ONLY the hat in every cell and restore the canonical copper hair underneath. Preserve ALL sixteen poses, body/head/limb dimensions, blade in the SAME anatomical hand, outlines, wardrobe and grid geometry. Never mirror, change hand ownership or redesign him. Same white porcelain face and solid black oval eyes. Keep pure #FF00FF and same image dimensions. This is an identity-preserving hat-removal edit, no other changes."
+  },
+  {
+    "name": "carry-left-nohat",
+    "path": "C:\\Users\\illya\\.codex\\generated_images\\01a0f42e-65e9-7d62-80b8-d78ee371eb16\\exec-6c68b6ef-2784-4f06-be61-1a304ce343eb.png",
+    "prompt": "Edit this EXACT sixteen-frame 4 columns x4 rows Sumrak animation sheet: REMOVE ONLY the hat in every cell and restore the canonical copper hair underneath. Preserve ALL sixteen poses, body/head/limb dimensions, blade in the SAME anatomical hand, outlines, wardrobe and grid geometry. Never mirror, change hand ownership or redesign him. Same white porcelain face and solid black oval eyes. Keep pure #FF00FF and same image dimensions. This is an identity-preserving hat-removal edit, no other changes."
+  },
+  {
+    "name": "recycle-nohat",
+    "path": "C:\\Users\\illya\\.codex\\generated_images\\01a0f42e-65e9-7d62-80b8-d78ee371eb16\\exec-5fd2ec34-1590-4964-9663-ecc2058a0389.png",
+    "prompt": "Edit this EXACT sixteen-frame 4 columns x4 rows Sumrak animation sheet: REMOVE ONLY the hat in every cell and restore the canonical copper hair underneath. Preserve ALL sixteen poses, body/head/limb dimensions, blade in the SAME anatomical hand, outlines, wardrobe and grid geometry. Never mirror, change hand ownership or redesign him. Same white porcelain face and solid black oval eyes. Keep pure #FF00FF and same image dimensions. This is an identity-preserving hat-removal edit, no other changes."
+  },
+  {
+    "name": "failed-nohat",
+    "path": "C:\\Users\\illya\\.codex\\generated_images\\01a0f42e-65e9-7d62-80b8-d78ee371eb16\\exec-21dc6ff4-901f-4973-b828-8a522026f979.png",
+    "prompt": "Edit this EXACT sixteen-frame 4 columns x4 rows Sumrak animation sheet: REMOVE ONLY the hat in every cell and restore the canonical copper hair underneath. Preserve ALL sixteen poses, body/head/limb dimensions, blade in the SAME anatomical hand, outlines, wardrobe and grid geometry. Never mirror, change hand ownership or redesign him. Same white porcelain face and solid black oval eyes. Keep pure #FF00FF and same image dimensions. This is an identity-preserving hat-removal edit, no other changes."
+  },
+  {
+    "name": "recovery-nohat",
+    "path": "C:\\Users\\illya\\.codex\\generated_images\\01a0f42e-65e9-7d62-80b8-d78ee371eb16\\exec-4014ce95-9542-46fb-9e7a-d8f547a41cc1.png",
+    "prompt": "Edit this EXACT sixteen-frame 4 columns x4 rows Sumrak animation sheet: REMOVE ONLY the hat in every cell and restore the canonical copper hair underneath. Preserve ALL sixteen poses, body/head/limb dimensions, blade in the SAME anatomical hand, outlines, wardrobe and grid geometry. Never mirror, change hand ownership or redesign him. Same white porcelain face and solid black oval eyes. Keep pure #FF00FF and same image dimensions. This is an identity-preserving hat-removal edit, no other changes."
+  },
+  {
+    "name": "climb-correct",
+    "path": "C:\\Users\\illya\\.codex\\generated_images\\01a0f42e-65e9-7d62-80b8-d78ee371eb16\\exec-5f631e5e-7ccd-4e39-aec6-56a8aef7a8bc.png",
+    "prompt": "Use the supplied classic Sumrak canonical model sheet as the immutable character identity: porcelain WHITE face, two solid BLACK vertical oval eyes with NO pupils, copper messy hair, purple brown-banded hat, blue scarf and ragged navy cape, pale-blue open shirt, dark shorts, strapped dark boots. Identical skull, face, hands, limb lengths and torso in ALL frames. Orthographic painterly outlined HD 2D game art, same anatomical scale and camera. ONE coherent action, chronological left-to-right/top-to-bottom poses. No detached FX or floor. Pure #FF00FF background, no shadows/text/labels. Equal cells with isolated complete figures, no body/clothing/blade touches a neighbor; allow padding. With-hat and without-hat halves perform EXACT same poses, no-hat has full copper hair and identical body geometry. Blade stays LOW in anatomical RIGHT hand, LEFT hand free for interaction.  ONLY with hat, EXACT TWELVE images in 4 columns THREE rows. Climbing a vertical wall upwards in place: reachLEFT,graspLEFT,LEFTarm pullsbodyup,RIGHTknee lifts,RIGHTfootplants,LEFTfootlift, reachhigherLEFT,grasp,pullup,LEFTkneelift,LEFTfootplants,settle; true alternate leg cycle. Keep blade in anatomicalRIGHThand nearthigh, LEFTgrips wall. Do not depict wall. Entire body centered central65% cell with padding, no hat/cape/blade clipped; same body size in all cells. All12 figures, no extra variants."
+  },
+  {
+    "name": "climb-nohat-correct",
+    "path": "C:\\Users\\illya\\.codex\\generated_images\\01a0f42e-65e9-7d62-80b8-d78ee371eb16\\exec-30b915b3-7bcc-4714-aeb2-b40312359ce4.png",
+    "prompt": "Use the supplied classic Sumrak canonical model sheet as the immutable character identity: porcelain WHITE face, two solid BLACK vertical oval eyes with NO pupils, copper messy hair, purple brown-banded hat, blue scarf and ragged navy cape, pale-blue open shirt, dark shorts, strapped dark boots. Identical skull, face, hands, limb lengths and torso in ALL frames. Orthographic painterly outlined HD 2D game art, same anatomical scale and camera. ONE coherent action, chronological left-to-right/top-to-bottom poses. No detached FX or floor. Pure #FF00FF background, no shadows/text/labels. Equal cells with isolated complete figures, no body/clothing/blade touches a neighbor; allow padding. With-hat and without-hat halves perform EXACT same poses, no-hat has full copper hair and identical body geometry. Blade stays LOW in anatomical RIGHT hand, LEFT hand free for interaction.  ONLY WITHOUT HAT, EXACT TWELVE images in 4columns THREErows. Climbing a vertical wall upwards in place: reachLEFT,graspLEFT,LEFTarm pullsbodyup,RIGHTknee lifts,RIGHTfootplants,LEFTfootlift,reachhigherLEFT,grasp,pullup,LEFTkneelift,LEFTfootplants,settle; alternate leg cycle. BladeanatomicalRIGHThand,LEFTgripswall. Do not depictwall. Fullcopperhair identicalhead/body/limbs to master. Each fullbodycentral65%cell, safe margins. All12poses nohat."
+  },
+  {
+    "name": "fall-correct",
+    "path": "C:\\Users\\illya\\.codex\\generated_images\\01a0f42e-65e9-7d62-80b8-d78ee371eb16\\exec-0b410bcb-7d06-4a3c-b3f5-81309c10c735.png",
+    "prompt": "Use the supplied classic Sumrak canonical model sheet as the immutable character identity: porcelain WHITE face, two solid BLACK vertical oval eyes with NO pupils, copper messy hair, purple brown-banded hat, blue scarf and ragged navy cape, pale-blue open shirt, dark shorts, strapped dark boots. Identical skull, face, hands, limb lengths and torso in ALL frames. Orthographic painterly outlined HD 2D game art, same anatomical scale and camera. ONE coherent action, chronological left-to-right/top-to-bottom poses. No detached FX or floor. Pure #FF00FF background, no shadows/text/labels. Equal cells with isolated complete figures, no body/clothing/blade touches a neighbor; allow padding. With-hat and without-hat halves perform EXACT same poses, no-hat has full copper hair and identical body geometry. Blade stays LOW in anatomical RIGHT hand, LEFT hand free for interaction.  Falling down from a drag release, eight chronological poses: startled spread knees, freehandreachesout, legsforward, capeup, bodyuprightfall, kneesbend, legsforwardagain, compactlandingcrouch. FOURcolumns FOURrows total16figures: first2rows8withhat; last2rows SAME8posesnohat. No extra rows, no more than16figures. Bodycentral65% ofequalcells,feetcommonrootreference, noFX/ground. Intended1536x1536."
+  }
+]

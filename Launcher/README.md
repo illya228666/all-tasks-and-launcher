@@ -48,6 +48,8 @@ Das Profil `Windows-x64` bleibt im Startprojekt und erzeugt die eigenständige A
 - [Архитектура / Architektur](docs/ARCHITECTURE_RU_DE.md)
 - [Проверка и сценарии / Prüfung und Szenarien](docs/ANALYSIS_CHECKLIST_RU_DE.md)
 - [Термины / Begriffe](docs/GLOSSARY_RU_DE.md)
+- [Жизнь в постоянных руинах / Leben in den Ruinen](docs/DESKTOP_LIFE_RU_DE.md)
+- [Классический Сумрак: графика и проверки](docs/SUMRAK_GRAPHICS_RU.md)
 
 
 ## Переработка MVP / MVP-Überarbeitung

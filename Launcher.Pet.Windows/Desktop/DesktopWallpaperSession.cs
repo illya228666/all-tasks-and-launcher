@@ -5,7 +5,7 @@ using System.Text.Json;
 namespace Launcher.Pet.Windows.Desktop;
 
 // The journal is written before changing Windows settings so a later launch can undo a crash.
-public sealed class DesktopWallpaperSession
+public sealed class DesktopWallpaperSession : IDesktopWallpaperSession
 {
     private readonly string _art = Path.Combine(AppContext.BaseDirectory, "Resources", "ruins", "wallpaper.png");
     private readonly string _journal = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),

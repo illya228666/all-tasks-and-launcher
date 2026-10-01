@@ -1,0 +1,7207 @@
+{
+  "frameCount": 600,
+  "frames": [
+    {
+      "action": "idle",
+      "variant": "hat",
+      "frame": 0,
+      "alphaBox": [
+        243,
+        264,
+        549,
+        712
+      ],
+      "soleShift": -17
+    },
+    {
+      "action": "idle",
+      "variant": "hat",
+      "frame": 1,
+      "alphaBox": [
+        240,
+        259,
+        548,
+        712
+      ],
+      "soleShift": -17
+    },
+    {
+      "action": "idle",
+      "variant": "hat",
+      "frame": 2,
+      "alphaBox": [
+        239,
+        259,
+        552,
+        712
+      ],
+      "soleShift": -17
+    },
+    {
+      "action": "idle",
+      "variant": "hat",
+      "frame": 3,
+      "alphaBox": [
+        244,
+        261,
+        552,
+        712
+      ],
+      "soleShift": -17
+    },
+    {
+      "action": "idle",
+      "variant": "hat",
+      "frame": 4,
+      "alphaBox": [
+        244,
+        261,
+        550,
+        712
+      ],
+      "soleShift": -17
+    },
+    {
+      "action": "idle",
+      "variant": "hat",
+      "frame": 5,
+      "alphaBox": [
+        244,
+        266,
+        557,
+        712
+      ],
+      "soleShift": -16
+    },
+    {
+      "action": "idle",
+      "variant": "hat",
+      "frame": 6,
+      "alphaBox": [
+        238,
+        261,
+        551,
+        712
+      ],
+      "soleShift": -16
+    },
+    {
+      "action": "idle",
+      "variant": "hat",
+      "frame": 7,
+      "alphaBox": [
+        243,
+        259,
+        554,
+        712
+      ],
+      "soleShift": -16
+    },
+    {
+      "action": "idle",
+      "variant": "hat",
+      "frame": 8,
+      "alphaBox": [
+        243,
+        259,
+        553,
+        712
+      ],
+      "soleShift": -18
+    },
+    {
+      "action": "idle",
+      "variant": "hat",
+      "frame": 9,
+      "alphaBox": [
+        242,
+        259,
+        555,
+        712
+      ],
+      "soleShift": -17
+    },
+    {
+      "action": "idle",
+      "variant": "hat",
+      "frame": 10,
+      "alphaBox": [
+        242,
+        261,
+        557,
+        712
+      ],
+      "soleShift": -17
+    },
+    {
+      "action": "idle",
+      "variant": "hat",
+      "frame": 11,
+      "alphaBox": [
+        243,
+        264,
+        551,
+        712
+      ],
+      "soleShift": -17
+    },
+    {
+      "action": "idle",
+      "variant": "no-hat",
+      "frame": 0,
+      "alphaBox": [
+        245,
+        277,
+        540,
+        712
+      ],
+      "soleShift": -16
+    },
+    {
+      "action": "idle",
+      "variant": "no-hat",
+      "frame": 1,
+      "alphaBox": [
+        243,
+        279,
+        536,
+        712
+      ],
+      "soleShift": -16
+    },
+    {
+      "action": "idle",
+      "variant": "no-hat",
+      "frame": 2,
+      "alphaBox": [
+        240,
+        277,
+        531,
+        712
+      ],
+      "soleShift": -16
+    },
+    {
+      "action": "idle",
+      "variant": "no-hat",
+      "frame": 3,
+      "alphaBox": [
+        242,
+        279,
+        532,
+        712
+      ],
+      "soleShift": -16
+    },
+    {
+      "action": "idle",
+      "variant": "no-hat",
+      "frame": 4,
+      "alphaBox": [
+        245,
+        285,
+        540,
+        712
+      ],
+      "soleShift": -15
+    },
+    {
+      "action": "idle",
+      "variant": "no-hat",
+      "frame": 5,
+      "alphaBox": [
+        243,
+        288,
+        536,
+        712
+      ],
+      "soleShift": -16
+    },
+    {
+      "action": "idle",
+      "variant": "no-hat",
+      "frame": 6,
+      "alphaBox": [
+        242,
+        287,
+        533,
+        712
+      ],
+      "soleShift": -16
+    },
+    {
+      "action": "idle",
+      "variant": "no-hat",
+      "frame": 7,
+      "alphaBox": [
+        243,
+        290,
+        534,
+        712
+      ],
+      "soleShift": -16
+    },
+    {
+      "action": "idle",
+      "variant": "no-hat",
+      "frame": 8,
+      "alphaBox": [
+        247,
+        332,
+        538,
+        712
+      ],
+      "soleShift": -14
+    },
+    {
+      "action": "idle",
+      "variant": "no-hat",
+      "frame": 9,
+      "alphaBox": [
+        247,
+        326,
+        532,
+        712
+      ],
+      "soleShift": -13
+    },
+    {
+      "action": "idle",
+      "variant": "no-hat",
+      "frame": 10,
+      "alphaBox": [
+        247,
+        323,
+        535,
+        712
+      ],
+      "soleShift": -15
+    },
+    {
+      "action": "idle",
+      "variant": "no-hat",
+      "frame": 11,
+      "alphaBox": [
+        246,
+        327,
+        528,
+        712
+      ],
+      "soleShift": -14
+    },
+    {
+      "action": "walk-right",
+      "variant": "hat",
+      "frame": 0,
+      "alphaBox": [
+        210,
+        276,
+        564,
+        712
+      ],
+      "soleShift": -15
+    },
+    {
+      "action": "walk-right",
+      "variant": "hat",
+      "frame": 1,
+      "alphaBox": [
+        214,
+        279,
+        555,
+        712
+      ],
+      "soleShift": -16
+    },
+    {
+      "action": "walk-right",
+      "variant": "hat",
+      "frame": 2,
+      "alphaBox": [
+        245,
+        277,
+        543,
+        712
+      ],
+      "soleShift": -12
+    },
+    {
+      "action": "walk-right",
+      "variant": "hat",
+      "frame": 3,
+      "alphaBox": [
+        236,
+        274,
+        551,
+        712
+      ],
+      "soleShift": -19
+    },
+    {
+      "action": "walk-right",
+      "variant": "hat",
+      "frame": 4,
+      "alphaBox": [
+        208,
+        270,
+        553,
+        712
+      ],
+      "soleShift": -23
+    },
+    {
+      "action": "walk-right",
+      "variant": "hat",
+      "frame": 5,
+      "alphaBox": [
+        195,
+        273,
+        558,
+        712
+      ],
+      "soleShift": -20
+    },
+    {
+      "action": "walk-right",
+      "variant": "hat",
+      "frame": 6,
+      "alphaBox": [
+        222,
+        270,
+        559,
+        712
+      ],
+      "soleShift": -16
+    },
+    {
+      "action": "walk-right",
+      "variant": "hat",
+      "frame": 7,
+      "alphaBox": [
+        225,
+        274,
+        560,
+        712
+      ],
+      "soleShift": -20
+    },
+    {
+      "action": "walk-right",
+      "variant": "hat",
+      "frame": 8,
+      "alphaBox": [
+        207,
+        274,
+        567,
+        712
+      ],
+      "soleShift": -17
+    },
+    {
+      "action": "walk-right",
+      "variant": "hat",
+      "frame": 9,
+      "alphaBox": [
+        200,
+        269,
+        555,
+        712
+      ],
+      "soleShift": -17
+    },
+    {
+      "action": "walk-right",
+      "variant": "hat",
+      "frame": 10,
+      "alphaBox": [
+        245,
+        273,
+        548,
+        712
+      ],
+      "soleShift": -14
+    },
+    {
+      "action": "walk-right",
+      "variant": "hat",
+      "frame": 11,
+      "alphaBox": [
+        232,
+        268,
+        556,
+        712
+      ],
+      "soleShift": -18
+    },
+    {
+      "action": "walk-right",
+      "variant": "hat",
+      "frame": 12,
+      "alphaBox": [
+        216,
+        270,
+        562,
+        712
+      ],
+      "soleShift": -23
+    },
+    {
+      "action": "walk-right",
+      "variant": "hat",
+      "frame": 13,
+      "alphaBox": [
+        203,
+        274,
+        558,
+        712
+      ],
+      "soleShift": -21
+    },
+    {
+      "action": "walk-right",
+      "variant": "hat",
+      "frame": 14,
+      "alphaBox": [
+        212,
+        268,
+        550,
+        712
+      ],
+      "soleShift": -16
+    },
+    {
+      "action": "walk-right",
+      "variant": "hat",
+      "frame": 15,
+      "alphaBox": [
+        209,
+        268,
+        559,
+        712
+      ],
+      "soleShift": -18
+    },
+    {
+      "action": "walk-right",
+      "variant": "no-hat",
+      "frame": 0,
+      "alphaBox": [
+        208,
+        277,
+        537,
+        712
+      ],
+      "soleShift": -17
+    },
+    {
+      "action": "walk-right",
+      "variant": "no-hat",
+      "frame": 1,
+      "alphaBox": [
+        214,
+        277,
+        527,
+        712
+      ],
+      "soleShift": -16
+    },
+    {
+      "action": "walk-right",
+      "variant": "no-hat",
+      "frame": 2,
+      "alphaBox": [
+        244,
+        281,
+        525,
+        712
+      ],
+      "soleShift": -12
+    },
+    {
+      "action": "walk-right",
+      "variant": "no-hat",
+      "frame": 3,
+      "alphaBox": [
+        225,
+        279,
+        531,
+        712
+      ],
+      "soleShift": -19
+    },
+    {
+      "action": "walk-right",
+      "variant": "no-hat",
+      "frame": 4,
+      "alphaBox": [
+        205,
+        269,
+        543,
+        712
+      ],
+      "soleShift": -21
+    },
+    {
+      "action": "walk-right",
+      "variant": "no-hat",
+      "frame": 5,
+      "alphaBox": [
+        186,
+        269,
+        523,
+        712
+      ],
+      "soleShift": -20
+    },
+    {
+      "action": "walk-right",
+      "variant": "no-hat",
+      "frame": 6,
+      "alphaBox": [
+        221,
+        270,
+        536,
+        712
+      ],
+      "soleShift": -16
+    },
+    {
+      "action": "walk-right",
+      "variant": "no-hat",
+      "frame": 7,
+      "alphaBox": [
+        212,
+        270,
+        555,
+        712
+      ],
+      "soleShift": -20
+    },
+    {
+      "action": "walk-right",
+      "variant": "no-hat",
+      "frame": 8,
+      "alphaBox": [
+        207,
+        265,
+        540,
+        712
+      ],
+      "soleShift": -17
+    },
+    {
+      "action": "walk-right",
+      "variant": "no-hat",
+      "frame": 9,
+      "alphaBox": [
+        199,
+        264,
+        538,
+        712
+      ],
+      "soleShift": -16
+    },
+    {
+      "action": "walk-right",
+      "variant": "no-hat",
+      "frame": 10,
+      "alphaBox": [
+        245,
+        266,
+        529,
+        712
+      ],
+      "soleShift": -15
+    },
+    {
+      "action": "walk-right",
+      "variant": "no-hat",
+      "frame": 11,
+      "alphaBox": [
+        222,
+        266,
+        537,
+        712
+      ],
+      "soleShift": -19
+    },
+    {
+      "action": "walk-right",
+      "variant": "no-hat",
+      "frame": 12,
+      "alphaBox": [
+        209,
+        261,
+        546,
+        712
+      ],
+      "soleShift": -23
+    },
+    {
+      "action": "walk-right",
+      "variant": "no-hat",
+      "frame": 13,
+      "alphaBox": [
+        199,
+        261,
+        538,
+        712
+      ],
+      "soleShift": -23
+    },
+    {
+      "action": "walk-right",
+      "variant": "no-hat",
+      "frame": 14,
+      "alphaBox": [
+        210,
+        264,
+        530,
+        712
+      ],
+      "soleShift": -16
+    },
+    {
+      "action": "walk-right",
+      "variant": "no-hat",
+      "frame": 15,
+      "alphaBox": [
+        208,
+        263,
+        547,
+        712
+      ],
+      "soleShift": -17
+    },
+    {
+      "action": "walk-left",
+      "variant": "hat",
+      "frame": 0,
+      "alphaBox": [
+        256,
+        266,
+        634,
+        712
+      ],
+      "soleShift": -20
+    },
+    {
+      "action": "walk-left",
+      "variant": "hat",
+      "frame": 1,
+      "alphaBox": [
+        196,
+        270,
+        566,
+        712
+      ],
+      "soleShift": -16
+    },
+    {
+      "action": "walk-left",
+      "variant": "hat",
+      "frame": 2,
+      "alphaBox": [
+        222,
+        264,
+        581,
+        712
+      ],
+      "soleShift": -18
+    },
+    {
+      "action": "walk-left",
+      "variant": "hat",
+      "frame": 3,
+      "alphaBox": [
+        258,
+        269,
+        628,
+        712
+      ],
+      "soleShift": -18
+    },
+    {
+      "action": "walk-left",
+      "variant": "hat",
+      "frame": 4,
+      "alphaBox": [
+        247,
+        264,
+        629,
+        712
+      ],
+      "soleShift": -21
+    },
+    {
+      "action": "walk-left",
+      "variant": "hat",
+      "frame": 5,
+      "alphaBox": [
+        195,
+        264,
+        576,
+        712
+      ],
+      "soleShift": -18
+    },
+    {
+      "action": "walk-left",
+      "variant": "hat",
+      "frame": 6,
+      "alphaBox": [
+        222,
+        261,
+        582,
+        712
+      ],
+      "soleShift": -17
+    },
+    {
+      "action": "walk-left",
+      "variant": "hat",
+      "frame": 7,
+      "alphaBox": [
+        251,
+        263,
+        642,
+        712
+      ],
+      "soleShift": -21
+    },
+    {
+      "action": "walk-left",
+      "variant": "hat",
+      "frame": 8,
+      "alphaBox": [
+        257,
+        266,
+        635,
+        712
+      ],
+      "soleShift": -20
+    },
+    {
+      "action": "walk-left",
+      "variant": "hat",
+      "frame": 9,
+      "alphaBox": [
+        196,
+        270,
+        566,
+        712
+      ],
+      "soleShift": -15
+    },
+    {
+      "action": "walk-left",
+      "variant": "hat",
+      "frame": 10,
+      "alphaBox": [
+        222,
+        265,
+        581,
+        712
+      ],
+      "soleShift": -17
+    },
+    {
+      "action": "walk-left",
+      "variant": "hat",
+      "frame": 11,
+      "alphaBox": [
+        258,
+        269,
+        628,
+        712
+      ],
+      "soleShift": -18
+    },
+    {
+      "action": "walk-left",
+      "variant": "hat",
+      "frame": 12,
+      "alphaBox": [
+        247,
+        264,
+        629,
+        712
+      ],
+      "soleShift": -21
+    },
+    {
+      "action": "walk-left",
+      "variant": "hat",
+      "frame": 13,
+      "alphaBox": [
+        194,
+        265,
+        576,
+        712
+      ],
+      "soleShift": -19
+    },
+    {
+      "action": "walk-left",
+      "variant": "hat",
+      "frame": 14,
+      "alphaBox": [
+        222,
+        264,
+        582,
+        712
+      ],
+      "soleShift": -18
+    },
+    {
+      "action": "walk-left",
+      "variant": "hat",
+      "frame": 15,
+      "alphaBox": [
+        251,
+        265,
+        643,
+        712
+      ],
+      "soleShift": -20
+    },
+    {
+      "action": "walk-left",
+      "variant": "no-hat",
+      "frame": 0,
+      "alphaBox": [
+        257,
+        282,
+        635,
+        712
+      ],
+      "soleShift": -18
+    },
+    {
+      "action": "walk-left",
+      "variant": "no-hat",
+      "frame": 1,
+      "alphaBox": [
+        203,
+        287,
+        564,
+        712
+      ],
+      "soleShift": -15
+    },
+    {
+      "action": "walk-left",
+      "variant": "no-hat",
+      "frame": 2,
+      "alphaBox": [
+        226,
+        282,
+        585,
+        712
+      ],
+      "soleShift": -16
+    },
+    {
+      "action": "walk-left",
+      "variant": "no-hat",
+      "frame": 3,
+      "alphaBox": [
+        258,
+        283,
+        630,
+        712
+      ],
+      "soleShift": -19
+    },
+    {
+      "action": "walk-left",
+      "variant": "no-hat",
+      "frame": 4,
+      "alphaBox": [
+        248,
+        277,
+        630,
+        712
+      ],
+      "soleShift": -20
+    },
+    {
+      "action": "walk-left",
+      "variant": "no-hat",
+      "frame": 5,
+      "alphaBox": [
+        209,
+        278,
+        574,
+        712
+      ],
+      "soleShift": -17
+    },
+    {
+      "action": "walk-left",
+      "variant": "no-hat",
+      "frame": 6,
+      "alphaBox": [
+        232,
+        276,
+        584,
+        712
+      ],
+      "soleShift": -18
+    },
+    {
+      "action": "walk-left",
+      "variant": "no-hat",
+      "frame": 7,
+      "alphaBox": [
+        253,
+        277,
+        644,
+        712
+      ],
+      "soleShift": -21
+    },
+    {
+      "action": "walk-left",
+      "variant": "no-hat",
+      "frame": 8,
+      "alphaBox": [
+        258,
+        266,
+        636,
+        712
+      ],
+      "soleShift": -20
+    },
+    {
+      "action": "walk-left",
+      "variant": "no-hat",
+      "frame": 9,
+      "alphaBox": [
+        208,
+        272,
+        564,
+        712
+      ],
+      "soleShift": -14
+    },
+    {
+      "action": "walk-left",
+      "variant": "no-hat",
+      "frame": 10,
+      "alphaBox": [
+        232,
+        265,
+        582,
+        712
+      ],
+      "soleShift": -17
+    },
+    {
+      "action": "walk-left",
+      "variant": "no-hat",
+      "frame": 11,
+      "alphaBox": [
+        258,
+        269,
+        630,
+        712
+      ],
+      "soleShift": -18
+    },
+    {
+      "action": "walk-left",
+      "variant": "no-hat",
+      "frame": 12,
+      "alphaBox": [
+        248,
+        272,
+        629,
+        712
+      ],
+      "soleShift": -21
+    },
+    {
+      "action": "walk-left",
+      "variant": "no-hat",
+      "frame": 13,
+      "alphaBox": [
+        212,
+        273,
+        575,
+        712
+      ],
+      "soleShift": -17
+    },
+    {
+      "action": "walk-left",
+      "variant": "no-hat",
+      "frame": 14,
+      "alphaBox": [
+        229,
+        272,
+        584,
+        712
+      ],
+      "soleShift": -17
+    },
+    {
+      "action": "walk-left",
+      "variant": "no-hat",
+      "frame": 15,
+      "alphaBox": [
+        253,
+        272,
+        645,
+        712
+      ],
+      "soleShift": -21
+    },
+    {
+      "action": "wave",
+      "variant": "hat",
+      "frame": 0,
+      "alphaBox": [
+        226,
+        211,
+        569,
+        712
+      ],
+      "soleShift": -17
+    },
+    {
+      "action": "wave",
+      "variant": "hat",
+      "frame": 1,
+      "alphaBox": [
+        229,
+        212,
+        576,
+        712
+      ],
+      "soleShift": -18
+    },
+    {
+      "action": "wave",
+      "variant": "hat",
+      "frame": 2,
+      "alphaBox": [
+        229,
+        211,
+        593,
+        712
+      ],
+      "soleShift": -18
+    },
+    {
+      "action": "wave",
+      "variant": "hat",
+      "frame": 3,
+      "alphaBox": [
+        222,
+        211,
+        574,
+        712
+      ],
+      "soleShift": -19
+    },
+    {
+      "action": "wave",
+      "variant": "hat",
+      "frame": 4,
+      "alphaBox": [
+        225,
+        226,
+        585,
+        712
+      ],
+      "soleShift": -17
+    },
+    {
+      "action": "wave",
+      "variant": "hat",
+      "frame": 5,
+      "alphaBox": [
+        230,
+        225,
+        591,
+        712
+      ],
+      "soleShift": -17
+    },
+    {
+      "action": "wave",
+      "variant": "hat",
+      "frame": 6,
+      "alphaBox": [
+        226,
+        226,
+        577,
+        712
+      ],
+      "soleShift": -19
+    },
+    {
+      "action": "wave",
+      "variant": "hat",
+      "frame": 7,
+      "alphaBox": [
+        220,
+        225,
+        574,
+        712
+      ],
+      "soleShift": -18
+    },
+    {
+      "action": "wave",
+      "variant": "hat",
+      "frame": 8,
+      "alphaBox": [
+        225,
+        228,
+        585,
+        712
+      ],
+      "soleShift": -18
+    },
+    {
+      "action": "wave",
+      "variant": "hat",
+      "frame": 9,
+      "alphaBox": [
+        227,
+        228,
+        596,
+        712
+      ],
+      "soleShift": -18
+    },
+    {
+      "action": "wave",
+      "variant": "hat",
+      "frame": 10,
+      "alphaBox": [
+        230,
+        231,
+        550,
+        712
+      ],
+      "soleShift": -18
+    },
+    {
+      "action": "wave",
+      "variant": "hat",
+      "frame": 11,
+      "alphaBox": [
+        229,
+        225,
+        566,
+        712
+      ],
+      "soleShift": -18
+    },
+    {
+      "action": "wave",
+      "variant": "no-hat",
+      "frame": 0,
+      "alphaBox": [
+        229,
+        264,
+        567,
+        712
+      ],
+      "soleShift": -16
+    },
+    {
+      "action": "wave",
+      "variant": "no-hat",
+      "frame": 1,
+      "alphaBox": [
+        229,
+        261,
+        586,
+        712
+      ],
+      "soleShift": -17
+    },
+    {
+      "action": "wave",
+      "variant": "no-hat",
+      "frame": 2,
+      "alphaBox": [
+        227,
+        261,
+        595,
+        712
+      ],
+      "soleShift": -19
+    },
+    {
+      "action": "wave",
+      "variant": "no-hat",
+      "frame": 3,
+      "alphaBox": [
+        223,
+        264,
+        578,
+        712
+      ],
+      "soleShift": -18
+    },
+    {
+      "action": "wave",
+      "variant": "no-hat",
+      "frame": 4,
+      "alphaBox": [
+        226,
+        282,
+        583,
+        712
+      ],
+      "soleShift": -17
+    },
+    {
+      "action": "wave",
+      "variant": "no-hat",
+      "frame": 5,
+      "alphaBox": [
+        230,
+        286,
+        587,
+        712
+      ],
+      "soleShift": -17
+    },
+    {
+      "action": "wave",
+      "variant": "no-hat",
+      "frame": 6,
+      "alphaBox": [
+        227,
+        287,
+        574,
+        712
+      ],
+      "soleShift": -16
+    },
+    {
+      "action": "wave",
+      "variant": "no-hat",
+      "frame": 7,
+      "alphaBox": [
+        221,
+        282,
+        575,
+        712
+      ],
+      "soleShift": -17
+    },
+    {
+      "action": "wave",
+      "variant": "no-hat",
+      "frame": 8,
+      "alphaBox": [
+        229,
+        279,
+        586,
+        712
+      ],
+      "soleShift": -16
+    },
+    {
+      "action": "wave",
+      "variant": "no-hat",
+      "frame": 9,
+      "alphaBox": [
+        230,
+        277,
+        599,
+        712
+      ],
+      "soleShift": -16
+    },
+    {
+      "action": "wave",
+      "variant": "no-hat",
+      "frame": 10,
+      "alphaBox": [
+        231,
+        282,
+        550,
+        712
+      ],
+      "soleShift": -16
+    },
+    {
+      "action": "wave",
+      "variant": "no-hat",
+      "frame": 11,
+      "alphaBox": [
+        226,
+        277,
+        558,
+        712
+      ],
+      "soleShift": -14
+    },
+    {
+      "action": "jump",
+      "variant": "hat",
+      "frame": 0,
+      "alphaBox": [
+        234,
+        265,
+        562,
+        712
+      ],
+      "soleShift": -13
+    },
+    {
+      "action": "jump",
+      "variant": "hat",
+      "frame": 1,
+      "alphaBox": [
+        209,
+        295,
+        573,
+        712
+      ],
+      "soleShift": -13
+    },
+    {
+      "action": "jump",
+      "variant": "hat",
+      "frame": 2,
+      "alphaBox": [
+        212,
+        362,
+        602,
+        712
+      ],
+      "soleShift": -12
+    },
+    {
+      "action": "jump",
+      "variant": "hat",
+      "frame": 3,
+      "alphaBox": [
+        191,
+        256,
+        573,
+        712
+      ],
+      "soleShift": -21
+    },
+    {
+      "action": "jump",
+      "variant": "hat",
+      "frame": 4,
+      "alphaBox": [
+        204,
+        257,
+        569,
+        712
+      ],
+      "soleShift": -27
+    },
+    {
+      "action": "jump",
+      "variant": "hat",
+      "frame": 5,
+      "alphaBox": [
+        163,
+        314,
+        561,
+        712
+      ],
+      "soleShift": -27
+    },
+    {
+      "action": "jump",
+      "variant": "hat",
+      "frame": 6,
+      "alphaBox": [
+        147,
+        322,
+        550,
+        712
+      ],
+      "soleShift": -29
+    },
+    {
+      "action": "jump",
+      "variant": "hat",
+      "frame": 7,
+      "alphaBox": [
+        140,
+        310,
+        551,
+        712
+      ],
+      "soleShift": -33
+    },
+    {
+      "action": "jump",
+      "variant": "hat",
+      "frame": 8,
+      "alphaBox": [
+        160,
+        295,
+        554,
+        712
+      ],
+      "soleShift": -25
+    },
+    {
+      "action": "jump",
+      "variant": "hat",
+      "frame": 9,
+      "alphaBox": [
+        169,
+        298,
+        552,
+        712
+      ],
+      "soleShift": -24
+    },
+    {
+      "action": "jump",
+      "variant": "hat",
+      "frame": 10,
+      "alphaBox": [
+        181,
+        270,
+        550,
+        712
+      ],
+      "soleShift": -20
+    },
+    {
+      "action": "jump",
+      "variant": "hat",
+      "frame": 11,
+      "alphaBox": [
+        214,
+        342,
+        560,
+        712
+      ],
+      "soleShift": -12
+    },
+    {
+      "action": "jump",
+      "variant": "hat",
+      "frame": 12,
+      "alphaBox": [
+        217,
+        353,
+        587,
+        712
+      ],
+      "soleShift": -15
+    },
+    {
+      "action": "jump",
+      "variant": "hat",
+      "frame": 13,
+      "alphaBox": [
+        215,
+        278,
+        563,
+        712
+      ],
+      "soleShift": -16
+    },
+    {
+      "action": "jump",
+      "variant": "hat",
+      "frame": 14,
+      "alphaBox": [
+        223,
+        260,
+        564,
+        712
+      ],
+      "soleShift": -16
+    },
+    {
+      "action": "jump",
+      "variant": "hat",
+      "frame": 15,
+      "alphaBox": [
+        230,
+        264,
+        554,
+        712
+      ],
+      "soleShift": -16
+    },
+    {
+      "action": "jump",
+      "variant": "no-hat",
+      "frame": 0,
+      "alphaBox": [
+        233,
+        273,
+        533,
+        712
+      ],
+      "soleShift": -13
+    },
+    {
+      "action": "jump",
+      "variant": "no-hat",
+      "frame": 1,
+      "alphaBox": [
+        210,
+        296,
+        556,
+        712
+      ],
+      "soleShift": -13
+    },
+    {
+      "action": "jump",
+      "variant": "no-hat",
+      "frame": 2,
+      "alphaBox": [
+        212,
+        353,
+        581,
+        712
+      ],
+      "soleShift": -12
+    },
+    {
+      "action": "jump",
+      "variant": "no-hat",
+      "frame": 3,
+      "alphaBox": [
+        190,
+        274,
+        555,
+        712
+      ],
+      "soleShift": -20
+    },
+    {
+      "action": "jump",
+      "variant": "no-hat",
+      "frame": 4,
+      "alphaBox": [
+        201,
+        274,
+        549,
+        712
+      ],
+      "soleShift": -25
+    },
+    {
+      "action": "jump",
+      "variant": "no-hat",
+      "frame": 5,
+      "alphaBox": [
+        163,
+        326,
+        541,
+        712
+      ],
+      "soleShift": -26
+    },
+    {
+      "action": "jump",
+      "variant": "no-hat",
+      "frame": 6,
+      "alphaBox": [
+        147,
+        335,
+        550,
+        712
+      ],
+      "soleShift": -29
+    },
+    {
+      "action": "jump",
+      "variant": "no-hat",
+      "frame": 7,
+      "alphaBox": [
+        152,
+        318,
+        542,
+        712
+      ],
+      "soleShift": -32
+    },
+    {
+      "action": "jump",
+      "variant": "no-hat",
+      "frame": 8,
+      "alphaBox": [
+        161,
+        304,
+        538,
+        712
+      ],
+      "soleShift": -24
+    },
+    {
+      "action": "jump",
+      "variant": "no-hat",
+      "frame": 9,
+      "alphaBox": [
+        178,
+        309,
+        532,
+        712
+      ],
+      "soleShift": -24
+    },
+    {
+      "action": "jump",
+      "variant": "no-hat",
+      "frame": 10,
+      "alphaBox": [
+        207,
+        285,
+        527,
+        712
+      ],
+      "soleShift": -19
+    },
+    {
+      "action": "jump",
+      "variant": "no-hat",
+      "frame": 11,
+      "alphaBox": [
+        212,
+        334,
+        546,
+        712
+      ],
+      "soleShift": -12
+    },
+    {
+      "action": "jump",
+      "variant": "no-hat",
+      "frame": 12,
+      "alphaBox": [
+        220,
+        312,
+        562,
+        712
+      ],
+      "soleShift": -14
+    },
+    {
+      "action": "jump",
+      "variant": "no-hat",
+      "frame": 13,
+      "alphaBox": [
+        216,
+        286,
+        537,
+        712
+      ],
+      "soleShift": -14
+    },
+    {
+      "action": "jump",
+      "variant": "no-hat",
+      "frame": 14,
+      "alphaBox": [
+        243,
+        278,
+        536,
+        712
+      ],
+      "soleShift": -16
+    },
+    {
+      "action": "jump",
+      "variant": "no-hat",
+      "frame": 15,
+      "alphaBox": [
+        249,
+        278,
+        535,
+        712
+      ],
+      "soleShift": -15
+    },
+    {
+      "action": "failed",
+      "variant": "hat",
+      "frame": 0,
+      "alphaBox": [
+        236,
+        265,
+        560,
+        712
+      ],
+      "soleShift": -13
+    },
+    {
+      "action": "failed",
+      "variant": "hat",
+      "frame": 1,
+      "alphaBox": [
+        213,
+        264,
+        569,
+        712
+      ],
+      "soleShift": -14
+    },
+    {
+      "action": "failed",
+      "variant": "hat",
+      "frame": 2,
+      "alphaBox": [
+        240,
+        310,
+        607,
+        712
+      ],
+      "soleShift": -15
+    },
+    {
+      "action": "failed",
+      "variant": "hat",
+      "frame": 3,
+      "alphaBox": [
+        223,
+        282,
+        626,
+        712
+      ],
+      "soleShift": -15
+    },
+    {
+      "action": "failed",
+      "variant": "hat",
+      "frame": 4,
+      "alphaBox": [
+        222,
+        305,
+        613,
+        712
+      ],
+      "soleShift": -20
+    },
+    {
+      "action": "failed",
+      "variant": "hat",
+      "frame": 5,
+      "alphaBox": [
+        175,
+        308,
+        600,
+        712
+      ],
+      "soleShift": -26
+    },
+    {
+      "action": "failed",
+      "variant": "hat",
+      "frame": 6,
+      "alphaBox": [
+        148,
+        389,
+        570,
+        712
+      ],
+      "soleShift": -12
+    },
+    {
+      "action": "failed",
+      "variant": "hat",
+      "frame": 7,
+      "alphaBox": [
+        197,
+        402,
+        624,
+        712
+      ],
+      "soleShift": -12
+    },
+    {
+      "action": "failed",
+      "variant": "hat",
+      "frame": 8,
+      "alphaBox": [
+        221,
+        378,
+        613,
+        712
+      ],
+      "soleShift": -13
+    },
+    {
+      "action": "failed",
+      "variant": "hat",
+      "frame": 9,
+      "alphaBox": [
+        196,
+        345,
+        599,
+        712
+      ],
+      "soleShift": -20
+    },
+    {
+      "action": "failed",
+      "variant": "hat",
+      "frame": 10,
+      "alphaBox": [
+        174,
+        344,
+        600,
+        712
+      ],
+      "soleShift": -22
+    },
+    {
+      "action": "failed",
+      "variant": "hat",
+      "frame": 11,
+      "alphaBox": [
+        214,
+        334,
+        652,
+        712
+      ],
+      "soleShift": -14
+    },
+    {
+      "action": "failed",
+      "variant": "hat",
+      "frame": 12,
+      "alphaBox": [
+        217,
+        278,
+        621,
+        712
+      ],
+      "soleShift": -16
+    },
+    {
+      "action": "failed",
+      "variant": "hat",
+      "frame": 13,
+      "alphaBox": [
+        213,
+        256,
+        594,
+        712
+      ],
+      "soleShift": -15
+    },
+    {
+      "action": "failed",
+      "variant": "hat",
+      "frame": 14,
+      "alphaBox": [
+        231,
+        273,
+        564,
+        712
+      ],
+      "soleShift": -13
+    },
+    {
+      "action": "failed",
+      "variant": "hat",
+      "frame": 15,
+      "alphaBox": [
+        239,
+        264,
+        562,
+        712
+      ],
+      "soleShift": -13
+    },
+    {
+      "action": "failed",
+      "variant": "no-hat",
+      "frame": 0,
+      "alphaBox": [
+        239,
+        265,
+        541,
+        712
+      ],
+      "soleShift": -15
+    },
+    {
+      "action": "failed",
+      "variant": "no-hat",
+      "frame": 1,
+      "alphaBox": [
+        210,
+        266,
+        566,
+        712
+      ],
+      "soleShift": -14
+    },
+    {
+      "action": "failed",
+      "variant": "no-hat",
+      "frame": 2,
+      "alphaBox": [
+        226,
+        307,
+        586,
+        712
+      ],
+      "soleShift": -13
+    },
+    {
+      "action": "failed",
+      "variant": "no-hat",
+      "frame": 3,
+      "alphaBox": [
+        223,
+        296,
+        626,
+        712
+      ],
+      "soleShift": -15
+    },
+    {
+      "action": "failed",
+      "variant": "no-hat",
+      "frame": 4,
+      "alphaBox": [
+        218,
+        320,
+        613,
+        712
+      ],
+      "soleShift": -18
+    },
+    {
+      "action": "failed",
+      "variant": "no-hat",
+      "frame": 5,
+      "alphaBox": [
+        168,
+        316,
+        592,
+        712
+      ],
+      "soleShift": -23
+    },
+    {
+      "action": "failed",
+      "variant": "no-hat",
+      "frame": 6,
+      "alphaBox": [
+        150,
+        393,
+        566,
+        712
+      ],
+      "soleShift": -14
+    },
+    {
+      "action": "failed",
+      "variant": "no-hat",
+      "frame": 7,
+      "alphaBox": [
+        200,
+        412,
+        613,
+        712
+      ],
+      "soleShift": -10
+    },
+    {
+      "action": "failed",
+      "variant": "no-hat",
+      "frame": 8,
+      "alphaBox": [
+        220,
+        380,
+        602,
+        712
+      ],
+      "soleShift": -14
+    },
+    {
+      "action": "failed",
+      "variant": "no-hat",
+      "frame": 9,
+      "alphaBox": [
+        217,
+        348,
+        581,
+        712
+      ],
+      "soleShift": -20
+    },
+    {
+      "action": "failed",
+      "variant": "no-hat",
+      "frame": 10,
+      "alphaBox": [
+        165,
+        349,
+        572,
+        712
+      ],
+      "soleShift": -23
+    },
+    {
+      "action": "failed",
+      "variant": "no-hat",
+      "frame": 11,
+      "alphaBox": [
+        216,
+        340,
+        654,
+        712
+      ],
+      "soleShift": -14
+    },
+    {
+      "action": "failed",
+      "variant": "no-hat",
+      "frame": 12,
+      "alphaBox": [
+        216,
+        276,
+        590,
+        712
+      ],
+      "soleShift": -15
+    },
+    {
+      "action": "failed",
+      "variant": "no-hat",
+      "frame": 13,
+      "alphaBox": [
+        220,
+        264,
+        565,
+        712
+      ],
+      "soleShift": -12
+    },
+    {
+      "action": "failed",
+      "variant": "no-hat",
+      "frame": 14,
+      "alphaBox": [
+        232,
+        273,
+        557,
+        712
+      ],
+      "soleShift": -13
+    },
+    {
+      "action": "failed",
+      "variant": "no-hat",
+      "frame": 15,
+      "alphaBox": [
+        238,
+        269,
+        538,
+        712
+      ],
+      "soleShift": -13
+    },
+    {
+      "action": "look-upper",
+      "variant": "hat",
+      "frame": 0,
+      "alphaBox": [
+        222,
+        251,
+        572,
+        712
+      ],
+      "soleShift": -16
+    },
+    {
+      "action": "look-upper",
+      "variant": "hat",
+      "frame": 1,
+      "alphaBox": [
+        216,
+        242,
+        563,
+        712
+      ],
+      "soleShift": -17
+    },
+    {
+      "action": "look-upper",
+      "variant": "hat",
+      "frame": 2,
+      "alphaBox": [
+        223,
+        243,
+        560,
+        712
+      ],
+      "soleShift": -16
+    },
+    {
+      "action": "look-upper",
+      "variant": "hat",
+      "frame": 3,
+      "alphaBox": [
+        221,
+        250,
+        550,
+        712
+      ],
+      "soleShift": -17
+    },
+    {
+      "action": "look-upper",
+      "variant": "hat",
+      "frame": 4,
+      "alphaBox": [
+        218,
+        239,
+        573,
+        712
+      ],
+      "soleShift": -16
+    },
+    {
+      "action": "look-upper",
+      "variant": "hat",
+      "frame": 5,
+      "alphaBox": [
+        217,
+        241,
+        574,
+        712
+      ],
+      "soleShift": -17
+    },
+    {
+      "action": "look-upper",
+      "variant": "hat",
+      "frame": 6,
+      "alphaBox": [
+        218,
+        253,
+        570,
+        712
+      ],
+      "soleShift": -18
+    },
+    {
+      "action": "look-upper",
+      "variant": "hat",
+      "frame": 7,
+      "alphaBox": [
+        223,
+        266,
+        584,
+        712
+      ],
+      "soleShift": -16
+    },
+    {
+      "action": "look-upper",
+      "variant": "no-hat",
+      "frame": 0,
+      "alphaBox": [
+        224,
+        269,
+        574,
+        712
+      ],
+      "soleShift": -15
+    },
+    {
+      "action": "look-upper",
+      "variant": "no-hat",
+      "frame": 1,
+      "alphaBox": [
+        217,
+        269,
+        564,
+        712
+      ],
+      "soleShift": -15
+    },
+    {
+      "action": "look-upper",
+      "variant": "no-hat",
+      "frame": 2,
+      "alphaBox": [
+        225,
+        269,
+        562,
+        712
+      ],
+      "soleShift": -15
+    },
+    {
+      "action": "look-upper",
+      "variant": "no-hat",
+      "frame": 3,
+      "alphaBox": [
+        218,
+        269,
+        563,
+        712
+      ],
+      "soleShift": -15
+    },
+    {
+      "action": "look-upper",
+      "variant": "no-hat",
+      "frame": 4,
+      "alphaBox": [
+        220,
+        246,
+        570,
+        712
+      ],
+      "soleShift": -14
+    },
+    {
+      "action": "look-upper",
+      "variant": "no-hat",
+      "frame": 5,
+      "alphaBox": [
+        217,
+        247,
+        568,
+        712
+      ],
+      "soleShift": -16
+    },
+    {
+      "action": "look-upper",
+      "variant": "no-hat",
+      "frame": 6,
+      "alphaBox": [
+        217,
+        252,
+        562,
+        712
+      ],
+      "soleShift": -15
+    },
+    {
+      "action": "look-upper",
+      "variant": "no-hat",
+      "frame": 7,
+      "alphaBox": [
+        223,
+        265,
+        562,
+        712
+      ],
+      "soleShift": -15
+    },
+    {
+      "action": "look-lower",
+      "variant": "hat",
+      "frame": 0,
+      "alphaBox": [
+        221,
+        204,
+        586,
+        712
+      ],
+      "soleShift": -16
+    },
+    {
+      "action": "look-lower",
+      "variant": "hat",
+      "frame": 1,
+      "alphaBox": [
+        222,
+        203,
+        578,
+        712
+      ],
+      "soleShift": -16
+    },
+    {
+      "action": "look-lower",
+      "variant": "hat",
+      "frame": 2,
+      "alphaBox": [
+        216,
+        202,
+        571,
+        712
+      ],
+      "soleShift": -16
+    },
+    {
+      "action": "look-lower",
+      "variant": "hat",
+      "frame": 3,
+      "alphaBox": [
+        218,
+        211,
+        565,
+        712
+      ],
+      "soleShift": -14
+    },
+    {
+      "action": "look-lower",
+      "variant": "hat",
+      "frame": 4,
+      "alphaBox": [
+        220,
+        207,
+        574,
+        712
+      ],
+      "soleShift": -16
+    },
+    {
+      "action": "look-lower",
+      "variant": "hat",
+      "frame": 5,
+      "alphaBox": [
+        222,
+        211,
+        582,
+        712
+      ],
+      "soleShift": -16
+    },
+    {
+      "action": "look-lower",
+      "variant": "hat",
+      "frame": 6,
+      "alphaBox": [
+        223,
+        212,
+        568,
+        712
+      ],
+      "soleShift": -16
+    },
+    {
+      "action": "look-lower",
+      "variant": "hat",
+      "frame": 7,
+      "alphaBox": [
+        222,
+        220,
+        572,
+        712
+      ],
+      "soleShift": -16
+    },
+    {
+      "action": "look-lower",
+      "variant": "no-hat",
+      "frame": 0,
+      "alphaBox": [
+        218,
+        266,
+        570,
+        712
+      ],
+      "soleShift": -14
+    },
+    {
+      "action": "look-lower",
+      "variant": "no-hat",
+      "frame": 1,
+      "alphaBox": [
+        220,
+        266,
+        575,
+        712
+      ],
+      "soleShift": -14
+    },
+    {
+      "action": "look-lower",
+      "variant": "no-hat",
+      "frame": 2,
+      "alphaBox": [
+        216,
+        266,
+        570,
+        712
+      ],
+      "soleShift": -14
+    },
+    {
+      "action": "look-lower",
+      "variant": "no-hat",
+      "frame": 3,
+      "alphaBox": [
+        221,
+        266,
+        567,
+        712
+      ],
+      "soleShift": -14
+    },
+    {
+      "action": "look-lower",
+      "variant": "no-hat",
+      "frame": 4,
+      "alphaBox": [
+        225,
+        287,
+        570,
+        712
+      ],
+      "soleShift": -12
+    },
+    {
+      "action": "look-lower",
+      "variant": "no-hat",
+      "frame": 5,
+      "alphaBox": [
+        223,
+        287,
+        569,
+        712
+      ],
+      "soleShift": -12
+    },
+    {
+      "action": "look-lower",
+      "variant": "no-hat",
+      "frame": 6,
+      "alphaBox": [
+        225,
+        287,
+        567,
+        712
+      ],
+      "soleShift": -12
+    },
+    {
+      "action": "look-lower",
+      "variant": "no-hat",
+      "frame": 7,
+      "alphaBox": [
+        223,
+        287,
+        562,
+        712
+      ],
+      "soleShift": -12
+    },
+    {
+      "action": "climb",
+      "variant": "hat",
+      "frame": 0,
+      "alphaBox": [
+        240,
+        265,
+        607,
+        712
+      ],
+      "soleShift": -39
+    },
+    {
+      "action": "climb",
+      "variant": "hat",
+      "frame": 1,
+      "alphaBox": [
+        258,
+        276,
+        581,
+        712
+      ],
+      "soleShift": -36
+    },
+    {
+      "action": "climb",
+      "variant": "hat",
+      "frame": 2,
+      "alphaBox": [
+        238,
+        276,
+        575,
+        712
+      ],
+      "soleShift": -40
+    },
+    {
+      "action": "climb",
+      "variant": "hat",
+      "frame": 3,
+      "alphaBox": [
+        236,
+        269,
+        575,
+        712
+      ],
+      "soleShift": -42
+    },
+    {
+      "action": "climb",
+      "variant": "hat",
+      "frame": 4,
+      "alphaBox": [
+        234,
+        285,
+        569,
+        712
+      ],
+      "soleShift": -39
+    },
+    {
+      "action": "climb",
+      "variant": "hat",
+      "frame": 5,
+      "alphaBox": [
+        229,
+        288,
+        561,
+        712
+      ],
+      "soleShift": -40
+    },
+    {
+      "action": "climb",
+      "variant": "hat",
+      "frame": 6,
+      "alphaBox": [
+        235,
+        283,
+        580,
+        712
+      ],
+      "soleShift": -41
+    },
+    {
+      "action": "climb",
+      "variant": "hat",
+      "frame": 7,
+      "alphaBox": [
+        230,
+        283,
+        567,
+        712
+      ],
+      "soleShift": -39
+    },
+    {
+      "action": "climb",
+      "variant": "hat",
+      "frame": 8,
+      "alphaBox": [
+        232,
+        279,
+        571,
+        712
+      ],
+      "soleShift": -41
+    },
+    {
+      "action": "climb",
+      "variant": "hat",
+      "frame": 9,
+      "alphaBox": [
+        235,
+        283,
+        565,
+        712
+      ],
+      "soleShift": -39
+    },
+    {
+      "action": "climb",
+      "variant": "hat",
+      "frame": 10,
+      "alphaBox": [
+        232,
+        283,
+        566,
+        712
+      ],
+      "soleShift": -39
+    },
+    {
+      "action": "climb",
+      "variant": "hat",
+      "frame": 11,
+      "alphaBox": [
+        231,
+        273,
+        563,
+        712
+      ],
+      "soleShift": -42
+    },
+    {
+      "action": "climb",
+      "variant": "no-hat",
+      "frame": 0,
+      "alphaBox": [
+        251,
+        287,
+        620,
+        712
+      ],
+      "soleShift": -37
+    },
+    {
+      "action": "climb",
+      "variant": "no-hat",
+      "frame": 1,
+      "alphaBox": [
+        260,
+        290,
+        611,
+        712
+      ],
+      "soleShift": -35
+    },
+    {
+      "action": "climb",
+      "variant": "no-hat",
+      "frame": 2,
+      "alphaBox": [
+        254,
+        290,
+        574,
+        712
+      ],
+      "soleShift": -33
+    },
+    {
+      "action": "climb",
+      "variant": "no-hat",
+      "frame": 3,
+      "alphaBox": [
+        230,
+        290,
+        538,
+        712
+      ],
+      "soleShift": -30
+    },
+    {
+      "action": "climb",
+      "variant": "no-hat",
+      "frame": 4,
+      "alphaBox": [
+        251,
+        301,
+        575,
+        712
+      ],
+      "soleShift": -30
+    },
+    {
+      "action": "climb",
+      "variant": "no-hat",
+      "frame": 5,
+      "alphaBox": [
+        253,
+        301,
+        572,
+        712
+      ],
+      "soleShift": -32
+    },
+    {
+      "action": "climb",
+      "variant": "no-hat",
+      "frame": 6,
+      "alphaBox": [
+        256,
+        301,
+        611,
+        712
+      ],
+      "soleShift": -32
+    },
+    {
+      "action": "climb",
+      "variant": "no-hat",
+      "frame": 7,
+      "alphaBox": [
+        260,
+        301,
+        571,
+        712
+      ],
+      "soleShift": -33
+    },
+    {
+      "action": "climb",
+      "variant": "no-hat",
+      "frame": 8,
+      "alphaBox": [
+        240,
+        283,
+        568,
+        712
+      ],
+      "soleShift": -34
+    },
+    {
+      "action": "climb",
+      "variant": "no-hat",
+      "frame": 9,
+      "alphaBox": [
+        194,
+        288,
+        524,
+        712
+      ],
+      "soleShift": -29
+    },
+    {
+      "action": "climb",
+      "variant": "no-hat",
+      "frame": 10,
+      "alphaBox": [
+        197,
+        288,
+        520,
+        712
+      ],
+      "soleShift": -29
+    },
+    {
+      "action": "climb",
+      "variant": "no-hat",
+      "frame": 11,
+      "alphaBox": [
+        209,
+        288,
+        517,
+        712
+      ],
+      "soleShift": -31
+    },
+    {
+      "action": "drag",
+      "variant": "hat",
+      "frame": 0,
+      "alphaBox": [
+        177,
+        265,
+        536,
+        712
+      ],
+      "soleShift": -48
+    },
+    {
+      "action": "drag",
+      "variant": "hat",
+      "frame": 1,
+      "alphaBox": [
+        175,
+        283,
+        529,
+        712
+      ],
+      "soleShift": -33
+    },
+    {
+      "action": "drag",
+      "variant": "hat",
+      "frame": 2,
+      "alphaBox": [
+        175,
+        266,
+        560,
+        712
+      ],
+      "soleShift": -47
+    },
+    {
+      "action": "drag",
+      "variant": "hat",
+      "frame": 3,
+      "alphaBox": [
+        177,
+        268,
+        542,
+        712
+      ],
+      "soleShift": -47
+    },
+    {
+      "action": "drag",
+      "variant": "hat",
+      "frame": 4,
+      "alphaBox": [
+        172,
+        274,
+        544,
+        712
+      ],
+      "soleShift": -41
+    },
+    {
+      "action": "drag",
+      "variant": "hat",
+      "frame": 5,
+      "alphaBox": [
+        182,
+        276,
+        549,
+        712
+      ],
+      "soleShift": -45
+    },
+    {
+      "action": "drag",
+      "variant": "hat",
+      "frame": 6,
+      "alphaBox": [
+        147,
+        276,
+        529,
+        712
+      ],
+      "soleShift": -28
+    },
+    {
+      "action": "drag",
+      "variant": "hat",
+      "frame": 7,
+      "alphaBox": [
+        203,
+        273,
+        572,
+        712
+      ],
+      "soleShift": -51
+    },
+    {
+      "action": "drag",
+      "variant": "hat",
+      "frame": 8,
+      "alphaBox": [
+        185,
+        251,
+        552,
+        712
+      ],
+      "soleShift": -46
+    },
+    {
+      "action": "drag",
+      "variant": "hat",
+      "frame": 9,
+      "alphaBox": [
+        172,
+        283,
+        540,
+        712
+      ],
+      "soleShift": -34
+    },
+    {
+      "action": "drag",
+      "variant": "hat",
+      "frame": 10,
+      "alphaBox": [
+        168,
+        256,
+        570,
+        712
+      ],
+      "soleShift": -52
+    },
+    {
+      "action": "drag",
+      "variant": "hat",
+      "frame": 11,
+      "alphaBox": [
+        191,
+        272,
+        561,
+        712
+      ],
+      "soleShift": -45
+    },
+    {
+      "action": "drag",
+      "variant": "no-hat",
+      "frame": 0,
+      "alphaBox": [
+        172,
+        270,
+        537,
+        712
+      ],
+      "soleShift": -47
+    },
+    {
+      "action": "drag",
+      "variant": "no-hat",
+      "frame": 1,
+      "alphaBox": [
+        170,
+        290,
+        537,
+        712
+      ],
+      "soleShift": -32
+    },
+    {
+      "action": "drag",
+      "variant": "no-hat",
+      "frame": 2,
+      "alphaBox": [
+        170,
+        266,
+        564,
+        712
+      ],
+      "soleShift": -46
+    },
+    {
+      "action": "drag",
+      "variant": "no-hat",
+      "frame": 3,
+      "alphaBox": [
+        173,
+        270,
+        547,
+        712
+      ],
+      "soleShift": -46
+    },
+    {
+      "action": "drag",
+      "variant": "no-hat",
+      "frame": 4,
+      "alphaBox": [
+        168,
+        276,
+        546,
+        712
+      ],
+      "soleShift": -37
+    },
+    {
+      "action": "drag",
+      "variant": "no-hat",
+      "frame": 5,
+      "alphaBox": [
+        175,
+        282,
+        552,
+        712
+      ],
+      "soleShift": -44
+    },
+    {
+      "action": "drag",
+      "variant": "no-hat",
+      "frame": 6,
+      "alphaBox": [
+        137,
+        273,
+        532,
+        712
+      ],
+      "soleShift": -30
+    },
+    {
+      "action": "drag",
+      "variant": "no-hat",
+      "frame": 7,
+      "alphaBox": [
+        199,
+        278,
+        576,
+        712
+      ],
+      "soleShift": -48
+    },
+    {
+      "action": "drag",
+      "variant": "no-hat",
+      "frame": 8,
+      "alphaBox": [
+        181,
+        247,
+        553,
+        712
+      ],
+      "soleShift": -46
+    },
+    {
+      "action": "drag",
+      "variant": "no-hat",
+      "frame": 9,
+      "alphaBox": [
+        169,
+        290,
+        545,
+        712
+      ],
+      "soleShift": -34
+    },
+    {
+      "action": "drag",
+      "variant": "no-hat",
+      "frame": 10,
+      "alphaBox": [
+        168,
+        251,
+        572,
+        712
+      ],
+      "soleShift": -49
+    },
+    {
+      "action": "drag",
+      "variant": "no-hat",
+      "frame": 11,
+      "alphaBox": [
+        186,
+        272,
+        566,
+        712
+      ],
+      "soleShift": -47
+    },
+    {
+      "action": "grab",
+      "variant": "hat",
+      "frame": 0,
+      "alphaBox": [
+        261,
+        265,
+        508,
+        712
+      ],
+      "soleShift": -13
+    },
+    {
+      "action": "grab",
+      "variant": "hat",
+      "frame": 1,
+      "alphaBox": [
+        258,
+        264,
+        525,
+        712
+      ],
+      "soleShift": -14
+    },
+    {
+      "action": "grab",
+      "variant": "hat",
+      "frame": 2,
+      "alphaBox": [
+        257,
+        259,
+        525,
+        712
+      ],
+      "soleShift": -14
+    },
+    {
+      "action": "grab",
+      "variant": "hat",
+      "frame": 3,
+      "alphaBox": [
+        251,
+        208,
+        480,
+        712
+      ],
+      "soleShift": -29
+    },
+    {
+      "action": "grab",
+      "variant": "no-hat",
+      "frame": 0,
+      "alphaBox": [
+        264,
+        278,
+        509,
+        712
+      ],
+      "soleShift": -13
+    },
+    {
+      "action": "grab",
+      "variant": "no-hat",
+      "frame": 1,
+      "alphaBox": [
+        257,
+        272,
+        526,
+        712
+      ],
+      "soleShift": -14
+    },
+    {
+      "action": "grab",
+      "variant": "no-hat",
+      "frame": 2,
+      "alphaBox": [
+        258,
+        259,
+        526,
+        712
+      ],
+      "soleShift": -13
+    },
+    {
+      "action": "grab",
+      "variant": "no-hat",
+      "frame": 3,
+      "alphaBox": [
+        251,
+        202,
+        479,
+        712
+      ],
+      "soleShift": -27
+    },
+    {
+      "action": "pull-up",
+      "variant": "hat",
+      "frame": 0,
+      "alphaBox": [
+        244,
+        235,
+        538,
+        712
+      ],
+      "soleShift": -43
+    },
+    {
+      "action": "pull-up",
+      "variant": "hat",
+      "frame": 1,
+      "alphaBox": [
+        221,
+        252,
+        502,
+        712
+      ],
+      "soleShift": -37
+    },
+    {
+      "action": "pull-up",
+      "variant": "hat",
+      "frame": 2,
+      "alphaBox": [
+        271,
+        281,
+        562,
+        712
+      ],
+      "soleShift": -52
+    },
+    {
+      "action": "pull-up",
+      "variant": "hat",
+      "frame": 3,
+      "alphaBox": [
+        267,
+        283,
+        553,
+        712
+      ],
+      "soleShift": -54
+    },
+    {
+      "action": "pull-up",
+      "variant": "hat",
+      "frame": 4,
+      "alphaBox": [
+        229,
+        374,
+        584,
+        712
+      ],
+      "soleShift": -21
+    },
+    {
+      "action": "pull-up",
+      "variant": "hat",
+      "frame": 5,
+      "alphaBox": [
+        231,
+        360,
+        585,
+        712
+      ],
+      "soleShift": -21
+    },
+    {
+      "action": "pull-up",
+      "variant": "hat",
+      "frame": 6,
+      "alphaBox": [
+        245,
+        290,
+        586,
+        712
+      ],
+      "soleShift": -18
+    },
+    {
+      "action": "pull-up",
+      "variant": "hat",
+      "frame": 7,
+      "alphaBox": [
+        254,
+        265,
+        536,
+        712
+      ],
+      "soleShift": -16
+    },
+    {
+      "action": "pull-up",
+      "variant": "no-hat",
+      "frame": 0,
+      "alphaBox": [
+        244,
+        235,
+        538,
+        712
+      ],
+      "soleShift": -42
+    },
+    {
+      "action": "pull-up",
+      "variant": "no-hat",
+      "frame": 1,
+      "alphaBox": [
+        222,
+        252,
+        500,
+        712
+      ],
+      "soleShift": -37
+    },
+    {
+      "action": "pull-up",
+      "variant": "no-hat",
+      "frame": 2,
+      "alphaBox": [
+        271,
+        281,
+        562,
+        712
+      ],
+      "soleShift": -50
+    },
+    {
+      "action": "pull-up",
+      "variant": "no-hat",
+      "frame": 3,
+      "alphaBox": [
+        267,
+        283,
+        553,
+        712
+      ],
+      "soleShift": -54
+    },
+    {
+      "action": "pull-up",
+      "variant": "no-hat",
+      "frame": 4,
+      "alphaBox": [
+        230,
+        371,
+        559,
+        712
+      ],
+      "soleShift": -21
+    },
+    {
+      "action": "pull-up",
+      "variant": "no-hat",
+      "frame": 5,
+      "alphaBox": [
+        230,
+        364,
+        560,
+        712
+      ],
+      "soleShift": -22
+    },
+    {
+      "action": "pull-up",
+      "variant": "no-hat",
+      "frame": 6,
+      "alphaBox": [
+        245,
+        303,
+        568,
+        712
+      ],
+      "soleShift": -17
+    },
+    {
+      "action": "pull-up",
+      "variant": "no-hat",
+      "frame": 7,
+      "alphaBox": [
+        254,
+        273,
+        529,
+        712
+      ],
+      "soleShift": -16
+    },
+    {
+      "action": "fall",
+      "variant": "hat",
+      "frame": 0,
+      "alphaBox": [
+        204,
+        288,
+        606,
+        712
+      ],
+      "soleShift": -28
+    },
+    {
+      "action": "fall",
+      "variant": "hat",
+      "frame": 1,
+      "alphaBox": [
+        146,
+        272,
+        560,
+        712
+      ],
+      "soleShift": -35
+    },
+    {
+      "action": "fall",
+      "variant": "hat",
+      "frame": 2,
+      "alphaBox": [
+        174,
+        295,
+        599,
+        712
+      ],
+      "soleShift": -34
+    },
+    {
+      "action": "fall",
+      "variant": "hat",
+      "frame": 3,
+      "alphaBox": [
+        168,
+        331,
+        602,
+        712
+      ],
+      "soleShift": -32
+    },
+    {
+      "action": "fall",
+      "variant": "hat",
+      "frame": 4,
+      "alphaBox": [
+        201,
+        265,
+        582,
+        712
+      ],
+      "soleShift": -15
+    },
+    {
+      "action": "fall",
+      "variant": "hat",
+      "frame": 5,
+      "alphaBox": [
+        181,
+        299,
+        575,
+        712
+      ],
+      "soleShift": -17
+    },
+    {
+      "action": "fall",
+      "variant": "hat",
+      "frame": 6,
+      "alphaBox": [
+        157,
+        291,
+        578,
+        712
+      ],
+      "soleShift": -30
+    },
+    {
+      "action": "fall",
+      "variant": "hat",
+      "frame": 7,
+      "alphaBox": [
+        165,
+        370,
+        572,
+        712
+      ],
+      "soleShift": -15
+    },
+    {
+      "action": "fall",
+      "variant": "no-hat",
+      "frame": 0,
+      "alphaBox": [
+        192,
+        298,
+        603,
+        712
+      ],
+      "soleShift": -27
+    },
+    {
+      "action": "fall",
+      "variant": "no-hat",
+      "frame": 1,
+      "alphaBox": [
+        139,
+        290,
+        564,
+        712
+      ],
+      "soleShift": -35
+    },
+    {
+      "action": "fall",
+      "variant": "no-hat",
+      "frame": 2,
+      "alphaBox": [
+        179,
+        316,
+        604,
+        712
+      ],
+      "soleShift": -31
+    },
+    {
+      "action": "fall",
+      "variant": "no-hat",
+      "frame": 3,
+      "alphaBox": [
+        164,
+        332,
+        593,
+        712
+      ],
+      "soleShift": -31
+    },
+    {
+      "action": "fall",
+      "variant": "no-hat",
+      "frame": 4,
+      "alphaBox": [
+        205,
+        285,
+        582,
+        712
+      ],
+      "soleShift": -14
+    },
+    {
+      "action": "fall",
+      "variant": "no-hat",
+      "frame": 5,
+      "alphaBox": [
+        175,
+        316,
+        571,
+        712
+      ],
+      "soleShift": -17
+    },
+    {
+      "action": "fall",
+      "variant": "no-hat",
+      "frame": 6,
+      "alphaBox": [
+        157,
+        305,
+        579,
+        712
+      ],
+      "soleShift": -33
+    },
+    {
+      "action": "fall",
+      "variant": "no-hat",
+      "frame": 7,
+      "alphaBox": [
+        160,
+        362,
+        571,
+        712
+      ],
+      "soleShift": -14
+    },
+    {
+      "action": "recovery",
+      "variant": "hat",
+      "frame": 0,
+      "alphaBox": [
+        139,
+        439,
+        582,
+        712
+      ],
+      "soleShift": -16
+    },
+    {
+      "action": "recovery",
+      "variant": "hat",
+      "frame": 1,
+      "alphaBox": [
+        152,
+        431,
+        554,
+        712
+      ],
+      "soleShift": -13
+    },
+    {
+      "action": "recovery",
+      "variant": "hat",
+      "frame": 2,
+      "alphaBox": [
+        204,
+        382,
+        644,
+        712
+      ],
+      "soleShift": -14
+    },
+    {
+      "action": "recovery",
+      "variant": "hat",
+      "frame": 3,
+      "alphaBox": [
+        203,
+        365,
+        651,
+        712
+      ],
+      "soleShift": -13
+    },
+    {
+      "action": "recovery",
+      "variant": "hat",
+      "frame": 4,
+      "alphaBox": [
+        195,
+        370,
+        646,
+        712
+      ],
+      "soleShift": -12
+    },
+    {
+      "action": "recovery",
+      "variant": "hat",
+      "frame": 5,
+      "alphaBox": [
+        205,
+        342,
+        656,
+        712
+      ],
+      "soleShift": -14
+    },
+    {
+      "action": "recovery",
+      "variant": "hat",
+      "frame": 6,
+      "alphaBox": [
+        200,
+        355,
+        647,
+        712
+      ],
+      "soleShift": -15
+    },
+    {
+      "action": "recovery",
+      "variant": "hat",
+      "frame": 7,
+      "alphaBox": [
+        226,
+        358,
+        611,
+        712
+      ],
+      "soleShift": -10
+    },
+    {
+      "action": "recovery",
+      "variant": "hat",
+      "frame": 8,
+      "alphaBox": [
+        204,
+        327,
+        595,
+        712
+      ],
+      "soleShift": -11
+    },
+    {
+      "action": "recovery",
+      "variant": "hat",
+      "frame": 9,
+      "alphaBox": [
+        230,
+        314,
+        620,
+        712
+      ],
+      "soleShift": -15
+    },
+    {
+      "action": "recovery",
+      "variant": "hat",
+      "frame": 10,
+      "alphaBox": [
+        205,
+        299,
+        635,
+        712
+      ],
+      "soleShift": -16
+    },
+    {
+      "action": "recovery",
+      "variant": "hat",
+      "frame": 11,
+      "alphaBox": [
+        239,
+        327,
+        620,
+        712
+      ],
+      "soleShift": -15
+    },
+    {
+      "action": "recovery",
+      "variant": "hat",
+      "frame": 12,
+      "alphaBox": [
+        254,
+        261,
+        556,
+        712
+      ],
+      "soleShift": -16
+    },
+    {
+      "action": "recovery",
+      "variant": "hat",
+      "frame": 13,
+      "alphaBox": [
+        210,
+        261,
+        555,
+        712
+      ],
+      "soleShift": -16
+    },
+    {
+      "action": "recovery",
+      "variant": "hat",
+      "frame": 14,
+      "alphaBox": [
+        240,
+        264,
+        559,
+        712
+      ],
+      "soleShift": -16
+    },
+    {
+      "action": "recovery",
+      "variant": "hat",
+      "frame": 15,
+      "alphaBox": [
+        230,
+        266,
+        555,
+        712
+      ],
+      "soleShift": -16
+    },
+    {
+      "action": "recovery",
+      "variant": "no-hat",
+      "frame": 0,
+      "alphaBox": [
+        140,
+        432,
+        570,
+        712
+      ],
+      "soleShift": -16
+    },
+    {
+      "action": "recovery",
+      "variant": "no-hat",
+      "frame": 1,
+      "alphaBox": [
+        152,
+        428,
+        548,
+        712
+      ],
+      "soleShift": -14
+    },
+    {
+      "action": "recovery",
+      "variant": "no-hat",
+      "frame": 2,
+      "alphaBox": [
+        205,
+        397,
+        617,
+        712
+      ],
+      "soleShift": -14
+    },
+    {
+      "action": "recovery",
+      "variant": "no-hat",
+      "frame": 3,
+      "alphaBox": [
+        203,
+        377,
+        620,
+        712
+      ],
+      "soleShift": -11
+    },
+    {
+      "action": "recovery",
+      "variant": "no-hat",
+      "frame": 4,
+      "alphaBox": [
+        196,
+        370,
+        622,
+        712
+      ],
+      "soleShift": -11
+    },
+    {
+      "action": "recovery",
+      "variant": "no-hat",
+      "frame": 5,
+      "alphaBox": [
+        205,
+        358,
+        629,
+        712
+      ],
+      "soleShift": -14
+    },
+    {
+      "action": "recovery",
+      "variant": "no-hat",
+      "frame": 6,
+      "alphaBox": [
+        199,
+        360,
+        619,
+        712
+      ],
+      "soleShift": -14
+    },
+    {
+      "action": "recovery",
+      "variant": "no-hat",
+      "frame": 7,
+      "alphaBox": [
+        200,
+        353,
+        592,
+        712
+      ],
+      "soleShift": -11
+    },
+    {
+      "action": "recovery",
+      "variant": "no-hat",
+      "frame": 8,
+      "alphaBox": [
+        203,
+        322,
+        586,
+        712
+      ],
+      "soleShift": -9
+    },
+    {
+      "action": "recovery",
+      "variant": "no-hat",
+      "frame": 9,
+      "alphaBox": [
+        230,
+        312,
+        597,
+        712
+      ],
+      "soleShift": -14
+    },
+    {
+      "action": "recovery",
+      "variant": "no-hat",
+      "frame": 10,
+      "alphaBox": [
+        205,
+        304,
+        607,
+        712
+      ],
+      "soleShift": -16
+    },
+    {
+      "action": "recovery",
+      "variant": "no-hat",
+      "frame": 11,
+      "alphaBox": [
+        239,
+        316,
+        603,
+        712
+      ],
+      "soleShift": -14
+    },
+    {
+      "action": "recovery",
+      "variant": "no-hat",
+      "frame": 12,
+      "alphaBox": [
+        256,
+        269,
+        533,
+        712
+      ],
+      "soleShift": -16
+    },
+    {
+      "action": "recovery",
+      "variant": "no-hat",
+      "frame": 13,
+      "alphaBox": [
+        234,
+        264,
+        549,
+        712
+      ],
+      "soleShift": -16
+    },
+    {
+      "action": "recovery",
+      "variant": "no-hat",
+      "frame": 14,
+      "alphaBox": [
+        220,
+        264,
+        533,
+        712
+      ],
+      "soleShift": -16
+    },
+    {
+      "action": "recovery",
+      "variant": "no-hat",
+      "frame": 15,
+      "alphaBox": [
+        231,
+        265,
+        533,
+        712
+      ],
+      "soleShift": -16
+    },
+    {
+      "action": "hat-pickup",
+      "variant": "hat",
+      "frame": 0,
+      "alphaBox": [
+        242,
+        303,
+        539,
+        712
+      ],
+      "soleShift": -10
+    },
+    {
+      "action": "hat-pickup",
+      "variant": "hat",
+      "frame": 1,
+      "alphaBox": [
+        226,
+        345,
+        603,
+        712
+      ],
+      "soleShift": -11
+    },
+    {
+      "action": "hat-pickup",
+      "variant": "hat",
+      "frame": 2,
+      "alphaBox": [
+        153,
+        370,
+        689,
+        712
+      ],
+      "soleShift": -11
+    },
+    {
+      "action": "hat-pickup",
+      "variant": "hat",
+      "frame": 3,
+      "alphaBox": [
+        209,
+        335,
+        712,
+        712
+      ],
+      "soleShift": -13
+    },
+    {
+      "action": "hat-pickup",
+      "variant": "hat",
+      "frame": 4,
+      "alphaBox": [
+        243,
+        270,
+        677,
+        712
+      ],
+      "soleShift": -12
+    },
+    {
+      "action": "hat-pickup",
+      "variant": "hat",
+      "frame": 5,
+      "alphaBox": [
+        239,
+        276,
+        659,
+        712
+      ],
+      "soleShift": -13
+    },
+    {
+      "action": "hat-pickup",
+      "variant": "hat",
+      "frame": 6,
+      "alphaBox": [
+        236,
+        270,
+        586,
+        712
+      ],
+      "soleShift": -11
+    },
+    {
+      "action": "hat-pickup",
+      "variant": "hat",
+      "frame": 7,
+      "alphaBox": [
+        239,
+        273,
+        578,
+        712
+      ],
+      "soleShift": -12
+    },
+    {
+      "action": "hat-pickup",
+      "variant": "hat",
+      "frame": 8,
+      "alphaBox": [
+        229,
+        268,
+        585,
+        712
+      ],
+      "soleShift": -10
+    },
+    {
+      "action": "hat-pickup",
+      "variant": "hat",
+      "frame": 9,
+      "alphaBox": [
+        218,
+        260,
+        581,
+        712
+      ],
+      "soleShift": -11
+    },
+    {
+      "action": "hat-pickup",
+      "variant": "hat",
+      "frame": 10,
+      "alphaBox": [
+        221,
+        265,
+        581,
+        712
+      ],
+      "soleShift": -11
+    },
+    {
+      "action": "hat-pickup",
+      "variant": "hat",
+      "frame": 11,
+      "alphaBox": [
+        222,
+        265,
+        579,
+        712
+      ],
+      "soleShift": -11
+    },
+    {
+      "action": "hat-pickup",
+      "variant": "no-hat",
+      "frame": 0,
+      "alphaBox": [
+        231,
+        330,
+        533,
+        712
+      ],
+      "soleShift": -8
+    },
+    {
+      "action": "hat-pickup",
+      "variant": "no-hat",
+      "frame": 1,
+      "alphaBox": [
+        229,
+        373,
+        601,
+        712
+      ],
+      "soleShift": -8
+    },
+    {
+      "action": "hat-pickup",
+      "variant": "no-hat",
+      "frame": 2,
+      "alphaBox": [
+        151,
+        389,
+        685,
+        712
+      ],
+      "soleShift": -9
+    },
+    {
+      "action": "hat-pickup",
+      "variant": "no-hat",
+      "frame": 3,
+      "alphaBox": [
+        209,
+        360,
+        708,
+        712
+      ],
+      "soleShift": -10
+    },
+    {
+      "action": "hat-pickup",
+      "variant": "no-hat",
+      "frame": 4,
+      "alphaBox": [
+        245,
+        327,
+        665,
+        712
+      ],
+      "soleShift": -11
+    },
+    {
+      "action": "hat-pickup",
+      "variant": "no-hat",
+      "frame": 5,
+      "alphaBox": [
+        249,
+        330,
+        648,
+        712
+      ],
+      "soleShift": -13
+    },
+    {
+      "action": "hat-pickup",
+      "variant": "no-hat",
+      "frame": 6,
+      "alphaBox": [
+        242,
+        322,
+        579,
+        712
+      ],
+      "soleShift": -9
+    },
+    {
+      "action": "hat-pickup",
+      "variant": "no-hat",
+      "frame": 7,
+      "alphaBox": [
+        242,
+        316,
+        568,
+        712
+      ],
+      "soleShift": -10
+    },
+    {
+      "action": "hat-pickup",
+      "variant": "no-hat",
+      "frame": 8,
+      "alphaBox": [
+        230,
+        325,
+        569,
+        712
+      ],
+      "soleShift": -9
+    },
+    {
+      "action": "hat-pickup",
+      "variant": "no-hat",
+      "frame": 9,
+      "alphaBox": [
+        239,
+        325,
+        576,
+        712
+      ],
+      "soleShift": -9
+    },
+    {
+      "action": "hat-pickup",
+      "variant": "no-hat",
+      "frame": 10,
+      "alphaBox": [
+        231,
+        325,
+        570,
+        712
+      ],
+      "soleShift": -9
+    },
+    {
+      "action": "hat-pickup",
+      "variant": "no-hat",
+      "frame": 11,
+      "alphaBox": [
+        232,
+        327,
+        575,
+        712
+      ],
+      "soleShift": -10
+    },
+    {
+      "action": "idle-curious",
+      "variant": "hat",
+      "frame": 0,
+      "alphaBox": [
+        258,
+        248,
+        549,
+        712
+      ],
+      "soleShift": -17
+    },
+    {
+      "action": "idle-curious",
+      "variant": "hat",
+      "frame": 1,
+      "alphaBox": [
+        252,
+        250,
+        543,
+        712
+      ],
+      "soleShift": -17
+    },
+    {
+      "action": "idle-curious",
+      "variant": "hat",
+      "frame": 2,
+      "alphaBox": [
+        256,
+        250,
+        547,
+        712
+      ],
+      "soleShift": -17
+    },
+    {
+      "action": "idle-curious",
+      "variant": "hat",
+      "frame": 3,
+      "alphaBox": [
+        254,
+        250,
+        547,
+        712
+      ],
+      "soleShift": -15
+    },
+    {
+      "action": "idle-curious",
+      "variant": "hat",
+      "frame": 4,
+      "alphaBox": [
+        257,
+        242,
+        556,
+        712
+      ],
+      "soleShift": -16
+    },
+    {
+      "action": "idle-curious",
+      "variant": "hat",
+      "frame": 5,
+      "alphaBox": [
+        251,
+        242,
+        554,
+        712
+      ],
+      "soleShift": -17
+    },
+    {
+      "action": "idle-curious",
+      "variant": "hat",
+      "frame": 6,
+      "alphaBox": [
+        245,
+        243,
+        545,
+        712
+      ],
+      "soleShift": -16
+    },
+    {
+      "action": "idle-curious",
+      "variant": "hat",
+      "frame": 7,
+      "alphaBox": [
+        252,
+        246,
+        559,
+        712
+      ],
+      "soleShift": -16
+    },
+    {
+      "action": "idle-curious",
+      "variant": "hat",
+      "frame": 8,
+      "alphaBox": [
+        253,
+        246,
+        559,
+        712
+      ],
+      "soleShift": -16
+    },
+    {
+      "action": "idle-curious",
+      "variant": "hat",
+      "frame": 9,
+      "alphaBox": [
+        249,
+        246,
+        556,
+        712
+      ],
+      "soleShift": -16
+    },
+    {
+      "action": "idle-curious",
+      "variant": "hat",
+      "frame": 10,
+      "alphaBox": [
+        248,
+        246,
+        554,
+        712
+      ],
+      "soleShift": -16
+    },
+    {
+      "action": "idle-curious",
+      "variant": "hat",
+      "frame": 11,
+      "alphaBox": [
+        251,
+        246,
+        555,
+        712
+      ],
+      "soleShift": -16
+    },
+    {
+      "action": "idle-curious",
+      "variant": "no-hat",
+      "frame": 0,
+      "alphaBox": [
+        261,
+        265,
+        543,
+        712
+      ],
+      "soleShift": -16
+    },
+    {
+      "action": "idle-curious",
+      "variant": "no-hat",
+      "frame": 1,
+      "alphaBox": [
+        253,
+        273,
+        530,
+        712
+      ],
+      "soleShift": -16
+    },
+    {
+      "action": "idle-curious",
+      "variant": "no-hat",
+      "frame": 2,
+      "alphaBox": [
+        253,
+        272,
+        535,
+        712
+      ],
+      "soleShift": -17
+    },
+    {
+      "action": "idle-curious",
+      "variant": "no-hat",
+      "frame": 3,
+      "alphaBox": [
+        254,
+        272,
+        530,
+        712
+      ],
+      "soleShift": -15
+    },
+    {
+      "action": "idle-curious",
+      "variant": "no-hat",
+      "frame": 4,
+      "alphaBox": [
+        258,
+        266,
+        540,
+        712
+      ],
+      "soleShift": -15
+    },
+    {
+      "action": "idle-curious",
+      "variant": "no-hat",
+      "frame": 5,
+      "alphaBox": [
+        253,
+        266,
+        537,
+        712
+      ],
+      "soleShift": -16
+    },
+    {
+      "action": "idle-curious",
+      "variant": "no-hat",
+      "frame": 6,
+      "alphaBox": [
+        256,
+        266,
+        541,
+        712
+      ],
+      "soleShift": -15
+    },
+    {
+      "action": "idle-curious",
+      "variant": "no-hat",
+      "frame": 7,
+      "alphaBox": [
+        253,
+        266,
+        543,
+        712
+      ],
+      "soleShift": -15
+    },
+    {
+      "action": "idle-curious",
+      "variant": "no-hat",
+      "frame": 8,
+      "alphaBox": [
+        254,
+        269,
+        542,
+        712
+      ],
+      "soleShift": -16
+    },
+    {
+      "action": "idle-curious",
+      "variant": "no-hat",
+      "frame": 9,
+      "alphaBox": [
+        253,
+        266,
+        544,
+        712
+      ],
+      "soleShift": -16
+    },
+    {
+      "action": "idle-curious",
+      "variant": "no-hat",
+      "frame": 10,
+      "alphaBox": [
+        252,
+        269,
+        541,
+        712
+      ],
+      "soleShift": -16
+    },
+    {
+      "action": "idle-curious",
+      "variant": "no-hat",
+      "frame": 11,
+      "alphaBox": [
+        256,
+        269,
+        541,
+        712
+      ],
+      "soleShift": -16
+    },
+    {
+      "action": "observe",
+      "variant": "hat",
+      "frame": 0,
+      "alphaBox": [
+        234,
+        212,
+        566,
+        712
+      ],
+      "soleShift": -16
+    },
+    {
+      "action": "observe",
+      "variant": "hat",
+      "frame": 1,
+      "alphaBox": [
+        239,
+        220,
+        560,
+        712
+      ],
+      "soleShift": -16
+    },
+    {
+      "action": "observe",
+      "variant": "hat",
+      "frame": 2,
+      "alphaBox": [
+        220,
+        242,
+        598,
+        712
+      ],
+      "soleShift": -14
+    },
+    {
+      "action": "observe",
+      "variant": "hat",
+      "frame": 3,
+      "alphaBox": [
+        220,
+        281,
+        634,
+        712
+      ],
+      "soleShift": -14
+    },
+    {
+      "action": "observe",
+      "variant": "hat",
+      "frame": 4,
+      "alphaBox": [
+        222,
+        285,
+        622,
+        712
+      ],
+      "soleShift": -15
+    },
+    {
+      "action": "observe",
+      "variant": "hat",
+      "frame": 5,
+      "alphaBox": [
+        238,
+        287,
+        638,
+        712
+      ],
+      "soleShift": -16
+    },
+    {
+      "action": "observe",
+      "variant": "hat",
+      "frame": 6,
+      "alphaBox": [
+        243,
+        323,
+        642,
+        712
+      ],
+      "soleShift": -14
+    },
+    {
+      "action": "observe",
+      "variant": "hat",
+      "frame": 7,
+      "alphaBox": [
+        225,
+        366,
+        629,
+        712
+      ],
+      "soleShift": -13
+    },
+    {
+      "action": "observe",
+      "variant": "hat",
+      "frame": 8,
+      "alphaBox": [
+        216,
+        380,
+        636,
+        712
+      ],
+      "soleShift": -14
+    },
+    {
+      "action": "observe",
+      "variant": "hat",
+      "frame": 9,
+      "alphaBox": [
+        213,
+        391,
+        633,
+        712
+      ],
+      "soleShift": -13
+    },
+    {
+      "action": "observe",
+      "variant": "hat",
+      "frame": 10,
+      "alphaBox": [
+        220,
+        396,
+        642,
+        712
+      ],
+      "soleShift": -13
+    },
+    {
+      "action": "observe",
+      "variant": "hat",
+      "frame": 11,
+      "alphaBox": [
+        217,
+        389,
+        639,
+        712
+      ],
+      "soleShift": -14
+    },
+    {
+      "action": "observe",
+      "variant": "no-hat",
+      "frame": 0,
+      "alphaBox": [
+        235,
+        230,
+        554,
+        712
+      ],
+      "soleShift": -16
+    },
+    {
+      "action": "observe",
+      "variant": "no-hat",
+      "frame": 1,
+      "alphaBox": [
+        239,
+        241,
+        542,
+        712
+      ],
+      "soleShift": -14
+    },
+    {
+      "action": "observe",
+      "variant": "no-hat",
+      "frame": 2,
+      "alphaBox": [
+        220,
+        264,
+        581,
+        712
+      ],
+      "soleShift": -14
+    },
+    {
+      "action": "observe",
+      "variant": "no-hat",
+      "frame": 3,
+      "alphaBox": [
+        218,
+        295,
+        601,
+        712
+      ],
+      "soleShift": -13
+    },
+    {
+      "action": "observe",
+      "variant": "no-hat",
+      "frame": 4,
+      "alphaBox": [
+        223,
+        303,
+        593,
+        712
+      ],
+      "soleShift": -14
+    },
+    {
+      "action": "observe",
+      "variant": "no-hat",
+      "frame": 5,
+      "alphaBox": [
+        236,
+        303,
+        609,
+        712
+      ],
+      "soleShift": -14
+    },
+    {
+      "action": "observe",
+      "variant": "no-hat",
+      "frame": 6,
+      "alphaBox": [
+        240,
+        344,
+        623,
+        712
+      ],
+      "soleShift": -13
+    },
+    {
+      "action": "observe",
+      "variant": "no-hat",
+      "frame": 7,
+      "alphaBox": [
+        225,
+        375,
+        610,
+        712
+      ],
+      "soleShift": -12
+    },
+    {
+      "action": "observe",
+      "variant": "no-hat",
+      "frame": 8,
+      "alphaBox": [
+        220,
+        383,
+        620,
+        712
+      ],
+      "soleShift": -13
+    },
+    {
+      "action": "observe",
+      "variant": "no-hat",
+      "frame": 9,
+      "alphaBox": [
+        214,
+        393,
+        618,
+        712
+      ],
+      "soleShift": -14
+    },
+    {
+      "action": "observe",
+      "variant": "no-hat",
+      "frame": 10,
+      "alphaBox": [
+        220,
+        396,
+        616,
+        712
+      ],
+      "soleShift": -12
+    },
+    {
+      "action": "observe",
+      "variant": "no-hat",
+      "frame": 11,
+      "alphaBox": [
+        220,
+        391,
+        615,
+        712
+      ],
+      "soleShift": -12
+    },
+    {
+      "action": "pickup",
+      "variant": "hat",
+      "frame": 0,
+      "alphaBox": [
+        245,
+        265,
+        555,
+        712
+      ],
+      "soleShift": -13
+    },
+    {
+      "action": "pickup",
+      "variant": "hat",
+      "frame": 1,
+      "alphaBox": [
+        245,
+        313,
+        596,
+        712
+      ],
+      "soleShift": -12
+    },
+    {
+      "action": "pickup",
+      "variant": "hat",
+      "frame": 2,
+      "alphaBox": [
+        223,
+        358,
+        579,
+        712
+      ],
+      "soleShift": -11
+    },
+    {
+      "action": "pickup",
+      "variant": "hat",
+      "frame": 3,
+      "alphaBox": [
+        216,
+        397,
+        576,
+        712
+      ],
+      "soleShift": -10
+    },
+    {
+      "action": "pickup",
+      "variant": "hat",
+      "frame": 4,
+      "alphaBox": [
+        216,
+        406,
+        577,
+        712
+      ],
+      "soleShift": -11
+    },
+    {
+      "action": "pickup",
+      "variant": "hat",
+      "frame": 5,
+      "alphaBox": [
+        214,
+        402,
+        568,
+        712
+      ],
+      "soleShift": -11
+    },
+    {
+      "action": "pickup",
+      "variant": "hat",
+      "frame": 6,
+      "alphaBox": [
+        217,
+        406,
+        568,
+        712
+      ],
+      "soleShift": -10
+    },
+    {
+      "action": "pickup",
+      "variant": "hat",
+      "frame": 7,
+      "alphaBox": [
+        236,
+        342,
+        591,
+        712
+      ],
+      "soleShift": -12
+    },
+    {
+      "action": "pickup",
+      "variant": "hat",
+      "frame": 8,
+      "alphaBox": [
+        238,
+        274,
+        593,
+        712
+      ],
+      "soleShift": -13
+    },
+    {
+      "action": "pickup",
+      "variant": "hat",
+      "frame": 9,
+      "alphaBox": [
+        242,
+        260,
+        555,
+        712
+      ],
+      "soleShift": -15
+    },
+    {
+      "action": "pickup",
+      "variant": "hat",
+      "frame": 10,
+      "alphaBox": [
+        248,
+        256,
+        554,
+        712
+      ],
+      "soleShift": -15
+    },
+    {
+      "action": "pickup",
+      "variant": "hat",
+      "frame": 11,
+      "alphaBox": [
+        240,
+        256,
+        550,
+        712
+      ],
+      "soleShift": -15
+    },
+    {
+      "action": "pickup",
+      "variant": "no-hat",
+      "frame": 0,
+      "alphaBox": [
+        243,
+        276,
+        534,
+        712
+      ],
+      "soleShift": -13
+    },
+    {
+      "action": "pickup",
+      "variant": "no-hat",
+      "frame": 1,
+      "alphaBox": [
+        244,
+        320,
+        577,
+        712
+      ],
+      "soleShift": -10
+    },
+    {
+      "action": "pickup",
+      "variant": "no-hat",
+      "frame": 2,
+      "alphaBox": [
+        218,
+        360,
+        559,
+        712
+      ],
+      "soleShift": -10
+    },
+    {
+      "action": "pickup",
+      "variant": "no-hat",
+      "frame": 3,
+      "alphaBox": [
+        210,
+        397,
+        558,
+        712
+      ],
+      "soleShift": -8
+    },
+    {
+      "action": "pickup",
+      "variant": "no-hat",
+      "frame": 4,
+      "alphaBox": [
+        214,
+        402,
+        561,
+        712
+      ],
+      "soleShift": -10
+    },
+    {
+      "action": "pickup",
+      "variant": "no-hat",
+      "frame": 5,
+      "alphaBox": [
+        209,
+        404,
+        555,
+        712
+      ],
+      "soleShift": -9
+    },
+    {
+      "action": "pickup",
+      "variant": "no-hat",
+      "frame": 6,
+      "alphaBox": [
+        212,
+        410,
+        555,
+        712
+      ],
+      "soleShift": -8
+    },
+    {
+      "action": "pickup",
+      "variant": "no-hat",
+      "frame": 7,
+      "alphaBox": [
+        232,
+        348,
+        582,
+        712
+      ],
+      "soleShift": -12
+    },
+    {
+      "action": "pickup",
+      "variant": "no-hat",
+      "frame": 8,
+      "alphaBox": [
+        231,
+        276,
+        582,
+        712
+      ],
+      "soleShift": -13
+    },
+    {
+      "action": "pickup",
+      "variant": "no-hat",
+      "frame": 9,
+      "alphaBox": [
+        235,
+        263,
+        543,
+        712
+      ],
+      "soleShift": -13
+    },
+    {
+      "action": "pickup",
+      "variant": "no-hat",
+      "frame": 10,
+      "alphaBox": [
+        242,
+        261,
+        539,
+        712
+      ],
+      "soleShift": -14
+    },
+    {
+      "action": "pickup",
+      "variant": "no-hat",
+      "frame": 11,
+      "alphaBox": [
+        235,
+        263,
+        537,
+        712
+      ],
+      "soleShift": -14
+    },
+    {
+      "action": "carry-right",
+      "variant": "hat",
+      "frame": 0,
+      "alphaBox": [
+        232,
+        265,
+        573,
+        712
+      ],
+      "soleShift": -16
+    },
+    {
+      "action": "carry-right",
+      "variant": "hat",
+      "frame": 1,
+      "alphaBox": [
+        230,
+        268,
+        569,
+        712
+      ],
+      "soleShift": -16
+    },
+    {
+      "action": "carry-right",
+      "variant": "hat",
+      "frame": 2,
+      "alphaBox": [
+        221,
+        265,
+        556,
+        712
+      ],
+      "soleShift": -15
+    },
+    {
+      "action": "carry-right",
+      "variant": "hat",
+      "frame": 3,
+      "alphaBox": [
+        210,
+        266,
+        569,
+        712
+      ],
+      "soleShift": -19
+    },
+    {
+      "action": "carry-right",
+      "variant": "hat",
+      "frame": 4,
+      "alphaBox": [
+        229,
+        273,
+        570,
+        712
+      ],
+      "soleShift": -17
+    },
+    {
+      "action": "carry-right",
+      "variant": "hat",
+      "frame": 5,
+      "alphaBox": [
+        221,
+        265,
+        571,
+        712
+      ],
+      "soleShift": -17
+    },
+    {
+      "action": "carry-right",
+      "variant": "hat",
+      "frame": 6,
+      "alphaBox": [
+        209,
+        266,
+        544,
+        712
+      ],
+      "soleShift": -18
+    },
+    {
+      "action": "carry-right",
+      "variant": "hat",
+      "frame": 7,
+      "alphaBox": [
+        214,
+        276,
+        573,
+        712
+      ],
+      "soleShift": -18
+    },
+    {
+      "action": "carry-right",
+      "variant": "hat",
+      "frame": 8,
+      "alphaBox": [
+        231,
+        268,
+        572,
+        712
+      ],
+      "soleShift": -17
+    },
+    {
+      "action": "carry-right",
+      "variant": "hat",
+      "frame": 9,
+      "alphaBox": [
+        231,
+        270,
+        572,
+        712
+      ],
+      "soleShift": -16
+    },
+    {
+      "action": "carry-right",
+      "variant": "hat",
+      "frame": 10,
+      "alphaBox": [
+        225,
+        265,
+        559,
+        712
+      ],
+      "soleShift": -16
+    },
+    {
+      "action": "carry-right",
+      "variant": "hat",
+      "frame": 11,
+      "alphaBox": [
+        213,
+        266,
+        570,
+        712
+      ],
+      "soleShift": -20
+    },
+    {
+      "action": "carry-right",
+      "variant": "hat",
+      "frame": 12,
+      "alphaBox": [
+        226,
+        269,
+        571,
+        712
+      ],
+      "soleShift": -18
+    },
+    {
+      "action": "carry-right",
+      "variant": "hat",
+      "frame": 13,
+      "alphaBox": [
+        222,
+        263,
+        570,
+        712
+      ],
+      "soleShift": -17
+    },
+    {
+      "action": "carry-right",
+      "variant": "hat",
+      "frame": 14,
+      "alphaBox": [
+        213,
+        264,
+        546,
+        712
+      ],
+      "soleShift": -20
+    },
+    {
+      "action": "carry-right",
+      "variant": "hat",
+      "frame": 15,
+      "alphaBox": [
+        213,
+        274,
+        572,
+        712
+      ],
+      "soleShift": -19
+    },
+    {
+      "action": "carry-right",
+      "variant": "no-hat",
+      "frame": 0,
+      "alphaBox": [
+        232,
+        276,
+        571,
+        712
+      ],
+      "soleShift": -18
+    },
+    {
+      "action": "carry-right",
+      "variant": "no-hat",
+      "frame": 1,
+      "alphaBox": [
+        231,
+        274,
+        570,
+        712
+      ],
+      "soleShift": -17
+    },
+    {
+      "action": "carry-right",
+      "variant": "no-hat",
+      "frame": 2,
+      "alphaBox": [
+        222,
+        276,
+        552,
+        712
+      ],
+      "soleShift": -14
+    },
+    {
+      "action": "carry-right",
+      "variant": "no-hat",
+      "frame": 3,
+      "alphaBox": [
+        212,
+        274,
+        569,
+        712
+      ],
+      "soleShift": -17
+    },
+    {
+      "action": "carry-right",
+      "variant": "no-hat",
+      "frame": 4,
+      "alphaBox": [
+        227,
+        287,
+        570,
+        712
+      ],
+      "soleShift": -17
+    },
+    {
+      "action": "carry-right",
+      "variant": "no-hat",
+      "frame": 5,
+      "alphaBox": [
+        221,
+        279,
+        572,
+        712
+      ],
+      "soleShift": -18
+    },
+    {
+      "action": "carry-right",
+      "variant": "no-hat",
+      "frame": 6,
+      "alphaBox": [
+        210,
+        282,
+        543,
+        712
+      ],
+      "soleShift": -17
+    },
+    {
+      "action": "carry-right",
+      "variant": "no-hat",
+      "frame": 7,
+      "alphaBox": [
+        216,
+        279,
+        575,
+        712
+      ],
+      "soleShift": -20
+    },
+    {
+      "action": "carry-right",
+      "variant": "no-hat",
+      "frame": 8,
+      "alphaBox": [
+        231,
+        278,
+        572,
+        712
+      ],
+      "soleShift": -19
+    },
+    {
+      "action": "carry-right",
+      "variant": "no-hat",
+      "frame": 9,
+      "alphaBox": [
+        231,
+        274,
+        573,
+        712
+      ],
+      "soleShift": -17
+    },
+    {
+      "action": "carry-right",
+      "variant": "no-hat",
+      "frame": 10,
+      "alphaBox": [
+        226,
+        276,
+        558,
+        712
+      ],
+      "soleShift": -15
+    },
+    {
+      "action": "carry-right",
+      "variant": "no-hat",
+      "frame": 11,
+      "alphaBox": [
+        214,
+        273,
+        571,
+        712
+      ],
+      "soleShift": -20
+    },
+    {
+      "action": "carry-right",
+      "variant": "no-hat",
+      "frame": 12,
+      "alphaBox": [
+        229,
+        278,
+        571,
+        712
+      ],
+      "soleShift": -20
+    },
+    {
+      "action": "carry-right",
+      "variant": "no-hat",
+      "frame": 13,
+      "alphaBox": [
+        221,
+        266,
+        569,
+        712
+      ],
+      "soleShift": -19
+    },
+    {
+      "action": "carry-right",
+      "variant": "no-hat",
+      "frame": 14,
+      "alphaBox": [
+        212,
+        266,
+        545,
+        712
+      ],
+      "soleShift": -20
+    },
+    {
+      "action": "carry-right",
+      "variant": "no-hat",
+      "frame": 15,
+      "alphaBox": [
+        213,
+        272,
+        572,
+        712
+      ],
+      "soleShift": -19
+    },
+    {
+      "action": "carry-left",
+      "variant": "hat",
+      "frame": 0,
+      "alphaBox": [
+        178,
+        265,
+        523,
+        712
+      ],
+      "soleShift": -19
+    },
+    {
+      "action": "carry-left",
+      "variant": "hat",
+      "frame": 1,
+      "alphaBox": [
+        197,
+        270,
+        539,
+        712
+      ],
+      "soleShift": -16
+    },
+    {
+      "action": "carry-left",
+      "variant": "hat",
+      "frame": 2,
+      "alphaBox": [
+        232,
+        269,
+        570,
+        712
+      ],
+      "soleShift": -16
+    },
+    {
+      "action": "carry-left",
+      "variant": "hat",
+      "frame": 3,
+      "alphaBox": [
+        212,
+        269,
+        549,
+        712
+      ],
+      "soleShift": -17
+    },
+    {
+      "action": "carry-left",
+      "variant": "hat",
+      "frame": 4,
+      "alphaBox": [
+        216,
+        265,
+        599,
+        712
+      ],
+      "soleShift": -16
+    },
+    {
+      "action": "carry-left",
+      "variant": "hat",
+      "frame": 5,
+      "alphaBox": [
+        223,
+        266,
+        600,
+        712
+      ],
+      "soleShift": -19
+    },
+    {
+      "action": "carry-left",
+      "variant": "hat",
+      "frame": 6,
+      "alphaBox": [
+        204,
+        264,
+        554,
+        712
+      ],
+      "soleShift": -13
+    },
+    {
+      "action": "carry-left",
+      "variant": "hat",
+      "frame": 7,
+      "alphaBox": [
+        229,
+        264,
+        570,
+        712
+      ],
+      "soleShift": -18
+    },
+    {
+      "action": "carry-left",
+      "variant": "hat",
+      "frame": 8,
+      "alphaBox": [
+        179,
+        257,
+        569,
+        712
+      ],
+      "soleShift": -16
+    },
+    {
+      "action": "carry-left",
+      "variant": "hat",
+      "frame": 9,
+      "alphaBox": [
+        192,
+        257,
+        556,
+        712
+      ],
+      "soleShift": -20
+    },
+    {
+      "action": "carry-left",
+      "variant": "hat",
+      "frame": 10,
+      "alphaBox": [
+        201,
+        261,
+        536,
+        712
+      ],
+      "soleShift": -20
+    },
+    {
+      "action": "carry-left",
+      "variant": "hat",
+      "frame": 11,
+      "alphaBox": [
+        197,
+        261,
+        575,
+        712
+      ],
+      "soleShift": -23
+    },
+    {
+      "action": "carry-left",
+      "variant": "hat",
+      "frame": 12,
+      "alphaBox": [
+        188,
+        266,
+        565,
+        712
+      ],
+      "soleShift": -18
+    },
+    {
+      "action": "carry-left",
+      "variant": "hat",
+      "frame": 13,
+      "alphaBox": [
+        200,
+        265,
+        541,
+        712
+      ],
+      "soleShift": -17
+    },
+    {
+      "action": "carry-left",
+      "variant": "hat",
+      "frame": 14,
+      "alphaBox": [
+        212,
+        264,
+        550,
+        712
+      ],
+      "soleShift": -17
+    },
+    {
+      "action": "carry-left",
+      "variant": "hat",
+      "frame": 15,
+      "alphaBox": [
+        177,
+        261,
+        527,
+        712
+      ],
+      "soleShift": -21
+    },
+    {
+      "action": "carry-left",
+      "variant": "no-hat",
+      "frame": 0,
+      "alphaBox": [
+        181,
+        277,
+        555,
+        712
+      ],
+      "soleShift": -17
+    },
+    {
+      "action": "carry-left",
+      "variant": "no-hat",
+      "frame": 1,
+      "alphaBox": [
+        216,
+        279,
+        589,
+        712
+      ],
+      "soleShift": -16
+    },
+    {
+      "action": "carry-left",
+      "variant": "no-hat",
+      "frame": 2,
+      "alphaBox": [
+        251,
+        281,
+        620,
+        712
+      ],
+      "soleShift": -16
+    },
+    {
+      "action": "carry-left",
+      "variant": "no-hat",
+      "frame": 3,
+      "alphaBox": [
+        229,
+        281,
+        579,
+        712
+      ],
+      "soleShift": -16
+    },
+    {
+      "action": "carry-left",
+      "variant": "no-hat",
+      "frame": 4,
+      "alphaBox": [
+        230,
+        274,
+        611,
+        712
+      ],
+      "soleShift": -16
+    },
+    {
+      "action": "carry-left",
+      "variant": "no-hat",
+      "frame": 5,
+      "alphaBox": [
+        247,
+        274,
+        607,
+        712
+      ],
+      "soleShift": -20
+    },
+    {
+      "action": "carry-left",
+      "variant": "no-hat",
+      "frame": 6,
+      "alphaBox": [
+        223,
+        274,
+        571,
+        712
+      ],
+      "soleShift": -13
+    },
+    {
+      "action": "carry-left",
+      "variant": "no-hat",
+      "frame": 7,
+      "alphaBox": [
+        245,
+        274,
+        571,
+        712
+      ],
+      "soleShift": -19
+    },
+    {
+      "action": "carry-left",
+      "variant": "no-hat",
+      "frame": 8,
+      "alphaBox": [
+        182,
+        266,
+        572,
+        712
+      ],
+      "soleShift": -18
+    },
+    {
+      "action": "carry-left",
+      "variant": "no-hat",
+      "frame": 9,
+      "alphaBox": [
+        210,
+        269,
+        566,
+        712
+      ],
+      "soleShift": -18
+    },
+    {
+      "action": "carry-left",
+      "variant": "no-hat",
+      "frame": 10,
+      "alphaBox": [
+        209,
+        266,
+        568,
+        712
+      ],
+      "soleShift": -21
+    },
+    {
+      "action": "carry-left",
+      "variant": "no-hat",
+      "frame": 11,
+      "alphaBox": [
+        217,
+        268,
+        573,
+        712
+      ],
+      "soleShift": -21
+    },
+    {
+      "action": "carry-left",
+      "variant": "no-hat",
+      "frame": 12,
+      "alphaBox": [
+        197,
+        270,
+        577,
+        712
+      ],
+      "soleShift": -17
+    },
+    {
+      "action": "carry-left",
+      "variant": "no-hat",
+      "frame": 13,
+      "alphaBox": [
+        217,
+        270,
+        578,
+        712
+      ],
+      "soleShift": -17
+    },
+    {
+      "action": "carry-left",
+      "variant": "no-hat",
+      "frame": 14,
+      "alphaBox": [
+        229,
+        270,
+        554,
+        712
+      ],
+      "soleShift": -17
+    },
+    {
+      "action": "carry-left",
+      "variant": "no-hat",
+      "frame": 15,
+      "alphaBox": [
+        177,
+        270,
+        562,
+        712
+      ],
+      "soleShift": -21
+    },
+    {
+      "action": "carry-climb",
+      "variant": "hat",
+      "frame": 0,
+      "alphaBox": [
+        248,
+        265,
+        546,
+        712
+      ],
+      "soleShift": -38
+    },
+    {
+      "action": "carry-climb",
+      "variant": "hat",
+      "frame": 1,
+      "alphaBox": [
+        244,
+        263,
+        532,
+        712
+      ],
+      "soleShift": -35
+    },
+    {
+      "action": "carry-climb",
+      "variant": "hat",
+      "frame": 2,
+      "alphaBox": [
+        229,
+        261,
+        519,
+        712
+      ],
+      "soleShift": -36
+    },
+    {
+      "action": "carry-climb",
+      "variant": "hat",
+      "frame": 3,
+      "alphaBox": [
+        249,
+        264,
+        539,
+        712
+      ],
+      "soleShift": -35
+    },
+    {
+      "action": "carry-climb",
+      "variant": "hat",
+      "frame": 4,
+      "alphaBox": [
+        249,
+        264,
+        539,
+        712
+      ],
+      "soleShift": -35
+    },
+    {
+      "action": "carry-climb",
+      "variant": "hat",
+      "frame": 5,
+      "alphaBox": [
+        254,
+        268,
+        539,
+        712
+      ],
+      "soleShift": -34
+    },
+    {
+      "action": "carry-climb",
+      "variant": "hat",
+      "frame": 6,
+      "alphaBox": [
+        245,
+        268,
+        551,
+        712
+      ],
+      "soleShift": -35
+    },
+    {
+      "action": "carry-climb",
+      "variant": "hat",
+      "frame": 7,
+      "alphaBox": [
+        243,
+        272,
+        537,
+        712
+      ],
+      "soleShift": -36
+    },
+    {
+      "action": "carry-climb",
+      "variant": "hat",
+      "frame": 8,
+      "alphaBox": [
+        236,
+        251,
+        534,
+        712
+      ],
+      "soleShift": -35
+    },
+    {
+      "action": "carry-climb",
+      "variant": "hat",
+      "frame": 9,
+      "alphaBox": [
+        244,
+        253,
+        533,
+        712
+      ],
+      "soleShift": -36
+    },
+    {
+      "action": "carry-climb",
+      "variant": "hat",
+      "frame": 10,
+      "alphaBox": [
+        238,
+        247,
+        542,
+        712
+      ],
+      "soleShift": -38
+    },
+    {
+      "action": "carry-climb",
+      "variant": "hat",
+      "frame": 11,
+      "alphaBox": [
+        244,
+        247,
+        563,
+        712
+      ],
+      "soleShift": -37
+    },
+    {
+      "action": "carry-climb",
+      "variant": "no-hat",
+      "frame": 0,
+      "alphaBox": [
+        245,
+        264,
+        547,
+        712
+      ],
+      "soleShift": -38
+    },
+    {
+      "action": "carry-climb",
+      "variant": "no-hat",
+      "frame": 1,
+      "alphaBox": [
+        242,
+        265,
+        536,
+        712
+      ],
+      "soleShift": -35
+    },
+    {
+      "action": "carry-climb",
+      "variant": "no-hat",
+      "frame": 2,
+      "alphaBox": [
+        230,
+        264,
+        528,
+        712
+      ],
+      "soleShift": -36
+    },
+    {
+      "action": "carry-climb",
+      "variant": "no-hat",
+      "frame": 3,
+      "alphaBox": [
+        249,
+        265,
+        540,
+        712
+      ],
+      "soleShift": -35
+    },
+    {
+      "action": "carry-climb",
+      "variant": "no-hat",
+      "frame": 4,
+      "alphaBox": [
+        247,
+        269,
+        545,
+        712
+      ],
+      "soleShift": -34
+    },
+    {
+      "action": "carry-climb",
+      "variant": "no-hat",
+      "frame": 5,
+      "alphaBox": [
+        252,
+        276,
+        545,
+        712
+      ],
+      "soleShift": -33
+    },
+    {
+      "action": "carry-climb",
+      "variant": "no-hat",
+      "frame": 6,
+      "alphaBox": [
+        243,
+        270,
+        546,
+        712
+      ],
+      "soleShift": -36
+    },
+    {
+      "action": "carry-climb",
+      "variant": "no-hat",
+      "frame": 7,
+      "alphaBox": [
+        244,
+        270,
+        541,
+        712
+      ],
+      "soleShift": -37
+    },
+    {
+      "action": "carry-climb",
+      "variant": "no-hat",
+      "frame": 8,
+      "alphaBox": [
+        234,
+        247,
+        540,
+        712
+      ],
+      "soleShift": -34
+    },
+    {
+      "action": "carry-climb",
+      "variant": "no-hat",
+      "frame": 9,
+      "alphaBox": [
+        240,
+        252,
+        537,
+        712
+      ],
+      "soleShift": -34
+    },
+    {
+      "action": "carry-climb",
+      "variant": "no-hat",
+      "frame": 10,
+      "alphaBox": [
+        231,
+        248,
+        535,
+        712
+      ],
+      "soleShift": -37
+    },
+    {
+      "action": "carry-climb",
+      "variant": "no-hat",
+      "frame": 11,
+      "alphaBox": [
+        243,
+        248,
+        554,
+        712
+      ],
+      "soleShift": -37
+    },
+    {
+      "action": "place",
+      "variant": "hat",
+      "frame": 0,
+      "alphaBox": [
+        231,
+        265,
+        565,
+        712
+      ],
+      "soleShift": -15
+    },
+    {
+      "action": "place",
+      "variant": "hat",
+      "frame": 1,
+      "alphaBox": [
+        232,
+        314,
+        584,
+        712
+      ],
+      "soleShift": -15
+    },
+    {
+      "action": "place",
+      "variant": "hat",
+      "frame": 2,
+      "alphaBox": [
+        218,
+        352,
+        605,
+        712
+      ],
+      "soleShift": -14
+    },
+    {
+      "action": "place",
+      "variant": "hat",
+      "frame": 3,
+      "alphaBox": [
+        197,
+        373,
+        600,
+        712
+      ],
+      "soleShift": -14
+    },
+    {
+      "action": "place",
+      "variant": "hat",
+      "frame": 4,
+      "alphaBox": [
+        200,
+        393,
+        590,
+        712
+      ],
+      "soleShift": -12
+    },
+    {
+      "action": "place",
+      "variant": "hat",
+      "frame": 5,
+      "alphaBox": [
+        199,
+        400,
+        591,
+        712
+      ],
+      "soleShift": -14
+    },
+    {
+      "action": "place",
+      "variant": "hat",
+      "frame": 6,
+      "alphaBox": [
+        240,
+        378,
+        616,
+        712
+      ],
+      "soleShift": -13
+    },
+    {
+      "action": "place",
+      "variant": "hat",
+      "frame": 7,
+      "alphaBox": [
+        226,
+        327,
+        594,
+        712
+      ],
+      "soleShift": -15
+    },
+    {
+      "action": "place",
+      "variant": "hat",
+      "frame": 8,
+      "alphaBox": [
+        223,
+        269,
+        564,
+        712
+      ],
+      "soleShift": -16
+    },
+    {
+      "action": "place",
+      "variant": "hat",
+      "frame": 9,
+      "alphaBox": [
+        221,
+        265,
+        558,
+        712
+      ],
+      "soleShift": -16
+    },
+    {
+      "action": "place",
+      "variant": "hat",
+      "frame": 10,
+      "alphaBox": [
+        227,
+        269,
+        561,
+        712
+      ],
+      "soleShift": -16
+    },
+    {
+      "action": "place",
+      "variant": "hat",
+      "frame": 11,
+      "alphaBox": [
+        222,
+        268,
+        560,
+        712
+      ],
+      "soleShift": -16
+    },
+    {
+      "action": "place",
+      "variant": "no-hat",
+      "frame": 0,
+      "alphaBox": [
+        230,
+        287,
+        553,
+        712
+      ],
+      "soleShift": -13
+    },
+    {
+      "action": "place",
+      "variant": "no-hat",
+      "frame": 1,
+      "alphaBox": [
+        231,
+        326,
+        561,
+        712
+      ],
+      "soleShift": -15
+    },
+    {
+      "action": "place",
+      "variant": "no-hat",
+      "frame": 2,
+      "alphaBox": [
+        220,
+        367,
+        584,
+        712
+      ],
+      "soleShift": -14
+    },
+    {
+      "action": "place",
+      "variant": "no-hat",
+      "frame": 3,
+      "alphaBox": [
+        197,
+        382,
+        571,
+        712
+      ],
+      "soleShift": -13
+    },
+    {
+      "action": "place",
+      "variant": "no-hat",
+      "frame": 4,
+      "alphaBox": [
+        200,
+        404,
+        564,
+        712
+      ],
+      "soleShift": -12
+    },
+    {
+      "action": "place",
+      "variant": "no-hat",
+      "frame": 5,
+      "alphaBox": [
+        197,
+        415,
+        564,
+        712
+      ],
+      "soleShift": -14
+    },
+    {
+      "action": "place",
+      "variant": "no-hat",
+      "frame": 6,
+      "alphaBox": [
+        239,
+        405,
+        582,
+        712
+      ],
+      "soleShift": -13
+    },
+    {
+      "action": "place",
+      "variant": "no-hat",
+      "frame": 7,
+      "alphaBox": [
+        226,
+        343,
+        564,
+        712
+      ],
+      "soleShift": -13
+    },
+    {
+      "action": "place",
+      "variant": "no-hat",
+      "frame": 8,
+      "alphaBox": [
+        223,
+        276,
+        536,
+        712
+      ],
+      "soleShift": -15
+    },
+    {
+      "action": "place",
+      "variant": "no-hat",
+      "frame": 9,
+      "alphaBox": [
+        221,
+        283,
+        545,
+        712
+      ],
+      "soleShift": -16
+    },
+    {
+      "action": "place",
+      "variant": "no-hat",
+      "frame": 10,
+      "alphaBox": [
+        229,
+        287,
+        548,
+        712
+      ],
+      "soleShift": -16
+    },
+    {
+      "action": "place",
+      "variant": "no-hat",
+      "frame": 11,
+      "alphaBox": [
+        223,
+        279,
+        542,
+        712
+      ],
+      "soleShift": -16
+    },
+    {
+      "action": "plant",
+      "variant": "hat",
+      "frame": 0,
+      "alphaBox": [
+        266,
+        265,
+        557,
+        712
+      ],
+      "soleShift": -12
+    },
+    {
+      "action": "plant",
+      "variant": "hat",
+      "frame": 1,
+      "alphaBox": [
+        273,
+        301,
+        616,
+        712
+      ],
+      "soleShift": -12
+    },
+    {
+      "action": "plant",
+      "variant": "hat",
+      "frame": 2,
+      "alphaBox": [
+        249,
+        343,
+        599,
+        712
+      ],
+      "soleShift": -18
+    },
+    {
+      "action": "plant",
+      "variant": "hat",
+      "frame": 3,
+      "alphaBox": [
+        251,
+        382,
+        603,
+        712
+      ],
+      "soleShift": -10
+    },
+    {
+      "action": "plant",
+      "variant": "hat",
+      "frame": 4,
+      "alphaBox": [
+        235,
+        360,
+        613,
+        712
+      ],
+      "soleShift": -18
+    },
+    {
+      "action": "plant",
+      "variant": "hat",
+      "frame": 5,
+      "alphaBox": [
+        251,
+        387,
+        624,
+        712
+      ],
+      "soleShift": -14
+    },
+    {
+      "action": "plant",
+      "variant": "hat",
+      "frame": 6,
+      "alphaBox": [
+        235,
+        409,
+        608,
+        712
+      ],
+      "soleShift": -12
+    },
+    {
+      "action": "plant",
+      "variant": "hat",
+      "frame": 7,
+      "alphaBox": [
+        232,
+        402,
+        600,
+        712
+      ],
+      "soleShift": -12
+    },
+    {
+      "action": "plant",
+      "variant": "hat",
+      "frame": 8,
+      "alphaBox": [
+        235,
+        408,
+        618,
+        712
+      ],
+      "soleShift": -13
+    },
+    {
+      "action": "plant",
+      "variant": "hat",
+      "frame": 9,
+      "alphaBox": [
+        238,
+        410,
+        616,
+        712
+      ],
+      "soleShift": -13
+    },
+    {
+      "action": "plant",
+      "variant": "hat",
+      "frame": 10,
+      "alphaBox": [
+        230,
+        405,
+        612,
+        712
+      ],
+      "soleShift": -12
+    },
+    {
+      "action": "plant",
+      "variant": "hat",
+      "frame": 11,
+      "alphaBox": [
+        247,
+        364,
+        620,
+        712
+      ],
+      "soleShift": -19
+    },
+    {
+      "action": "plant",
+      "variant": "hat",
+      "frame": 12,
+      "alphaBox": [
+        249,
+        327,
+        622,
+        712
+      ],
+      "soleShift": -23
+    },
+    {
+      "action": "plant",
+      "variant": "hat",
+      "frame": 13,
+      "alphaBox": [
+        234,
+        287,
+        599,
+        712
+      ],
+      "soleShift": -13
+    },
+    {
+      "action": "plant",
+      "variant": "hat",
+      "frame": 14,
+      "alphaBox": [
+        245,
+        266,
+        583,
+        712
+      ],
+      "soleShift": -14
+    },
+    {
+      "action": "plant",
+      "variant": "hat",
+      "frame": 15,
+      "alphaBox": [
+        248,
+        265,
+        546,
+        712
+      ],
+      "soleShift": -13
+    },
+    {
+      "action": "plant",
+      "variant": "no-hat",
+      "frame": 0,
+      "alphaBox": [
+        243,
+        277,
+        537,
+        712
+      ],
+      "soleShift": -12
+    },
+    {
+      "action": "plant",
+      "variant": "no-hat",
+      "frame": 1,
+      "alphaBox": [
+        258,
+        304,
+        600,
+        712
+      ],
+      "soleShift": -11
+    },
+    {
+      "action": "plant",
+      "variant": "no-hat",
+      "frame": 2,
+      "alphaBox": [
+        244,
+        336,
+        590,
+        712
+      ],
+      "soleShift": -19
+    },
+    {
+      "action": "plant",
+      "variant": "no-hat",
+      "frame": 3,
+      "alphaBox": [
+        245,
+        370,
+        586,
+        712
+      ],
+      "soleShift": -11
+    },
+    {
+      "action": "plant",
+      "variant": "no-hat",
+      "frame": 4,
+      "alphaBox": [
+        232,
+        356,
+        595,
+        712
+      ],
+      "soleShift": -20
+    },
+    {
+      "action": "plant",
+      "variant": "no-hat",
+      "frame": 5,
+      "alphaBox": [
+        235,
+        378,
+        608,
+        712
+      ],
+      "soleShift": -14
+    },
+    {
+      "action": "plant",
+      "variant": "no-hat",
+      "frame": 6,
+      "alphaBox": [
+        236,
+        393,
+        597,
+        712
+      ],
+      "soleShift": -14
+    },
+    {
+      "action": "plant",
+      "variant": "no-hat",
+      "frame": 7,
+      "alphaBox": [
+        227,
+        399,
+        586,
+        712
+      ],
+      "soleShift": -13
+    },
+    {
+      "action": "plant",
+      "variant": "no-hat",
+      "frame": 8,
+      "alphaBox": [
+        232,
+        389,
+        600,
+        712
+      ],
+      "soleShift": -14
+    },
+    {
+      "action": "plant",
+      "variant": "no-hat",
+      "frame": 9,
+      "alphaBox": [
+        231,
+        401,
+        600,
+        712
+      ],
+      "soleShift": -13
+    },
+    {
+      "action": "plant",
+      "variant": "no-hat",
+      "frame": 10,
+      "alphaBox": [
+        227,
+        401,
+        592,
+        712
+      ],
+      "soleShift": -13
+    },
+    {
+      "action": "plant",
+      "variant": "no-hat",
+      "frame": 11,
+      "alphaBox": [
+        247,
+        375,
+        601,
+        712
+      ],
+      "soleShift": -20
+    },
+    {
+      "action": "plant",
+      "variant": "no-hat",
+      "frame": 12,
+      "alphaBox": [
+        239,
+        322,
+        598,
+        712
+      ],
+      "soleShift": -22
+    },
+    {
+      "action": "plant",
+      "variant": "no-hat",
+      "frame": 13,
+      "alphaBox": [
+        208,
+        291,
+        572,
+        712
+      ],
+      "soleShift": -12
+    },
+    {
+      "action": "plant",
+      "variant": "no-hat",
+      "frame": 14,
+      "alphaBox": [
+        230,
+        274,
+        560,
+        712
+      ],
+      "soleShift": -13
+    },
+    {
+      "action": "plant",
+      "variant": "no-hat",
+      "frame": 15,
+      "alphaBox": [
+        231,
+        270,
+        535,
+        712
+      ],
+      "soleShift": -14
+    },
+    {
+      "action": "recycle",
+      "variant": "hat",
+      "frame": 0,
+      "alphaBox": [
+        236,
+        265,
+        575,
+        712
+      ],
+      "soleShift": -15
+    },
+    {
+      "action": "recycle",
+      "variant": "hat",
+      "frame": 1,
+      "alphaBox": [
+        214,
+        340,
+        622,
+        712
+      ],
+      "soleShift": -14
+    },
+    {
+      "action": "recycle",
+      "variant": "hat",
+      "frame": 2,
+      "alphaBox": [
+        213,
+        375,
+        612,
+        712
+      ],
+      "soleShift": -10
+    },
+    {
+      "action": "recycle",
+      "variant": "hat",
+      "frame": 3,
+      "alphaBox": [
+        221,
+        393,
+        603,
+        712
+      ],
+      "soleShift": -8
+    },
+    {
+      "action": "recycle",
+      "variant": "hat",
+      "frame": 4,
+      "alphaBox": [
+        226,
+        358,
+        611,
+        712
+      ],
+      "soleShift": -11
+    },
+    {
+      "action": "recycle",
+      "variant": "hat",
+      "frame": 5,
+      "alphaBox": [
+        230,
+        360,
+        622,
+        712
+      ],
+      "soleShift": -9
+    },
+    {
+      "action": "recycle",
+      "variant": "hat",
+      "frame": 6,
+      "alphaBox": [
+        230,
+        358,
+        624,
+        712
+      ],
+      "soleShift": -10
+    },
+    {
+      "action": "recycle",
+      "variant": "hat",
+      "frame": 7,
+      "alphaBox": [
+        240,
+        360,
+        620,
+        712
+      ],
+      "soleShift": -9
+    },
+    {
+      "action": "recycle",
+      "variant": "hat",
+      "frame": 8,
+      "alphaBox": [
+        230,
+        355,
+        617,
+        712
+      ],
+      "soleShift": -10
+    },
+    {
+      "action": "recycle",
+      "variant": "hat",
+      "frame": 9,
+      "alphaBox": [
+        239,
+        358,
+        621,
+        712
+      ],
+      "soleShift": -10
+    },
+    {
+      "action": "recycle",
+      "variant": "hat",
+      "frame": 10,
+      "alphaBox": [
+        238,
+        355,
+        621,
+        712
+      ],
+      "soleShift": -9
+    },
+    {
+      "action": "recycle",
+      "variant": "hat",
+      "frame": 11,
+      "alphaBox": [
+        226,
+        355,
+        618,
+        712
+      ],
+      "soleShift": -10
+    },
+    {
+      "action": "recycle",
+      "variant": "hat",
+      "frame": 12,
+      "alphaBox": [
+        222,
+        310,
+        611,
+        712
+      ],
+      "soleShift": -14
+    },
+    {
+      "action": "recycle",
+      "variant": "hat",
+      "frame": 13,
+      "alphaBox": [
+        226,
+        314,
+        630,
+        712
+      ],
+      "soleShift": -15
+    },
+    {
+      "action": "recycle",
+      "variant": "hat",
+      "frame": 14,
+      "alphaBox": [
+        238,
+        277,
+        606,
+        712
+      ],
+      "soleShift": -16
+    },
+    {
+      "action": "recycle",
+      "variant": "hat",
+      "frame": 15,
+      "alphaBox": [
+        236,
+        265,
+        562,
+        712
+      ],
+      "soleShift": -16
+    },
+    {
+      "action": "recycle",
+      "variant": "no-hat",
+      "frame": 0,
+      "alphaBox": [
+        238,
+        266,
+        566,
+        712
+      ],
+      "soleShift": -14
+    },
+    {
+      "action": "recycle",
+      "variant": "no-hat",
+      "frame": 1,
+      "alphaBox": [
+        214,
+        321,
+        603,
+        712
+      ],
+      "soleShift": -13
+    },
+    {
+      "action": "recycle",
+      "variant": "no-hat",
+      "frame": 2,
+      "alphaBox": [
+        223,
+        373,
+        603,
+        712
+      ],
+      "soleShift": -9
+    },
+    {
+      "action": "recycle",
+      "variant": "no-hat",
+      "frame": 3,
+      "alphaBox": [
+        212,
+        396,
+        593,
+        712
+      ],
+      "soleShift": -8
+    },
+    {
+      "action": "recycle",
+      "variant": "no-hat",
+      "frame": 4,
+      "alphaBox": [
+        218,
+        364,
+        595,
+        712
+      ],
+      "soleShift": -10
+    },
+    {
+      "action": "recycle",
+      "variant": "no-hat",
+      "frame": 5,
+      "alphaBox": [
+        230,
+        369,
+        607,
+        712
+      ],
+      "soleShift": -9
+    },
+    {
+      "action": "recycle",
+      "variant": "no-hat",
+      "frame": 6,
+      "alphaBox": [
+        227,
+        369,
+        609,
+        712
+      ],
+      "soleShift": -9
+    },
+    {
+      "action": "recycle",
+      "variant": "no-hat",
+      "frame": 7,
+      "alphaBox": [
+        239,
+        366,
+        603,
+        712
+      ],
+      "soleShift": -10
+    },
+    {
+      "action": "recycle",
+      "variant": "no-hat",
+      "frame": 8,
+      "alphaBox": [
+        229,
+        361,
+        605,
+        712
+      ],
+      "soleShift": -11
+    },
+    {
+      "action": "recycle",
+      "variant": "no-hat",
+      "frame": 9,
+      "alphaBox": [
+        232,
+        361,
+        618,
+        712
+      ],
+      "soleShift": -9
+    },
+    {
+      "action": "recycle",
+      "variant": "no-hat",
+      "frame": 10,
+      "alphaBox": [
+        230,
+        361,
+        613,
+        712
+      ],
+      "soleShift": -9
+    },
+    {
+      "action": "recycle",
+      "variant": "no-hat",
+      "frame": 11,
+      "alphaBox": [
+        229,
+        361,
+        610,
+        712
+      ],
+      "soleShift": -11
+    },
+    {
+      "action": "recycle",
+      "variant": "no-hat",
+      "frame": 12,
+      "alphaBox": [
+        213,
+        318,
+        594,
+        712
+      ],
+      "soleShift": -12
+    },
+    {
+      "action": "recycle",
+      "variant": "no-hat",
+      "frame": 13,
+      "alphaBox": [
+        230,
+        304,
+        616,
+        712
+      ],
+      "soleShift": -15
+    },
+    {
+      "action": "recycle",
+      "variant": "no-hat",
+      "frame": 14,
+      "alphaBox": [
+        240,
+        273,
+        578,
+        712
+      ],
+      "soleShift": -14
+    },
+    {
+      "action": "recycle",
+      "variant": "no-hat",
+      "frame": 15,
+      "alphaBox": [
+        236,
+        272,
+        535,
+        712
+      ],
+      "soleShift": -14
+    }
+  ],
+  "source": "imagegen",
+  "perFrameResize": false
+}

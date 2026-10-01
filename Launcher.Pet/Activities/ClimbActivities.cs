@@ -20,7 +20,7 @@ internal abstract class ClimbActivity : PetActivity
         System.Drawing.PointF targetPoint = new(Link.EndX ?? Link.X, target.Y);
         var top = source.Y < target.Y ? sourcePoint : targetPoint;
         var bottom = source.Y < target.Y ? targetPoint : sourcePoint;
-        c.Body.X = RuinMotion.ClimbX(top, bottom, nav.FootY) - c.HalfWidth;
+        c.Body.X = RuinMotion.ClimbX(top, bottom, nav.FootY, c.Metrics) - c.HalfWidth;
         c.Body.Row = PetAnimationCatalog.ClimbRow;
         c.Actor.Present(Mode);
         Climb(c, target);
@@ -47,8 +47,8 @@ internal sealed class ClimbingActivity : ClimbActivity
     {
         c.Body.Frame = 1 + (int)(Time / 0.18f) % 2;
         float distance = target.Y - c.Actor.Navigation.FootY;
-        c.Actor.Navigation.FootY += Math.Clamp(distance, -RuinMotion.ClimbSpeed * c.Step, RuinMotion.ClimbSpeed * c.Step);
-        if (Math.Abs(distance) <= RuinMotion.ClimbSpeed * c.Step) c.Actor.ContinueWith(new PullUpActivity(Link), c.Now);
+        c.Actor.Navigation.FootY += Math.Clamp(distance, -c.Metrics.ClimbSpeed * c.Step, c.Metrics.ClimbSpeed * c.Step);
+        if (Math.Abs(distance) <= c.Metrics.ClimbSpeed * c.Step) c.Actor.ContinueWith(new PullUpActivity(Link), c.Now);
     }
 }
 
