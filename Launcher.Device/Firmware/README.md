@@ -5,6 +5,7 @@
 | v1 | LAUNCHER_IO 1 | INPUT NONE / BUTTON_PRESSED | INDICATOR ON/OFF |
 | v2 | LAUNCHER_IO 2 | INPUT NONE / LEFT_PRESSED / RIGHT_PRESSED / BOTH_PRESSED | LEDS 0..7 |
 | v3 | LAUNCHER_IO 3 | FADE 0..255 | none |
+| v4 | LAUNCHER_IO 4 | DICE sequence value (1..6) | none |
 
 Commands end with LF; CRLF is accepted. v1 and v2 firmware remain unchanged.
 
@@ -19,3 +20,7 @@ Version; v3 muss deshalb weder Verdrahtung noch Funktionen von v2 beibehalten.
 
 See [v2 configuration and semantics](LauncherIoEsp8266V2/README.md) and
 [v3 fade configuration and semantics](LauncherIoEsp8266V3/README.md).
+
+[v4 autonomous dice](LauncherIoEsp8266V4/README.md) is independent of v1–v3.
+It rolls every 5000 ms and lights a dice pattern on D1, D2, D3, D5, D6, D7, D8.
+ESP Controller animates each new sequence for 2100 ms and lands on the ESP result.

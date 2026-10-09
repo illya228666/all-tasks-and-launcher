@@ -1,10 +1,12 @@
 <Window x:Class="EspController.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:controls="clr-namespace:EspController.Controls"
         Title="ESP Controller" Width="1180" Height="860" MinWidth="1000" MinHeight="700"
         WindowStartupLocation="CenterScreen" Background="{StaticResource BackgroundBrush}"
         Foreground="{StaticResource TextBrush}" FontFamily="Segoe UI" FontSize="14"
         UseLayoutRounding="True" SnapsToDevicePixels="True">
+    <Window.Resources><BooleanToVisibilityConverter x:Key="BooleanVisibility" /></Window.Resources>
     <Grid>
         <Grid.ColumnDefinitions><ColumnDefinition Width="210" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
         <Border Background="#151B28" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,0" Padding="22,32">
@@ -25,7 +27,7 @@
                 <StackPanel DockPanel.Dock="Bottom">
                     <Border Height="1" Background="{StaticResource BorderBrush}" Margin="0,20" />
                     <TextBlock Text="ESP8266" FontWeight="SemiBold" />
-                    <TextBlock Text="Launcher IO v1 / v2 / v3" Foreground="{StaticResource MutedBrush}" FontSize="12" Margin="0,6,0,0" />
+                    <TextBlock Text="Launcher IO v1 / v2 / v3 / v4" Foreground="{StaticResource MutedBrush}" FontSize="12" Margin="0,6,0,0" />
                     <TextBlock Text="USB · 115 200 Baud" Foreground="{StaticResource MutedBrush}" FontSize="12" Margin="0,4,0,0" />
                     <TextBlock Text="Zahlen Launcher" Style="{StaticResource Caption}" Margin="0,24,0,0" />
                 </StackPanel>
@@ -79,6 +81,13 @@
                         <Button Grid.Column="1" Content="{Binding ConnectionAction}" Command="{Binding ConnectionCommand}" Style="{StaticResource PrimaryButton}" VerticalAlignment="Center" MinWidth="116" AutomationProperties.Name="Verbindung umschalten" />
                     </Grid>
                 </Border>
+                <controls:DiceView Roll="{Binding DiceRoll}" Visibility="{Binding IsDiceFirmware, Converter={StaticResource BooleanVisibility}}" Margin="0,0,0,20" />
+                <StackPanel>
+                    <StackPanel.Style>
+                        <Style TargetType="StackPanel">
+                            <Style.Triggers><DataTrigger Binding="{Binding IsDiceFirmware}" Value="True"><Setter Property="Visibility" Value="Collapsed" /></DataTrigger></Style.Triggers>
+                        </Style>
+                    </StackPanel.Style>
                 <TextBlock Text="AUSGÄNGE" Style="{StaticResource Caption}" Margin="2,0,0,12" />
                 <Grid Margin="0,0,0,12">
                     <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="16" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
@@ -150,7 +159,7 @@
                                 <StackPanel Orientation="Horizontal"><TextBlock Text="{Binding FadeText}" FontSize="38" FontWeight="SemiBold" /><TextBlock Text=" / 255" Foreground="{StaticResource MutedBrush}" VerticalAlignment="Bottom" Margin="0,0,0,8" /></StackPanel>
                                 <TextBlock Text="{Binding FadePercent}" HorizontalAlignment="Right" VerticalAlignment="Center" Foreground="{StaticResource AccentBrush}" />
                             </Grid>
-                            <ProgressBar Maximum="255" Value="{Binding FadeValue}" AutomationProperties.Name="Potentiometerwert" />
+                            <ProgressBar Maximum="255" Value="{Binding FadeValue, Mode=OneWay}" AutomationProperties.Name="Potentiometerwert" />
                             <TextBlock Text="{Binding FadeHint}" Foreground="{StaticResource MutedBrush}" FontSize="12" Margin="0,14,0,0" />
                         </StackPanel>
                     </Border>
@@ -163,6 +172,7 @@
                         </StackPanel>
                     </Border>
                 </Grid>
+                </StackPanel>
                 <Border Style="{StaticResource Card}">
                     <StackPanel>
                         <Grid><TextBlock Text="Aktivitätsprotokoll" FontSize="19" FontWeight="SemiBold" /><TextBlock Text="NEUESTE ZUERST · MAX. 200" Style="{StaticResource Caption}" HorizontalAlignment="Right" VerticalAlignment="Center" /></Grid>

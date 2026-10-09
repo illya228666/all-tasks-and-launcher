@@ -51,6 +51,9 @@
         <Setter Property="Background" Value="{StaticResource AccentBrush}" />
         <Setter Property="Foreground" Value="#102A29" />
         <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
+        <Setter Property="ContentTemplate">
+            <Setter.Value><DataTemplate><TextBlock Text="{Binding}" Foreground="#102A29" /></DataTemplate></Setter.Value>
+        </Setter>
     </Style>
     <Style x:Key="LedButton" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
         <Setter Property="Padding" Value="12,18" />

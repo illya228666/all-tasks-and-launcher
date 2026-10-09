@@ -16,6 +16,7 @@ public sealed class DeviceConnection : IAsyncDisposable
     public event Action<DeviceState>? StateChanged;
     public event Action<DeviceInput>? InputReceived;
     public event Action<byte>? FadeReceived;
+    public event Action<DeviceDiceRoll>? DiceReceived;
     public DeviceState State { get { lock (_gate) return _state; } }
     public DeviceConnection() : this(new SerialDeviceTransportFactory(), new()) { }
     internal DeviceConnection(IDeviceTransportFactory factory, DeviceConnectionTiming timing)
@@ -124,6 +125,7 @@ public sealed class DeviceConnection : IAsyncDisposable
     }
     private async Task ServeAsync(IDeviceTransport transport, IDeviceProtocolVersion protocol, CancellationToken token)
     {
+        uint? lastDiceSequence = null;
         while (true)
         {
             token.ThrowIfCancellationRequested();
@@ -157,6 +159,11 @@ public sealed class DeviceConnection : IAsyncDisposable
             DevicePoll poll = protocol.ReadPoll(inputReply);
             if (poll.Input is DeviceInput input) InputReceived?.Invoke(input);
             if (poll.Fade is byte fade) FadeReceived?.Invoke(fade);
+            if (poll.Dice is { } dice && dice.Sequence != lastDiceSequence)
+            {
+                lastDiceSequence = dice.Sequence;
+                DiceReceived?.Invoke(dice);
+            }
             await Task.Delay(_timing.PollIntervalMs, token).ConfigureAwait(false);
         }
     }

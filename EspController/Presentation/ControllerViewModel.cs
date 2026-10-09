@@ -15,6 +15,7 @@ internal sealed class ControllerViewModel : INotifyPropertyChanged, IAsyncDispos
     private bool _busy, _closing, _indicator;
     private DeviceLights _lights;
     private byte? _fade;
+    private DeviceDiceRoll? _diceRoll;
     private int _inputCount;
     private string _lastInput = "Noch kein Tastendruck", _lastInputTime = "Warte auf Eingaben vom Controller";
     private string _commandStatus = "Ausgänge werden nach der Verbindung freigeschaltet.";
@@ -61,6 +62,8 @@ internal sealed class ControllerViewModel : INotifyPropertyChanged, IAsyncDispos
         };
     public string Port => _state.PortName ?? "—";
     public string Protocol => _state.ProtocolVersion is { } version ? $"Launcher IO v{(int)version}" : "Automatisch";
+    public bool IsDiceFirmware => IsConnected && _state.ProtocolVersion == DeviceProtocolVersion.V4;
+    public DeviceDiceRoll? DiceRoll => _diceRoll;
     public string ConnectionBadge => IsConnected ? "ONLINE" : IsSearching ? "SUCHE" : "OFFLINE";
     public bool CanUseIndicator => !_closing && !_busy && IsConnected && _state.Capabilities.HasFlag(DeviceCapabilities.Indicator);
     public bool CanUseLights => !_closing && !_busy && IsConnected && _state.Capabilities.HasFlag(DeviceCapabilities.Lights);
@@ -92,6 +95,12 @@ internal sealed class ControllerViewModel : INotifyPropertyChanged, IAsyncDispos
         connection.StateChanged += state => Post(connection, () => DisplayState(state));
         connection.InputReceived += input => Post(connection, () => DisplayInput(input));
         connection.FadeReceived += fade => Post(connection, () => { _fade = fade; NotifyFade(); });
+        connection.DiceReceived += dice => Post(connection, () =>
+        {
+            _diceRoll = dice;
+            Log($"Wurf #{dice.Sequence} · ESP-Ergebnis: {dice.Value}");
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(DiceRoll)));
+        });
         Log("Verbindung gestartet · automatische COM-Port-Erkennung");
         connection.Start();
         Notify();
@@ -134,6 +143,7 @@ internal sealed class ControllerViewModel : INotifyPropertyChanged, IAsyncDispos
             _indicator = false;
             _lights = DeviceLights.None;
             _fade = null;
+            _diceRoll = null;
             _commandStatus = "Ausgänge werden nach der Verbindung freigeschaltet.";
         }
         else if (changed)

@@ -13,6 +13,7 @@ Launcher startet Lernprogramme, zeigt einen Begleiter und verarbeitet ESP8266-Ei
 | Launcher.Pet | Поведение, речь, шляпа / Verhalten, Sprache, Hut |
 | Launcher.Pet.Windows | Рисование и рабочий стол / Zeichnen und Desktop |
 | Launcher.Device | Порт, команды, прошивка / Port, Befehle, Firmware |
+| EspController | Самостоятельное WPF-приложение управления ESP / eigenständige WPF-Gerätesteuerung |
 
 Все шесть проектов находятся в папке решения `Launcher`. Библиотеки лежат рядом с запускаемым проектом в репозитории.
 Alle sechs Projekte stehen im Lösungsordner `Launcher`. Bibliotheken liegen neben dem Startprojekt im Repository.
@@ -64,3 +65,11 @@ HELLO wählt v1/v2. v1 verbindet Taste/Erdbeben und Indicator. v2-Eingaben sind 
 - [Замысел каждого коммита / Absicht jedes Commits](docs/MVP_REWRITE_RU_DE.md)
 - [Результаты и команды проверок / Prüfergebnisse und Befehle](docs/ANALYSIS_CHECKLIST_RU_DE.md)
 - [Версии прошивки / Firmwareversionen](../Launcher.Device/Firmware/README.md)
+
+## ESP Controller / ESP-Steuerung
+
+Из лаунчера запускается отдельная программа `EspController`. Она автоматически распознаёт IO v1–v4. В v4 ESP8266 сам бросает кубик каждые 5 секунд, включает от 1 до 6 LED и сообщает номер броска и число. WPF показывает анимацию подбрасывания и соответствующую грань. У v4 нет функций старых прошивок; карточки v1–v3 скрываются.
+
+Der Launcher startet `EspController` als eigenes Programm. IO v4 würfelt selbst alle fünf Sekunden und liefert Wurfnummer und Augenzahl; WPF animiert den Würfel und zeigt das ESP-Ergebnis. v4 enthält keine Funktionen älterer Firmwareversionen.
+
+Подключение LED, формат протокола и загрузка: [Launcher IO v4](../Launcher.Device/Firmware/LauncherIoEsp8266V4/README.md).

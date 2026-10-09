@@ -28,6 +28,6 @@ public partial class MainWindow : Window
         _closing = true;
         IsEnabled = false;
         try { await _controller.DisposeAsync(); }
-        finally { _readyToClose = true; Close(); }
+        finally { _readyToClose = true; _ = Dispatcher.BeginInvoke(new Action(Close)); }
     }
 }
