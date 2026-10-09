@@ -52,7 +52,7 @@ public sealed class ProjectAppSource : IAppSource
                         string expected = Path.Combine(_baseFolder, assembly + ".exe");
                         string exe = File.Exists(expected) ? expected : outputs.Where(file => Path.GetFileName(file).Equals(assembly + ".exe", StringComparison.OrdinalIgnoreCase)).OrderByDescending(File.GetLastWriteTimeUtc).FirstOrDefault() ?? expected;
                         string[] parts = Path.GetRelativePath(root!, path).Split(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
-                        string category = parts.Length >= 3 && parts[0].Length > 3 && char.IsDigit(parts[0][0]) && char.IsDigit(parts[0][1]) && parts[0][2] == '_' ? parts[0] + " / " + parts[1] : parts[0];
+                        string category = parts.Length >= 4 && parts[0].Length > 3 && char.IsDigit(parts[0][0]) && char.IsDigit(parts[0][1]) && parts[0][2] == '_' ? parts[0] + " / " + parts[1] : parts[0];
                         apps.Add(AppFiles.Create(_baseFolder, name, category.Replace('_', ' '), exe, Path.GetDirectoryName(path)!));
                     }
                     catch (Exception error) when (AppFiles.IsReadError(error))

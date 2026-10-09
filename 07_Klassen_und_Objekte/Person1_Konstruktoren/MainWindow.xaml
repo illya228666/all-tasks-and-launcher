@@ -1,0 +1,71 @@
+<Window x:Class="Person1_Konstruktoren.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Style="{StaticResource {x:Type Window}}" WindowStartupLocation="CenterScreen"
+        Title="Person 1 · Konstruktoren" Width="1050" Height="920" MinWidth="900" MinHeight="650">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Background="{StaticResource Hintergrund}">
+        <StackPanel Margin="32">
+            <TextBlock Text="01 / KLASSEN UND OBJEKTE" Foreground="{DynamicResource Akzent}" FontWeight="Bold" />
+            <TextBlock Text="Eine Klasse. Vier Konstruktoren." Style="{StaticResource Titel}" />
+            <TextBlock Text="Erzeuge Personen mit unterschiedlichen Übergabewerten und vergleiche ihre Anfangswerte." Style="{StaticResource Untertitel}" />
+            <Border Style="{StaticResource Karte}">
+                <StackPanel>
+                    <TextBlock Text="Deine Übergabewerte" Style="{StaticResource Abschnitt}" />
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" /><ColumnDefinition Width="24" /><ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel>
+                            <TextBlock Text="Person 3 · Name" Style="{StaticResource Feldname}" />
+                            <TextBox x:Name="TelefonName" Text="Schmidt" AutomationProperties.Name="Name für Person 3" />
+                            <TextBlock Text="Telefonnummer" Style="{StaticResource Feldname}" />
+                            <TextBox x:Name="TelefonEingabe" Text="0421 123456" AutomationProperties.Name="Telefonnummer" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="2">
+                            <TextBlock Text="Person 4 · Name" Style="{StaticResource Feldname}" />
+                            <TextBox x:Name="AlterName" Text="Anna" AutomationProperties.Name="Name für Person 4" />
+                            <TextBlock Text="Alter in Jahren" Style="{StaticResource Feldname}" />
+                            <TextBox x:Name="AlterEingabe" Text="20" AutomationProperties.Name="Alter für Person 4" />
+                        </StackPanel>
+                    </Grid>
+                    <WrapPanel>
+                        <Button x:Name="ErstellenButton" Content="_Vier Personen erstellen" Click="Erstellen_Click" Margin="0,0,12,0" IsDefault="True" />
+                        <Button x:Name="SammelnButton" Content="Objekte auf null setzen" Click="Sammeln_Click" Style="{StaticResource NebenButton}" />
+                    </WrapPanel>
+                    <TextBlock x:Name="Status" Style="{StaticResource Hinweis}" />
+                </StackPanel>
+            </Border>
+            <UniformGrid Columns="2" Margin="0,20,0,0">
+                <Border Style="{StaticResource Karte}" Margin="0,0,10,10">
+                    <StackPanel>
+                        <TextBlock Text="01 · Standardkonstruktor" Style="{StaticResource Abschnitt}" />
+                        <TextBlock Text="new CPerson()" Style="{StaticResource Code}" />
+                        <TextBlock x:Name="ErsteAusgabe" LineHeight="25" />
+                    </StackPanel>
+                </Border>
+                <Border Style="{StaticResource Karte}" Margin="10,0,0,10">
+                    <StackPanel>
+                        <TextBlock Text="02 · Nur ein Name" Style="{StaticResource Abschnitt}" />
+                        <TextBlock Text="new CPerson(&quot;Maier&quot;)" Style="{StaticResource Code}" />
+                        <TextBlock x:Name="ZweiteAusgabe" LineHeight="25" />
+                    </StackPanel>
+                </Border>
+                <Border Style="{StaticResource Karte}" Margin="0,10,10,0">
+                    <StackPanel>
+                        <TextBlock Text="03 · Name und Telefon" Style="{StaticResource Abschnitt}" />
+                        <TextBlock Text="new CPerson(name, telefon)" Style="{StaticResource Code}" />
+                        <TextBlock x:Name="DritteAusgabe" LineHeight="25" />
+                    </StackPanel>
+                </Border>
+                <Border Style="{StaticResource Karte}" Margin="10,10,0,0">
+                    <StackPanel>
+                        <TextBlock Text="04 · Name und Alter" Style="{StaticResource Abschnitt}" />
+                        <TextBlock Text="new CPerson(name, alter)" Style="{StaticResource Code}" />
+                        <TextBlock x:Name="VierteAusgabe" LineHeight="25" />
+                    </StackPanel>
+                </Border>
+            </UniformGrid>
+            <TextBlock Text="Gleicher Klassenname, unterschiedliche Parameter: C# wählt den passenden Konstruktor anhand der Datentypen." Style="{StaticResource Hinweis}" />
+        </StackPanel>
+    </ScrollViewer>
+</Window>

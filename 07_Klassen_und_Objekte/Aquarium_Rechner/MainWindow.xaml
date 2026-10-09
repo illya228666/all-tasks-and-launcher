@@ -1,0 +1,87 @@
+<Window x:Class="Aquarium_Rechner.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Style="{StaticResource {x:Type Window}}" WindowStartupLocation="CenterScreen"
+        Title="Aquarium · Zoogeschäft Bremer" Width="1140" Height="940" MinWidth="980" MinHeight="710">
+    <Window.Resources>
+        <SolidColorBrush x:Key="Akzent" Color="#1768A6" />
+    </Window.Resources>
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Background="{StaticResource Hintergrund}">
+        <StackPanel Margin="32">
+            <TextBlock Text="03 / ZOOGESCHÄFT BREMER" Foreground="{DynamicResource Akzent}" FontWeight="Bold" />
+            <TextBlock Text="Dein Aquarium nach Maß." Style="{StaticResource Titel}" />
+            <TextBlock Text="Berechne das Volumen und den Glaspreis eines offenen, quaderförmigen Aquariums." Style="{StaticResource Untertitel}" />
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="320" /><ColumnDefinition Width="20" /><ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Border Style="{StaticResource Karte}" VerticalAlignment="Top">
+                    <StackPanel>
+                        <TextBlock Text="Maße und Material" Style="{StaticResource Abschnitt}" />
+                        <TextBlock Text="Länge · cm" Style="{StaticResource Feldname}" />
+                        <TextBox x:Name="LaengeEingabe" Text="80" AutomationProperties.Name="Länge in Zentimetern" />
+                        <TextBlock Text="Breite · cm" Style="{StaticResource Feldname}" />
+                        <TextBox x:Name="BreiteEingabe" Text="35" AutomationProperties.Name="Breite in Zentimetern" />
+                        <TextBlock Text="Höhe · cm" Style="{StaticResource Feldname}" />
+                        <TextBox x:Name="HoeheEingabe" Text="35" AutomationProperties.Name="Höhe in Zentimetern" />
+                        <TextBlock Text="Glaspreis · € / dm²" Style="{StaticResource Feldname}" />
+                        <TextBox x:Name="GlaspreisEingabe" Text="0,40" AutomationProperties.Name="Glaspreis in Euro pro Quadratdezimeter" />
+                        <Button x:Name="BerechnenButton" Content="_Aquarium berechnen" Click="Berechnen_Click" IsDefault="True" />
+                        <Button x:Name="BeispielButton" Content="Beispiel 80 × 35 × 35 laden" Click="Beispiel_Click" Style="{StaticResource NebenButton}" Margin="0,10,0,0" />
+                        <TextBlock x:Name="Status" Style="{StaticResource Hinweis}" />
+                        <TextBlock Text="Komma und Punkt sind als Dezimalzeichen möglich. Alle Maße müssen größer als 0 sein." Style="{StaticResource Hinweis}" />
+                    </StackPanel>
+                </Border>
+                <StackPanel Grid.Column="2">
+                    <Border Style="{StaticResource Karte}" Background="#ECF6FC" BorderBrush="#D0E5F3">
+                        <StackPanel>
+                            <DockPanel>
+                                <Border DockPanel.Dock="Right" Background="White" CornerRadius="8" Padding="12,6" VerticalAlignment="Top">
+                                    <TextBlock Text="OHNE DECKEL" Foreground="#1768A6" FontWeight="Bold" FontSize="11" />
+                                </Border>
+                                <TextBlock Text="Dein Entwurf" Style="{StaticResource Abschnitt}" />
+                            </DockPanel>
+                            <Viewbox Height="215" Stretch="Uniform" Margin="0,10,0,8">
+                                <Canvas Width="480" Height="230">
+                                    <Ellipse Width="340" Height="24" Canvas.Left="65" Canvas.Top="195" Fill="#D4E7F2" />
+                                    <Polygon x:Name="Boden" Points="70,175 325,175 400,135 145,135" Fill="#72B9DF" Stroke="#1768A6" StrokeThickness="2" />
+                                    <Polygon x:Name="Seite" Points="325,60 400,20 400,135 325,175" Fill="#A8D6EF" Opacity="0.85" Stroke="#1768A6" StrokeThickness="2" />
+                                    <Polygon x:Name="Front" Points="70,60 325,60 325,175 70,175" Fill="#BDE3F5" Opacity="0.8" Stroke="#1768A6" StrokeThickness="2" />
+                                    <Polygon x:Name="Oeffnung" Points="70,60 145,20 400,20 325,60" Fill="#F4FBFF" Stroke="#1768A6" StrokeThickness="2" />
+                                    <TextBlock x:Name="LaengeZeichnung" Canvas.Left="105" Canvas.Top="188" Foreground="#1768A6" FontWeight="SemiBold" />
+                                    <TextBlock x:Name="HoeheZeichnung" Canvas.Left="8" Canvas.Top="104" Foreground="#1768A6" FontWeight="SemiBold" />
+                                    <TextBlock x:Name="BreiteZeichnung" Canvas.Left="358" Canvas.Top="164" Foreground="#1768A6" FontWeight="SemiBold" />
+                                </Canvas>
+                            </Viewbox>
+                            <TextBlock Text="Schematische Darstellung · Maße in Zentimetern" HorizontalAlignment="Center" Foreground="#556775" FontSize="12" />
+                        </StackPanel>
+                    </Border>
+                    <Grid Margin="0,20,0,20">
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="16" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                        <Border Style="{StaticResource Karte}">
+                            <StackPanel>
+                                <TextBlock Text="VOLUMEN" FontSize="11" Foreground="#556775" FontWeight="Bold" />
+                                <TextBlock x:Name="VolumenAusgabe" FontSize="32" FontWeight="SemiBold" Margin="0,8,0,0" />
+                                <TextBlock Text="Liter · geometrisches Volumen" Foreground="#556775" FontSize="12" />
+                            </StackPanel>
+                        </Border>
+                        <Border Grid.Column="2" Style="{StaticResource Karte}" Background="#1768A6" BorderBrush="#1768A6">
+                            <StackPanel>
+                                <TextBlock Text="GESAMTPREIS" FontSize="11" Foreground="#D4EAF8" FontWeight="Bold" />
+                                <TextBlock x:Name="PreisAusgabe" FontSize="32" FontWeight="SemiBold" Foreground="White" Margin="0,8,0,0" />
+                                <TextBlock Text="auf volle 5 € aufgerundet" Foreground="#D4EAF8" FontSize="12" />
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                    <Border Style="{StaticResource Karte}">
+                        <StackPanel>
+                            <TextBlock Text="So setzt sich der Preis zusammen" Style="{StaticResource Abschnitt}" />
+                            <TextBlock x:Name="Rechenweg" LineHeight="27" />
+                            <TextBlock Text="Glasfläche = (2 · Länge · Höhe + 2 · Breite · Höhe + Länge · Breite) / 100" Style="{StaticResource Code}" Margin="0,14,0,0" />
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </Grid>
+        </StackPanel>
+    </ScrollViewer>
+</Window>

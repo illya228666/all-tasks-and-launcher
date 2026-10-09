@@ -1,0 +1,94 @@
+<Window x:Class="Person2_Properties.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Style="{StaticResource {x:Type Window}}" WindowStartupLocation="CenterScreen"
+        Title="Person 2 · Properties" Width="1120" Height="940" MinWidth="960" MinHeight="700">
+    <Window.Resources>
+        <SolidColorBrush x:Key="Akzent" Color="#6D4CC2" />
+    </Window.Resources>
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Background="{StaticResource Hintergrund}">
+        <StackPanel Margin="32">
+            <TextBlock Text="02 / KLASSEN UND OBJEKTE" Foreground="{DynamicResource Akzent}" FontWeight="Bold" />
+            <TextBlock Text="Personen lesen und verändern." Style="{StaticResource Titel}" />
+            <TextBlock Text="Konstruktoren legen Anfangswerte fest. Properties erlauben anschließend den lesenden und schreibenden Zugriff." Style="{StaticResource Untertitel}" />
+            <TextBlock x:Name="Status" Foreground="{StaticResource LeiserText}" Margin="0,0,0,16" />
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="310" /><ColumnDefinition Width="20" /><ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <StackPanel>
+                    <Border Style="{StaticResource Karte}">
+                        <StackPanel>
+                            <TextBlock Text="Vierte Person erstellen" Style="{StaticResource Abschnitt}" />
+                            <TextBlock Text="new CPerson2(name, alter)" Style="{StaticResource Code}" />
+                            <TextBlock Text="Name" Style="{StaticResource Feldname}" />
+                            <TextBox x:Name="NeuerName" Text="Max" AutomationProperties.Name="Name der neuen Person" />
+                            <TextBlock Text="Alter in Jahren" Style="{StaticResource Feldname}" />
+                            <TextBox x:Name="NeuesAlter" Text="23" AutomationProperties.Name="Alter der neuen Person" />
+                            <Button x:Name="ErstellenButton" Content="Person _erstellen" Click="Erstellen_Click" IsDefault="True" />
+                        </StackPanel>
+                    </Border>
+                    <Border Style="{StaticResource Karte}" Margin="0,20,0,0">
+                        <StackPanel>
+                            <TextBlock Text="Properties ändern" Style="{StaticResource Abschnitt}" />
+                            <TextBlock Text="Eine Person in der Tabelle auswählen." Foreground="{StaticResource LeiserText}" Margin="0,0,0,16" />
+                            <TextBlock Text="Name" Style="{StaticResource Feldname}" />
+                            <TextBox x:Name="BearbeitenName" AutomationProperties.Name="Ausgewählten Namen ändern" />
+                            <TextBlock Text="Alter in Jahren" Style="{StaticResource Feldname}" />
+                            <TextBox x:Name="BearbeitenAlter" AutomationProperties.Name="Ausgewähltes Alter ändern" />
+                            <Button x:Name="AendernButton" Content="Änderungen _übernehmen" Click="Aendern_Click" Style="{StaticResource NebenButton}" />
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+                <StackPanel Grid.Column="2">
+                    <Border Style="{StaticResource Karte}">
+                        <StackPanel>
+                            <DockPanel Margin="0,0,0,16">
+                                <Button x:Name="ZuruecksetzenButton" DockPanel.Dock="Right" Content="Zurücksetzen" Click="Zuruecksetzen_Click" Style="{StaticResource NebenButton}" Padding="12,8" />
+                                <TextBlock Text="Deine Personen" Style="{StaticResource Abschnitt}" Margin="0,3,12,0" />
+                            </DockPanel>
+                            <DataGrid x:Name="PersonenTabelle" AutoGenerateColumns="False" IsReadOnly="True"
+                                      CanUserAddRows="False" CanUserDeleteRows="False" CanUserSortColumns="False"
+                                      SelectionMode="Single" SelectionUnit="FullRow" SelectionChanged="Auswahl_Geaendert"
+                                      RowHeight="46" ColumnHeaderHeight="38" HeadersVisibility="Column" Height="245"
+                                      GridLinesVisibility="None" BorderThickness="0" Background="White" AlternatingRowBackground="#F5F2FB"
+                                      AutomationProperties.Name="Personen auswählen">
+                                <DataGrid.Resources>
+                                    <Style x:Key="Tabellentext" TargetType="TextBlock">
+                                        <Setter Property="Margin" Value="12,0,0,0" />
+                                        <Setter Property="VerticalAlignment" Value="Center" />
+                                        <Setter Property="TextWrapping" Value="NoWrap" />
+                                    </Style>
+                                    <Style TargetType="DataGridColumnHeader">
+                                        <Setter Property="Background" Value="#F0EDF7" />
+                                        <Setter Property="FontWeight" Value="SemiBold" />
+                                        <Setter Property="Padding" Value="12,8" />
+                                        <Setter Property="BorderThickness" Value="0" />
+                                    </Style>
+                                    <Style TargetType="DataGridCell">
+                                        <Setter Property="Padding" Value="12,8" />
+                                        <Setter Property="BorderThickness" Value="0" />
+                                    </Style>
+                                </DataGrid.Resources>
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="*" MinWidth="200" ElementStyle="{StaticResource Tabellentext}" />
+                                    <DataGridTextColumn Header="Alter" Binding="{Binding Alter}" Width="100" ElementStyle="{StaticResource Tabellentext}" />
+                                </DataGrid.Columns>
+                            </DataGrid>
+                            <TextBlock x:Name="Ausgabe" LineHeight="27" Margin="0,18,0,0" />
+                        </StackPanel>
+                    </Border>
+                    <Border Style="{StaticResource Karte}" Margin="0,20,0,0">
+                        <StackPanel>
+                            <TextBlock Text="Meldungen der Konstruktoren" Style="{StaticResource Abschnitt}" />
+                            <ScrollViewer Height="125" VerticalScrollBarVisibility="Auto">
+                                <TextBlock x:Name="Meldungen" FontFamily="Consolas" FontSize="13" LineHeight="24" />
+                            </ScrollViewer>
+                            <TextBlock Text="Willy und Fritz erhalten zuerst den Standardwert „nichts“. Ihre Namen werden danach über die Property gesetzt." Style="{StaticResource Hinweis}" />
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </Grid>
+        </StackPanel>
+    </ScrollViewer>
+</Window>

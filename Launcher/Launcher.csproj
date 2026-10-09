@@ -40,6 +40,13 @@
     <ProjectReference Include="..\05_Array\02_mittel\Zahlen_Rueckwaerts\Zahlen_Rueckwaerts.csproj" />
     <ProjectReference Include="..\05_Array\02_mittel\MinMaxMittelwert\MinMaxMittelwert.csproj" />
   </ItemGroup>
+  <!-- Klassen und Objekte: Aufgaben aus tasks.zip -->
+  <ItemGroup>
+    <ProjectReference Include="..\07_Klassen_und_Objekte\Person1_Konstruktoren\Person1_Konstruktoren.csproj" />
+    <ProjectReference Include="..\07_Klassen_und_Objekte\Person2_Properties\Person2_Properties.csproj" />
+    <ProjectReference Include="..\07_Klassen_und_Objekte\Aquarium_Rechner\Aquarium_Rechner.csproj" />
+    <ProjectReference Include="..\07_Klassen_und_Objekte\Konstruktoren_Beispiele\Konstruktoren_Beispiele.csproj" />
+  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Launcher.Apps\Launcher.Apps.csproj" />
     <ProjectReference Include="..\Launcher.Apps.Windows\Launcher.Apps.Windows.csproj" />
