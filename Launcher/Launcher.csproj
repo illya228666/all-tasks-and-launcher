@@ -52,7 +52,7 @@
     <ProjectReference Include="..\Launcher.Apps.Windows\Launcher.Apps.Windows.csproj" />
     <ProjectReference Include="..\Launcher.Pet\Launcher.Pet.csproj" />
     <ProjectReference Include="..\Launcher.Pet.Windows\Launcher.Pet.Windows.csproj" />
-    <ProjectReference Include="..\Launcher.Device\Launcher.Device.csproj" />
+    <ProjectReference Include="..\EspController\EspController.csproj" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Update="Windows\MainWindow.resx">

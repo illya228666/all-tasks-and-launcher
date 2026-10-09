@@ -133,6 +133,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aquarium_Rechner", "07_Klas
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Konstruktoren_Beispiele", "07_Klassen_und_Objekte\Konstruktoren_Beispiele\Konstruktoren_Beispiele.csproj", "{214AE444-37DE-4439-ACBD-564C298E8561}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EspController", "EspController\EspController.csproj", "{EA581091-6CE2-4794-933E-EE51EEE993D8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -683,6 +685,18 @@ Global
 		{214AE444-37DE-4439-ACBD-564C298E8561}.Release|x64.Build.0 = Release|Any CPU
 		{214AE444-37DE-4439-ACBD-564C298E8561}.Release|x86.ActiveCfg = Release|Any CPU
 		{214AE444-37DE-4439-ACBD-564C298E8561}.Release|x86.Build.0 = Release|Any CPU
+		{EA581091-6CE2-4794-933E-EE51EEE993D8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EA581091-6CE2-4794-933E-EE51EEE993D8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EA581091-6CE2-4794-933E-EE51EEE993D8}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{EA581091-6CE2-4794-933E-EE51EEE993D8}.Debug|x64.Build.0 = Debug|Any CPU
+		{EA581091-6CE2-4794-933E-EE51EEE993D8}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{EA581091-6CE2-4794-933E-EE51EEE993D8}.Debug|x86.Build.0 = Debug|Any CPU
+		{EA581091-6CE2-4794-933E-EE51EEE993D8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EA581091-6CE2-4794-933E-EE51EEE993D8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EA581091-6CE2-4794-933E-EE51EEE993D8}.Release|x64.ActiveCfg = Release|Any CPU
+		{EA581091-6CE2-4794-933E-EE51EEE993D8}.Release|x64.Build.0 = Release|Any CPU
+		{EA581091-6CE2-4794-933E-EE51EEE993D8}.Release|x86.ActiveCfg = Release|Any CPU
+		{EA581091-6CE2-4794-933E-EE51EEE993D8}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -742,6 +756,7 @@ Global
 		{ABE10966-E4BA-4170-9D7B-DD10A6E71256} = {E3B3C859-5F4F-7FE3-C491-A29EDCF2CECB}
 		{6F475B33-3F21-4FD7-B1AA-FBDEB4367E14} = {E3B3C859-5F4F-7FE3-C491-A29EDCF2CECB}
 		{214AE444-37DE-4439-ACBD-564C298E8561} = {E3B3C859-5F4F-7FE3-C491-A29EDCF2CECB}
+		{EA581091-6CE2-4794-933E-EE51EEE993D8} = {F74B2B2D-3D28-4B5B-ACFE-BA342D09A701}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {E0383A95-AB93-4921-8CB1-1061BF080195}

@@ -9,7 +9,7 @@ internal sealed class MainWindow : Form
         AutoSize = true,
         AutoSizeMode = AutoSizeMode.GrowAndShrink,
         ColumnCount = 1,
-        RowCount = 3,
+        RowCount = 2,
         Padding = new Padding(10)
     };
     private readonly Label _title;
@@ -40,7 +40,6 @@ internal sealed class MainWindow : Form
     };
     internal SearchPanel Search { get; } = new();
     internal AppListPanel Apps { get; } = new();
-    internal DevicePanel Device { get; } = new();
     internal StatusPanel Status { get; } = new();
 
     internal event Action? ThemeRequested;
@@ -77,10 +76,9 @@ internal sealed class MainWindow : Form
         options.Controls.AddRange(new Control[] { _theme, _collisions,
             new Label { AutoSize = true, Text = "Begleiter:", Margin = new Padding(12, 7, 3, 0) }, _pet });
         _header.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
-        for (int row = 0; row < 3; row++) _header.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+        for (int row = 0; row < 2; row++) _header.RowStyles.Add(new RowStyle(SizeType.AutoSize));
         _header.Controls.Add(_title, 0, 0);
         _header.Controls.Add(options, 0, 1);
-        _header.Controls.Add(Device, 0, 2);
         _layout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
         _layout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
         _layout.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
@@ -119,7 +117,7 @@ internal sealed class MainWindow : Form
 
     internal void DisableActions()
     {
-        Search.Enabled = Device.Enabled = Apps.Enabled = _header.Enabled = false;
+        Search.Enabled = Apps.Enabled = _header.Enabled = false;
     }
 
     protected override void OnKeyDown(KeyEventArgs args)

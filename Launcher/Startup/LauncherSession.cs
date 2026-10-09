@@ -1,7 +1,6 @@
 using Launcher.Apps.Launch;
 using Launcher.Apps.List;
 using Launcher.Connections;
-using Launcher.Device.Connection;
 using Launcher.Pet.Windows;
 using Launcher.Pet.Windows.Drawing;
 using Launcher.Settings;
@@ -13,30 +12,24 @@ internal sealed class LauncherSession : IDisposable
     private readonly AppList _apps;
     private readonly SettingsFile _settingsFile;
     private readonly LauncherSettings _settings;
-    private readonly DeviceConnection _device;
     private readonly AppListConnection _appConnection;
-    private readonly DevicePanelConnection _devicePanelConnection;
-    private readonly DevicePetConnection _devicePetConnection;
     private readonly PetWindowsSession? _pet;
     private readonly string? _startupWarning;
     private bool _closing, _readyToClose, _disposed;
     internal MainWindow Window { get; }
 
-    internal LauncherSession(MainWindow window, DeviceConnection device, PetWindowsSession? pet,
+    internal LauncherSession(MainWindow window, PetWindowsSession? pet,
         AppList apps, AppLaunch launch, SettingsFile settingsFile, LauncherSettings settings, string? warning)
     {
         _apps = apps;
         _settingsFile = settingsFile;
         _settings = settings;
         Window = window;
-        _device = device;
         _pet = pet;
         _startupWarning = warning;
         if (_pet is not null)
             _pet.Problem += ShowProblem;
         _appConnection = new(Window, apps, launch, Save);
-        _devicePanelConnection = new(_device, Window, Post);
-        _devicePetConnection = new(_device, _pet, Post);
         Window.Shown += Shown;
         Window.FormClosing += Closing;
         Window.ThemeRequested += ChangeTheme;
@@ -54,7 +47,6 @@ internal sealed class LauncherSession : IDisposable
         if (!string.IsNullOrWhiteSpace(_startupWarning))
             ShowProblem(_startupWarning);
         _pet?.Start();
-        _device.Start();
     }
 
     private void ChangeTheme()
@@ -104,24 +96,7 @@ internal sealed class LauncherSession : IDisposable
             ShowProblem(error);
     }
 
-    private void Post(Action action)
-    {
-        if (_closing || _disposed || !Window.IsHandleCreated || Window.IsDisposed)
-            return;
-        try
-        {
-            Window.BeginInvoke(new Action(() =>
-            {
-                if (!_closing && !_disposed && !Window.IsDisposed)
-                    action();
-            }));
-        }
-        catch (InvalidOperationException) when (_closing || Window.IsDisposed || !Window.IsHandleCreated)
-        {
-        }
-    }
-
-    private async void Closing(object? sender, FormClosingEventArgs args)
+    private void Closing(object? sender, FormClosingEventArgs args)
     {
         if (_readyToClose || args.Cancel)
             return;
@@ -132,15 +107,6 @@ internal sealed class LauncherSession : IDisposable
         Window.DisableActions();
         try
         {
-            try
-            {
-                await _device.StopAsync();
-            }
-            catch (Exception error)
-            {
-                MessageBox.Show(Window, error.Message, "Controller", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-            }
-
             _pet?.Stop();
             _settings.Apps = _apps.SaveSettings();
             if (_settingsFile.Write(_settings) is string settingsError)
@@ -160,17 +126,6 @@ internal sealed class LauncherSession : IDisposable
             return;
         _disposed = true;
         _closing = true;
-        try
-        {
-            _device.DisposeAsync().AsTask().GetAwaiter().GetResult();
-        }
-        catch (Exception error)
-        {
-            System.Diagnostics.Debug.WriteLine(error);
-        }
-
-        _devicePetConnection.Dispose();
-        _devicePanelConnection.Dispose();
         _appConnection.Dispose();
         if (_pet is not null)
         {

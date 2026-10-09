@@ -1,0 +1,177 @@
+<Window x:Class="EspController.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="ESP Controller" Width="1180" Height="860" MinWidth="1000" MinHeight="700"
+        WindowStartupLocation="CenterScreen" Background="{StaticResource BackgroundBrush}"
+        Foreground="{StaticResource TextBrush}" FontFamily="Segoe UI" FontSize="14"
+        UseLayoutRounding="True" SnapsToDevicePixels="True">
+    <Grid>
+        <Grid.ColumnDefinitions><ColumnDefinition Width="210" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+        <Border Background="#151B28" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,0" Padding="22,32">
+            <DockPanel LastChildFill="True">
+                <StackPanel DockPanel.Dock="Top">
+                    <Border Width="52" Height="52" CornerRadius="15" Background="#263F43" HorizontalAlignment="Left">
+                        <TextBlock Text="&#xE950;" FontFamily="Segoe MDL2 Assets" Foreground="{StaticResource AccentBrush}" FontSize="25" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <TextBlock Text="ESP" FontSize="30" FontWeight="Bold" Margin="0,18,0,0" />
+                    <TextBlock Text="CONTROL STUDIO" Style="{StaticResource Caption}" Margin="0,2,0,34" />
+                    <Border Background="#243638" CornerRadius="10" Padding="14,12">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="&#xE80F;" FontFamily="Segoe MDL2 Assets" Foreground="{StaticResource AccentBrush}" VerticalAlignment="Center" Margin="0,0,12,0" />
+                            <TextBlock Text="Übersicht" Foreground="{StaticResource AccentBrush}" FontWeight="SemiBold" />
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+                <StackPanel DockPanel.Dock="Bottom">
+                    <Border Height="1" Background="{StaticResource BorderBrush}" Margin="0,20" />
+                    <TextBlock Text="ESP8266" FontWeight="SemiBold" />
+                    <TextBlock Text="Launcher IO v1 / v2 / v3" Foreground="{StaticResource MutedBrush}" FontSize="12" Margin="0,6,0,0" />
+                    <TextBlock Text="USB · 115 200 Baud" Foreground="{StaticResource MutedBrush}" FontSize="12" Margin="0,4,0,0" />
+                    <TextBlock Text="Zahlen Launcher" Style="{StaticResource Caption}" Margin="0,24,0,0" />
+                </StackPanel>
+                <Grid />
+            </DockPanel>
+        </Border>
+        <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+            <StackPanel Margin="32,30,32,28">
+                <Grid Margin="0,0,0,24">
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                    <StackPanel>
+                        <TextBlock Text="HARDWARE / CONTROL CENTER" Style="{StaticResource Caption}" Margin="0,0,0,8" />
+                        <TextBlock Text="Dein Controller. Alles im Blick." FontSize="28" FontWeight="SemiBold" />
+                        <TextBlock Text="Verbinden, Ausgänge steuern und Signale live verfolgen." Foreground="{StaticResource MutedBrush}" Margin="0,8,0,0" />
+                    </StackPanel>
+                    <Border Grid.Column="1" CornerRadius="8" Background="#222C3D" Padding="12,7" VerticalAlignment="Top" Margin="16,0,0,0">
+                        <TextBlock Text="USB SERIAL" Style="{StaticResource Caption}" />
+                    </Border>
+                </Grid>
+                <Border Style="{StaticResource Card}" Margin="0,0,0,20">
+                    <Grid>
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                        <StackPanel Margin="0,0,22,0">
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                                <Ellipse Width="8" Height="8" Margin="0,0,8,0">
+                                    <Ellipse.Style>
+                                        <Style TargetType="Ellipse">
+                                            <Setter Property="Fill" Value="#7D8BA4" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsSearching}" Value="True"><Setter Property="Fill" Value="#F1C66D" /></DataTrigger>
+                                                <DataTrigger Binding="{Binding IsConnected}" Value="True"><Setter Property="Fill" Value="{StaticResource AccentBrush}" /></DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Ellipse.Style>
+                                </Ellipse>
+                                <TextBlock Text="{Binding ConnectionBadge}" Style="{StaticResource Caption}" />
+                            </StackPanel>
+                            <TextBlock Text="{Binding StatusTitle}" FontSize="22" FontWeight="SemiBold" />
+                            <TextBlock Text="{Binding StatusDetail}" Foreground="{StaticResource MutedBrush}" Margin="0,8,0,0" />
+                            <WrapPanel Margin="0,20,0,0">
+                                <StackPanel Orientation="Horizontal" Margin="0,0,26,0">
+                                    <TextBlock Text="PORT  " Style="{StaticResource Caption}" VerticalAlignment="Center" />
+                                    <TextBlock Text="{Binding Port}" FontWeight="SemiBold" />
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="PROTOKOLL  " Style="{StaticResource Caption}" VerticalAlignment="Center" />
+                                    <TextBlock Text="{Binding Protocol}" FontWeight="SemiBold" />
+                                </StackPanel>
+                            </WrapPanel>
+                        </StackPanel>
+                        <Button Grid.Column="1" Content="{Binding ConnectionAction}" Command="{Binding ConnectionCommand}" Style="{StaticResource PrimaryButton}" VerticalAlignment="Center" MinWidth="116" AutomationProperties.Name="Verbindung umschalten" />
+                    </Grid>
+                </Border>
+                <TextBlock Text="AUSGÄNGE" Style="{StaticResource Caption}" Margin="2,0,0,12" />
+                <Grid Margin="0,0,0,12">
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="16" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                    <Border Style="{StaticResource Card}">
+                        <StackPanel>
+                            <TextBlock Text="Indikator" FontSize="19" FontWeight="SemiBold" />
+                            <TextBlock Text="{Binding IndicatorHint}" Foreground="{StaticResource MutedBrush}" FontSize="12" Margin="0,6,0,18" />
+                            <Grid Height="75" Margin="0,0,0,16">
+                                <Border Width="64" Height="64" CornerRadius="32" Background="#242E40" HorizontalAlignment="Left">
+                                    <Ellipse Width="22" Height="22">
+                                        <Ellipse.Style>
+                                            <Style TargetType="Ellipse">
+                                                <Setter Property="Fill" Value="#526077" />
+                                                <Style.Triggers><DataTrigger Binding="{Binding IndicatorOn}" Value="True"><Setter Property="Fill" Value="{StaticResource AccentBrush}" /></DataTrigger></Style.Triggers>
+                                            </Style>
+                                        </Ellipse.Style>
+                                    </Ellipse>
+                                </Border>
+                                <StackPanel Margin="80,0,0,0" VerticalAlignment="Center">
+                                    <TextBlock Text="Status-LED" FontWeight="SemiBold" />
+                                    <TextBlock Text="Bestätigte Ausgabe" Foreground="{StaticResource MutedBrush}" FontSize="12" Margin="0,5,0,0" />
+                                </StackPanel>
+                            </Grid>
+                            <Button Content="{Binding IndicatorLabel}" Command="{Binding IndicatorCommand}" HorizontalAlignment="Left" />
+                        </StackPanel>
+                    </Border>
+                    <Border Grid.Column="2" Style="{StaticResource Card}">
+                        <StackPanel>
+                            <TextBlock Text="LED-Steuerung" FontSize="19" FontWeight="SemiBold" />
+                            <TextBlock Text="{Binding LightsHint}" Foreground="{StaticResource MutedBrush}" FontSize="12" Margin="0,6,0,18" />
+                            <UniformGrid Columns="3" Margin="-4,0,-4,16">
+                                <Button Command="{Binding LightsCommand}" CommandParameter="Red" AutomationProperties.Name="Rote LED umschalten" Margin="4,0">
+                                    <Button.Style>
+                                        <Style TargetType="Button" BasedOn="{StaticResource LedButton}">
+                                            <Style.Triggers><DataTrigger Binding="{Binding RedOn}" Value="True"><Setter Property="Background" Value="#683541" /><Setter Property="BorderBrush" Value="#FF7B91" /></DataTrigger></Style.Triggers>
+                                        </Style>
+                                    </Button.Style>
+                                    <StackPanel><Ellipse Width="12" Height="12" Fill="#FF7B91" Margin="0,0,0,8" /><TextBlock Text="Rot" HorizontalAlignment="Center" /></StackPanel>
+                                </Button>
+                                <Button Command="{Binding LightsCommand}" CommandParameter="Yellow" AutomationProperties.Name="Gelbe LED umschalten" Margin="4,0">
+                                    <Button.Style>
+                                        <Style TargetType="Button" BasedOn="{StaticResource LedButton}">
+                                            <Style.Triggers><DataTrigger Binding="{Binding YellowOn}" Value="True"><Setter Property="Background" Value="#685831" /><Setter Property="BorderBrush" Value="#F1C66D" /></DataTrigger></Style.Triggers>
+                                        </Style>
+                                    </Button.Style>
+                                    <StackPanel><Ellipse Width="12" Height="12" Fill="#F1C66D" Margin="0,0,0,8" /><TextBlock Text="Gelb" HorizontalAlignment="Center" /></StackPanel>
+                                </Button>
+                                <Button Command="{Binding LightsCommand}" CommandParameter="Green" AutomationProperties.Name="Grüne LED umschalten" Margin="4,0">
+                                    <Button.Style>
+                                        <Style TargetType="Button" BasedOn="{StaticResource LedButton}">
+                                            <Style.Triggers><DataTrigger Binding="{Binding GreenOn}" Value="True"><Setter Property="Background" Value="#285747" /><Setter Property="BorderBrush" Value="#6EE7CE" /></DataTrigger></Style.Triggers>
+                                        </Style>
+                                    </Button.Style>
+                                    <StackPanel><Ellipse Width="12" Height="12" Fill="#6EE7CE" Margin="0,0,0,8" /><TextBlock Text="Grün" HorizontalAlignment="Center" /></StackPanel>
+                                </Button>
+                            </UniformGrid>
+                            <WrapPanel><Button Content="Alle aus" Command="{Binding AllOffCommand}" Padding="14,9" Margin="0,0,8,0" /><Button Content="Alle an" Command="{Binding AllOnCommand}" Padding="14,9" /></WrapPanel>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+                <TextBlock Text="{Binding CommandStatus}" Foreground="{StaticResource MutedBrush}" FontSize="12" Margin="4,0,0,20" />
+                <TextBlock Text="LIVE-SIGNALE" Style="{StaticResource Caption}" Margin="2,0,0,12" />
+                <Grid Margin="0,0,0,20">
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="16" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                    <Border Style="{StaticResource Card}">
+                        <StackPanel>
+                            <TextBlock Text="Potentiometer" FontSize="19" FontWeight="SemiBold" />
+                            <Grid Margin="0,12,0,12">
+                                <StackPanel Orientation="Horizontal"><TextBlock Text="{Binding FadeText}" FontSize="38" FontWeight="SemiBold" /><TextBlock Text=" / 255" Foreground="{StaticResource MutedBrush}" VerticalAlignment="Bottom" Margin="0,0,0,8" /></StackPanel>
+                                <TextBlock Text="{Binding FadePercent}" HorizontalAlignment="Right" VerticalAlignment="Center" Foreground="{StaticResource AccentBrush}" />
+                            </Grid>
+                            <ProgressBar Maximum="255" Value="{Binding FadeValue}" AutomationProperties.Name="Potentiometerwert" />
+                            <TextBlock Text="{Binding FadeHint}" Foreground="{StaticResource MutedBrush}" FontSize="12" Margin="0,14,0,0" />
+                        </StackPanel>
+                    </Border>
+                    <Border Grid.Column="2" Style="{StaticResource Card}">
+                        <StackPanel>
+                            <Grid><TextBlock Text="Tasteneingaben" FontSize="19" FontWeight="SemiBold" /><TextBlock Text="{Binding InputCount}" HorizontalAlignment="Right" Foreground="{StaticResource AccentBrush}" FontSize="19" FontWeight="SemiBold" /></Grid>
+                            <TextBlock Text="{Binding LastInput}" FontSize="21" FontWeight="SemiBold" Margin="0,20,0,6" />
+                            <TextBlock Text="{Binding LastInputTime}" Foreground="{StaticResource MutedBrush}" FontSize="12" />
+                            <TextBlock Text="{Binding InputHint}" Foreground="{StaticResource MutedBrush}" FontSize="12" Margin="0,18,0,0" />
+                        </StackPanel>
+                    </Border>
+                </Grid>
+                <Border Style="{StaticResource Card}">
+                    <StackPanel>
+                        <Grid><TextBlock Text="Aktivitätsprotokoll" FontSize="19" FontWeight="SemiBold" /><TextBlock Text="NEUESTE ZUERST · MAX. 200" Style="{StaticResource Caption}" HorizontalAlignment="Right" VerticalAlignment="Center" /></Grid>
+                        <ListBox ItemsSource="{Binding Events}" Height="145" Margin="0,12,0,0" FontFamily="Consolas" FontSize="12" AutomationProperties.Name="Controller-Ereignisse">
+                            <ListBox.ItemTemplate><DataTemplate><TextBlock Text="{Binding}" Foreground="{StaticResource MutedBrush}" /></DataTemplate></ListBox.ItemTemplate>
+                        </ListBox>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</Window>

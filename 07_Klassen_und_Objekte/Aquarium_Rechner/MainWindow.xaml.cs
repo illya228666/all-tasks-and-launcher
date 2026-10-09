@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Windows;
+using System.Windows.Controls;
 
 namespace Aquarium_Rechner;
 
@@ -49,9 +50,8 @@ public partial class MainWindow : Window
             + "Material: " + materialpreis.ToString("N2", kultur) + " €\n"
             + "Sockelbetrag: 20,00 €\n"
             + "Vor dem Aufrunden: " + (20 + materialpreis).ToString("N2", kultur) + " €";
-        LaengeZeichnung.Text = laenge.ToString("G", kultur) + " cm";
-        BreiteZeichnung.Text = breite.ToString("G", kultur) + " cm";
-        HoeheZeichnung.Text = hoehe.ToString("G", kultur) + " cm";
+        AquariumVorschau.SetAbmessungen(laenge, breite, hoehe);
+        VorschauHinweis.Text = "Proportionale Live-Vorschau · Maße in Zentimetern";
         Status.Text = "Berechnung aktualisiert.";
     }
 
@@ -67,10 +67,33 @@ public partial class MainWindow : Window
         VolumenAusgabe.Text = "—";
         PreisAusgabe.Text = "—";
         Rechenweg.Text = "Für diese Eingabe liegt noch keine gültige Berechnung vor.";
-        LaengeZeichnung.Text = "Länge";
-        BreiteZeichnung.Text = "Breite";
-        HoeheZeichnung.Text = "Höhe";
         Status.Text = meldung;
+    }
+
+    private void Abmessung_Geaendert(object sender, TextChangedEventArgs e)
+    {
+        // TextChanged wird auch beim Aufbau des Fensters ausgelöst.
+        if (AquariumVorschau == null) return;
+        double laenge, breite, hoehe;
+        bool gueltig = LeseZahl(LaengeEingabe.Text, out laenge) && laenge > 0;
+        gueltig = LeseZahl(BreiteEingabe.Text, out breite) && breite > 0 && gueltig;
+        gueltig = LeseZahl(HoeheEingabe.Text, out hoehe) && hoehe > 0 && gueltig;
+        if (gueltig)
+        {
+            AquariumVorschau.SetAbmessungen(laenge, breite, hoehe);
+            VorschauHinweis.Text = "Proportionale Live-Vorschau · Preis mit „Berechnen“ aktualisieren";
+        }
+        else
+        {
+            AquariumVorschau.SetGueltig(false);
+            VorschauHinweis.Text = "Bitte drei positive Abmessungen eingeben.";
+        }
+    }
+
+    private void Animation_Click(object sender, RoutedEventArgs e)
+    {
+        AquariumVorschau.AnimationLaeuft = !AquariumVorschau.AnimationLaeuft;
+        AnimationButton.Content = AquariumVorschau.AnimationLaeuft ? "Ⅱ Pause" : "▶ Weiter";
     }
 
     private void Beispiel_Click(object sender, RoutedEventArgs e)

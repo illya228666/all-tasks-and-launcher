@@ -29,6 +29,8 @@ Preis = auf volle 5 Euro aufrunden (20 Euro + Glasfläche × Glaspreis)
 
 Für das Beispiel `new Aquarium(80, 35, 35)` und `GetPreis(0.4)` ergeben sich **98,00 Liter**, **108,50 dm² Glas** und **65,00 Euro**. Ein Glaspreis von 0 ist zulässig; Maße müssen positiv sein. Das Fenster akzeptiert Komma und Punkt als Dezimalzeichen.
 
+Die Vorschau passt Länge, Breite und Höhe bereits beim Tippen an. Alle drei Achsen verwenden einen gemeinsamen Maßstab; die schräge Breitenachse ist eine feste räumliche Projektion. Der Preis wird mit „Aquarium berechnen“ aktualisiert. Die Fischanimation enthält räumliches Schwimmen, weiche Wendungen, bewegte Flossen, Kiemen und Augen sowie Blasen, Pflanzenbewegung und Lichtreflexe. „Pause“ hält die ganze Szene an. Beim Minimieren, Ausblenden und Schließen wird die Animation angehalten beziehungsweise vom WPF-Bildereignis abgemeldet. Die Szene läuft unabhängig vom Begleiter im Launcher.
+
 ## Starten
 
 Alle vier Programme sind in `zahlen.sln` im Ordner `07_Klassen_und_Objekte` enthalten. Nach dem Build des Launchers erscheinen sie gemeinsam in der Kategorie `07 Klassen und Objekte`.
