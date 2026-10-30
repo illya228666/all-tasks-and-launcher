@@ -139,7 +139,7 @@
                             <Button Content="Alle Segmente aus" Command="{Binding DisplayNoSegmentsCommand}" Margin="0,0,10,8" />
                             <Button Content="Zurück zu Zahlen" Command="{Binding DisplayNumbersCommand}" Margin="0,0,10,8" />
                         </WrapPanel>
-                        <TextBlock Text="{Binding DisplayMask, StringFormat=Segmentmaske: {0} (0–127)}"
+                        <TextBlock Text="{Binding DisplayMask, StringFormat='Segmentmaske: {0} (0–127)'}"
                                    Foreground="{StaticResource MutedBrush}" Margin="0,5,0,0" FontSize="12" />
 
                         <Grid>
