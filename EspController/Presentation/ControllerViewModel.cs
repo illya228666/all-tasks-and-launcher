@@ -17,7 +17,9 @@ internal sealed class ControllerViewModel : INotifyPropertyChanged, IAsyncDispos
     private byte? _fade;
     private DeviceDiceRoll? _diceRoll;
     private DeviceDisplay? _display;
-    private int _displayValue = 42, _displayBrightness = 20, _displayInterval = 500;
+    private int _displayValue = 4, _displayBrightness = 20, _displayInterval = 500;
+    private int _manualMask = 0;
+    private bool _isManualMode, _manualPending;
     private bool _displayPending, _displaySending;
     private readonly DispatcherTimer _displayDebounce;
     private int _inputCount;
@@ -43,6 +45,10 @@ internal sealed class ControllerViewModel : INotifyPropertyChanged, IAsyncDispos
         DisplayModeCommand = new(SetDisplayModeAsync, () => CanUseDisplay);
         DisplayTestCommand = new(_ => ExecuteDisplayAsync(c => c.StartDisplayTestAsync(), "Segmenttest gestartet"), () => CanUseDisplay);
         DisplaySettingsCommand = new(_ => ApplyDisplaySettingsAsync(), () => CanUseDisplay);
+        DisplaySegmentCommand = new(ToggleSegmentAsync, () => CanUseDisplay);
+        DisplayAllSegmentsCommand = new(_ => { RequestManualMask(127); return Task.CompletedTask; }, () => CanUseDisplay);
+        DisplayNoSegmentsCommand = new(_ => { RequestManualMask(0); return Task.CompletedTask; }, () => CanUseDisplay);
+        DisplayNumbersCommand = new(_ => SetDisplayModeAsync("Hold"), () => CanUseDisplay);
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;
@@ -57,6 +63,10 @@ internal sealed class ControllerViewModel : INotifyPropertyChanged, IAsyncDispos
     public AsyncCommand DisplayModeCommand { get; }
     public AsyncCommand DisplayTestCommand { get; }
     public AsyncCommand DisplaySettingsCommand { get; }
+    public AsyncCommand DisplaySegmentCommand { get; }
+    public AsyncCommand DisplayAllSegmentsCommand { get; }
+    public AsyncCommand DisplayNoSegmentsCommand { get; }
+    public AsyncCommand DisplayNumbersCommand { get; }
     public bool IsConnected => _state.IsConnected;
     public bool IsSearching => _connection is not null && !IsConnected && _state.Phase != DeviceConnectionPhase.Faulted;
     public string ConnectionAction => _connection is null ? "Verbinden" : "Trennen";
@@ -91,13 +101,16 @@ internal sealed class ControllerViewModel : INotifyPropertyChanged, IAsyncDispos
         get => _displayValue;
         set
         {
-            int next = Math.Clamp(value, 0, 99);
+            int next = Math.Clamp(value, 0, 9);
             if (next == _displayValue) return;
             _displayValue = next;
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(DisplayValue)));
             if (CanUseDisplay)
             {
+                _isManualMode = false;
+                _manualPending = false;
                 _displayPending = true;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsPatternView)));
                 _displayDebounce.Stop();
                 _displayDebounce.Start();
             }
@@ -125,8 +138,11 @@ internal sealed class ControllerViewModel : INotifyPropertyChanged, IAsyncDispos
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(DisplayInterval)));
         }
     }
+    public int DisplayMask => _manualMask;
+    public bool IsPatternView => _isManualMode || _display?.Mode == DeviceDisplayMode.Test;
+    public bool IsManualMode => _isManualMode;
     public string DisplayStateText => _display is null ? "Warte auf das Gerät …"
-        : $"ESP: {_display.Value:D2} · {_display.Mode} · {_display.Brightness}% · {_display.IntervalMs} ms";
+        : $"ESP rechts: {_display.Value} · {_display.Mode} · Segmente {_display.SegmentMask} · {_display.Brightness}% · {_display.IntervalMs} ms";
     public string ConnectionBadge => IsConnected ? "ONLINE" : IsSearching ? "SUCHE" : "OFFLINE";
     public bool CanUseIndicator => !_closing && !_busy && IsConnected && _state.Capabilities.HasFlag(DeviceCapabilities.Indicator);
     public bool CanUseLights => !_closing && !_busy && IsConnected && _state.Capabilities.HasFlag(DeviceCapabilities.Lights);
@@ -168,10 +184,15 @@ internal sealed class ControllerViewModel : INotifyPropertyChanged, IAsyncDispos
         {
             bool first = _display is null;
             _display = display;
-            if (!_displayPending && !_displaySending)
+            if (!_displayPending && !_manualPending && !_displaySending)
             {
-                _displayValue = display.Value;
+                _displayValue = Math.Clamp(display.Value, 0, 9);
+                _isManualMode = display.Mode == DeviceDisplayMode.Manual;
+                _manualMask = display.SegmentMask;
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(DisplayValue)));
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(DisplayMask)));
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsManualMode)));
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsPatternView)));
             }
             if (first)
             {
@@ -227,6 +248,9 @@ internal sealed class ControllerViewModel : INotifyPropertyChanged, IAsyncDispos
             _diceRoll = null;
             _displayDebounce.Stop();
             _displayPending = false;
+            _manualPending = false;
+            _isManualMode = false;
+            _manualMask = 0;
             _display = null;
             _commandStatus = "Ausgänge werden nach der Verbindung freigeschaltet.";
         }
@@ -276,21 +300,28 @@ internal sealed class ControllerViewModel : INotifyPropertyChanged, IAsyncDispos
         return SendAsync(connection, () => connection.SetLightsAsync(lights), () => _lights = lights, "LEDs: " + lights);
     }
 
+    // Both the numeric slider and manual clicks share one debounced output
+    // channel. The latest user action wins; in-flight writes never overlap.
     private async void FlushDisplayValue(object? sender, EventArgs args)
     {
         _displayDebounce.Stop();
-        if (!_displayPending || !CanUseDisplay || _connection is null) return;
-        _displayPending = false;
-        _displaySending = true;
+        if ((!_displayPending && !_manualPending) || _displaySending || !CanUseDisplay || _connection is null) return;
         DeviceConnection connection = _connection;
+        bool manual = _manualPending;
         int value = _displayValue;
+        int mask = _manualMask;
+        _displayPending = false;
+        _manualPending = false;
+        _displaySending = true;
         try
         {
-            DeviceCommandResult result = await connection.SetDisplayValueAsync(value);
+            DeviceCommandResult result = manual
+                ? await connection.SetDisplaySegmentsAsync(mask)
+                : await connection.SetDisplayValueAsync(value);
             if (_closing || !ReferenceEquals(connection, _connection)) return;
             if (result is not (DeviceCommandResult.Completed or DeviceCommandResult.Superseded))
             {
-                _commandStatus = "Display SET: " + result;
+                _commandStatus = "Display: " + result;
                 Log(_commandStatus);
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(CommandStatus)));
             }
@@ -298,7 +329,7 @@ internal sealed class ControllerViewModel : INotifyPropertyChanged, IAsyncDispos
         finally
         {
             _displaySending = false;
-            if (_displayPending && !_closing)
+            if ((_displayPending || _manualPending) && !_closing)
             {
                 _displayDebounce.Stop();
                 _displayDebounce.Start();
@@ -306,11 +337,38 @@ internal sealed class ControllerViewModel : INotifyPropertyChanged, IAsyncDispos
         }
     }
 
+    private Task ToggleSegmentAsync(object? parameter)
+    {
+        if (!CanUseDisplay || !int.TryParse(parameter?.ToString(), out int bit) || bit is < 0 or > 6)
+            return Task.CompletedTask;
+        // On first click use the actual reported physical pattern as a base.
+        int baseMask = _isManualMode ? _manualMask : (_display?.SegmentMask ?? _manualMask);
+        RequestManualMask(baseMask ^ (1 << bit));
+        return Task.CompletedTask;
+    }
+
+    private void RequestManualMask(int mask)
+    {
+        if (!CanUseDisplay) return;
+        _manualMask = Math.Clamp(mask, 0, 127);
+        _isManualMode = true;
+        _displayPending = false;
+        _manualPending = true;
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(DisplayMask)));
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsManualMode)));
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsPatternView)));
+        _displayDebounce.Stop();
+        _displayDebounce.Start();
+    }
+
     private Task SetDisplayModeAsync(object? parameter)
     {
         if (!Enum.TryParse<DeviceDisplayMode>(parameter?.ToString(), true, out var mode)
             || mode is not (DeviceDisplayMode.Hold or DeviceDisplayMode.Up or DeviceDisplayMode.Down or DeviceDisplayMode.Bounce))
             return Task.CompletedTask;
+        _isManualMode = false;
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsManualMode)));
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsPatternView)));
         return ExecuteDisplayAsync(connection => connection.SetDisplayModeAsync(mode), "Modus: " + mode);
     }
 
@@ -320,6 +378,7 @@ internal sealed class ControllerViewModel : INotifyPropertyChanged, IAsyncDispos
         DeviceConnection connection = _connection;
         _displayDebounce.Stop();
         _displayPending = false;
+        _manualPending = false;
         return SendAsync(connection, () => operation(connection), () => { }, description);
     }
 
@@ -370,6 +429,8 @@ internal sealed class ControllerViewModel : INotifyPropertyChanged, IAsyncDispos
         ConnectionCommand.Refresh(); IndicatorCommand.Refresh(); LightsCommand.Refresh(); AllOffCommand.Refresh(); AllOnCommand.Refresh();
         DisplayMinusCommand.Refresh(); DisplayPlusCommand.Refresh(); DisplayModeCommand.Refresh();
         DisplayTestCommand.Refresh(); DisplaySettingsCommand.Refresh();
+        DisplaySegmentCommand.Refresh(); DisplayAllSegmentsCommand.Refresh();
+        DisplayNoSegmentsCommand.Refresh(); DisplayNumbersCommand.Refresh();
     }
     private void NotifyFade()
     {

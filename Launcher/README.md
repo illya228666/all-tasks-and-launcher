@@ -77,7 +77,7 @@ Der Launcher startet `EspController` als eigenes Programm. IO v4 würfelt selbst
 ## 7-Segment Live Control / IO v5
 
 `EspController` recognizes `LAUNCHER_IO 5` and exposes a virtual two-digit
-display with a live 00–99 slider, +/- buttons, ESP-side counting animations,
+display with a live 0–9 slider (right digit only), individual A–G segment toggles, +/- buttons and ESP-side counting animations,
 speed/brightness controls and a segment self-test. The Windows view polls the
 firmware for the actual value. Older firmware versions keep their own panels.
 
