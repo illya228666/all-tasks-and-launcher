@@ -15,7 +15,7 @@ internal sealed class DeviceProtocolV5 : IDeviceProtocolVersion
     public DevicePoll ReadPoll(string reply)
     {
         string[] parts = reply.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-        if (parts.Length != 5 || parts[0] != "DISPLAY"
+        if (parts.Length != 6 || parts[0] != "DISPLAY"
             || !int.TryParse(parts[1], NumberStyles.None, CultureInfo.InvariantCulture, out int value)
             || value is < 0 or > 99
             || !int.TryParse(parts[2], NumberStyles.None, CultureInfo.InvariantCulture, out int brightness)
@@ -23,9 +23,11 @@ internal sealed class DeviceProtocolV5 : IDeviceProtocolVersion
             || !Enum.TryParse<DeviceDisplayMode>(parts[3], true, out var mode)
             || !Enum.IsDefined(mode)
             || !int.TryParse(parts[4], NumberStyles.None, CultureInfo.InvariantCulture, out int interval)
-            || interval is < 100 or > 2000)
+            || interval is < 100 or > 2000
+            || !int.TryParse(parts[5], NumberStyles.None, CultureInfo.InvariantCulture, out int mask)
+            || mask is < 0 or > 127)
             throw new DeviceProtocolException(DeviceFailure.InvalidReply, "Unexpected v5 display state.");
 
-        return new(null, Display: new(value, brightness, mode, interval));
+        return new(null, Display: new(value, brightness, mode, interval, mask));
     }
 }
