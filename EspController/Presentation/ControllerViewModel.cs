@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using EspController.Firmware;
 using System.Windows.Threading;
 using Launcher.Device.Connection;
 using Launcher.Device.Data;
@@ -10,6 +11,9 @@ internal sealed class ControllerViewModel : INotifyPropertyChanged, IAsyncDispos
 {
     private readonly Dispatcher _dispatcher;
     private readonly Func<DeviceConnection> _createConnection;
+    private readonly bool _defaultConnectionFactory;
+    private string? _nextConnectionPort;
+    private bool _firmwareAttempted;
     private DeviceConnection? _connection;
     private DeviceState _state = new(DeviceConnectionPhase.Waiting);
     private bool _busy, _closing, _indicator;
@@ -20,6 +24,10 @@ internal sealed class ControllerViewModel : INotifyPropertyChanged, IAsyncDispos
     private int _displayValue = 42, _displayBrightness = 20, _displayInterval = 500;
     private bool _displayPending, _displaySending;
     private readonly DispatcherTimer _displayDebounce;
+    private bool _flashing;
+    private Task? _flashTask;
+    private int _selectedFirmwareVersion = 5;
+    private string _firmwareStatus = "Nur mit einem verbundenen ESP verfügbar.";
     private int _inputCount;
     private string _lastInput = "Noch kein Tastendruck", _lastInputTime = "Warte auf Eingaben vom Controller";
     private string _commandStatus = "Ausgänge werden nach der Verbindung freigeschaltet.";
@@ -27,6 +35,7 @@ internal sealed class ControllerViewModel : INotifyPropertyChanged, IAsyncDispos
     internal ControllerViewModel(Dispatcher dispatcher, Func<DeviceConnection>? createConnection = null)
     {
         _dispatcher = dispatcher;
+        _defaultConnectionFactory = createConnection is null;
         _createConnection = createConnection ?? (() => new DeviceConnection());
         _displayDebounce = new DispatcherTimer(DispatcherPriority.Normal, dispatcher)
         {
@@ -43,6 +52,7 @@ internal sealed class ControllerViewModel : INotifyPropertyChanged, IAsyncDispos
         DisplayModeCommand = new(SetDisplayModeAsync, () => CanUseDisplay);
         DisplayTestCommand = new(_ => ExecuteDisplayAsync(c => c.StartDisplayTestAsync(), "Segmenttest gestartet"), () => CanUseDisplay);
         DisplaySettingsCommand = new(_ => ApplyDisplaySettingsAsync(), () => CanUseDisplay);
+        FlashFirmwareCommand = new(_ => FlashFirmwareAsync(), () => CanFlashFirmware);
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;
@@ -57,6 +67,22 @@ internal sealed class ControllerViewModel : INotifyPropertyChanged, IAsyncDispos
     public AsyncCommand DisplayModeCommand { get; }
     public AsyncCommand DisplayTestCommand { get; }
     public AsyncCommand DisplaySettingsCommand { get; }
+    public AsyncCommand FlashFirmwareCommand { get; }
+    public IReadOnlyList<int> FirmwareVersions { get; } = new[] { 1, 2, 3, 4, 5 };
+    public int SelectedFirmwareVersion
+    {
+        get => _selectedFirmwareVersion;
+        set
+        {
+            if (!FirmwareVersions.Contains(value) || _selectedFirmwareVersion == value) return;
+            _selectedFirmwareVersion = value;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SelectedFirmwareVersion)));
+        }
+    }
+    public bool IsFlashing => _flashing;
+    public bool ShowFirmwarePanel => IsConnected || _flashing || _firmwareAttempted;
+    public bool CanFlashFirmware => !_closing && !_busy && !_flashing && IsConnected && !string.IsNullOrWhiteSpace(_state.PortName);
+    public string FirmwareStatus => _firmwareStatus;
     public bool IsConnected => _state.IsConnected;
     public bool IsSearching => _connection is not null && !IsConnected && _state.Phase != DeviceConnectionPhase.Faulted;
     public string ConnectionAction => _connection is null ? "Verbinden" : "Trennen";
@@ -153,7 +179,9 @@ internal sealed class ControllerViewModel : INotifyPropertyChanged, IAsyncDispos
     internal Task StartAsync()
     {
         if (_connection is not null || _closing) return Task.CompletedTask;
-        var connection = _createConnection();
+        var connection = _nextConnectionPort is { } port && _defaultConnectionFactory
+            ? new DeviceConnection(port) : _createConnection();
+        _nextConnectionPort = null;
         _connection = connection;
         connection.StateChanged += state => Post(connection, () => DisplayState(state));
         connection.InputReceived += input => Post(connection, () => DisplayInput(input));
@@ -276,6 +304,77 @@ internal sealed class ControllerViewModel : INotifyPropertyChanged, IAsyncDispos
         return SendAsync(connection, () => connection.SetLightsAsync(lights), () => _lights = lights, "LEDs: " + lights);
     }
 
+    private Task FlashFirmwareAsync()
+    {
+        if (!CanFlashFirmware || _state.PortName is not { } port) return Task.CompletedTask;
+        // The port has been confirmed via HELLO. No new port discovery is
+        // performed during compilation or upload.
+        Task task = FlashFirmwareCoreAsync(port, SelectedFirmwareVersion);
+        _flashTask = task;
+        return task;
+    }
+
+    private async Task FlashFirmwareCoreAsync(string port, int version)
+    {
+        _busy = _flashing = true;
+        _firmwareAttempted = true;
+        _firmwareStatus = $"IO v{version} wird für {port} kompiliert …";
+        _displayDebounce.Stop();
+        Notify();
+        string output = Path.Combine(Path.GetTempPath(), "zahlen-esp-firmware-" + Guid.NewGuid().ToString("N"));
+        bool released = false;
+        var progress = new Progress<string>(line =>
+        {
+            if (_closing || string.IsNullOrWhiteSpace(line)) return;
+            _firmwareStatus = line.Length > 240 ? line[..240] + " …" : line;
+            Log("Firmware: " + _firmwareStatus);
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(FirmwareStatus)));
+        });
+        try
+        {
+            Directory.CreateDirectory(output);
+            Log($"Firmware IO v{version} · Build gestartet · Ziel {port}");
+            await FirmwareFlasher.CompileAsync(version, output, progress);
+            if (_closing) return; // never start a new upload while the window is closing
+            _firmwareStatus = $"Build fertig · {port} wird zum Flashen freigegeben …";
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(FirmwareStatus)));
+
+            // Compile while connected; close only the confirmed port just before
+            // uploading. Await StopAsync so SerialPort.Dispose has completed.
+            released = true;
+            await StopConnectionAsync();
+            await FirmwareFlasher.UploadAsync(version, port, output, progress);
+            _firmwareStatus = $"IO v{version} erfolgreich auf {port} übertragen.";
+            Log(_firmwareStatus);
+        }
+        catch (Exception error) when (error is IOException or UnauthorizedAccessException or InvalidOperationException or ArgumentException)
+        {
+            _firmwareStatus = "Firmware fehlgeschlagen: " + error.Message;
+            Log(_firmwareStatus);
+        }
+        finally
+        {
+            try { if (Directory.Exists(output)) Directory.Delete(output, true); }
+            catch (IOException) { /* temporary compiler files are safe to leave */ }
+            catch (UnauthorizedAccessException) { }
+            if (released && !_closing)
+            {
+                try
+                {
+                    _nextConnectionPort = port;
+                    await StartAsync();
+                    Log($"Wiederverbindung zu {port} gestartet.");
+                }
+                catch (Exception e) when (e is IOException or InvalidOperationException)
+                {
+                    Log("Wiederverbindung fehlgeschlagen: " + e.Message);
+                }
+            }
+            _busy = _flashing = false;
+            Notify();
+        }
+    }
+
     private async void FlushDisplayValue(object? sender, EventArgs args)
     {
         _displayDebounce.Stop();
@@ -369,7 +468,7 @@ internal sealed class ControllerViewModel : INotifyPropertyChanged, IAsyncDispos
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(null));
         ConnectionCommand.Refresh(); IndicatorCommand.Refresh(); LightsCommand.Refresh(); AllOffCommand.Refresh(); AllOnCommand.Refresh();
         DisplayMinusCommand.Refresh(); DisplayPlusCommand.Refresh(); DisplayModeCommand.Refresh();
-        DisplayTestCommand.Refresh(); DisplaySettingsCommand.Refresh();
+        DisplayTestCommand.Refresh(); DisplaySettingsCommand.Refresh(); FlashFirmwareCommand.Refresh();
     }
     private void NotifyFade()
     {
@@ -393,6 +492,7 @@ internal sealed class ControllerViewModel : INotifyPropertyChanged, IAsyncDispos
         _closing = true;
         _displayDebounce.Stop();
         Notify();
+        if (_flashTask is not null) await _flashTask;
         await StopConnectionAsync();
     }
 }
