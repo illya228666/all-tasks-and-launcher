@@ -83,7 +83,7 @@
                 </Border>
                 <!-- Firmware actions are exposed only after HELLO recognized a live ESP. -->
                 <Border Style="{StaticResource Card}" Margin="0,0,0,20"
-                        Visibility="{Binding IsConnected, Converter={StaticResource BooleanVisibility}}">
+                        Visibility="{Binding ShowFirmwarePanel, Converter={StaticResource BooleanVisibility}}">
                     <StackPanel>
                         <TextBlock Text="FIRMWARE · DIREKT AUF DAS GERÄT" Style="{StaticResource Caption}" Margin="0,0,0,7"/>
                         <TextBlock Text="Firmware aktualisieren" FontSize="21" FontWeight="SemiBold" Margin="0,0,0,5"/>

@@ -11,6 +11,9 @@ internal sealed class ControllerViewModel : INotifyPropertyChanged, IAsyncDispos
 {
     private readonly Dispatcher _dispatcher;
     private readonly Func<DeviceConnection> _createConnection;
+    private readonly bool _defaultConnectionFactory;
+    private string? _nextConnectionPort;
+    private bool _firmwareAttempted;
     private DeviceConnection? _connection;
     private DeviceState _state = new(DeviceConnectionPhase.Waiting);
     private bool _busy, _closing, _indicator;
@@ -32,6 +35,7 @@ internal sealed class ControllerViewModel : INotifyPropertyChanged, IAsyncDispos
     internal ControllerViewModel(Dispatcher dispatcher, Func<DeviceConnection>? createConnection = null)
     {
         _dispatcher = dispatcher;
+        _defaultConnectionFactory = createConnection is null;
         _createConnection = createConnection ?? (() => new DeviceConnection());
         _displayDebounce = new DispatcherTimer(DispatcherPriority.Normal, dispatcher)
         {
@@ -76,6 +80,7 @@ internal sealed class ControllerViewModel : INotifyPropertyChanged, IAsyncDispos
         }
     }
     public bool IsFlashing => _flashing;
+    public bool ShowFirmwarePanel => IsConnected || _flashing || _firmwareAttempted;
     public bool CanFlashFirmware => !_closing && !_busy && !_flashing && IsConnected && !string.IsNullOrWhiteSpace(_state.PortName);
     public string FirmwareStatus => _firmwareStatus;
     public bool IsConnected => _state.IsConnected;
@@ -174,7 +179,9 @@ internal sealed class ControllerViewModel : INotifyPropertyChanged, IAsyncDispos
     internal Task StartAsync()
     {
         if (_connection is not null || _closing) return Task.CompletedTask;
-        var connection = _createConnection();
+        var connection = _nextConnectionPort is { } port && _defaultConnectionFactory
+            ? new DeviceConnection(port) : _createConnection();
+        _nextConnectionPort = null;
         _connection = connection;
         connection.StateChanged += state => Post(connection, () => DisplayState(state));
         connection.InputReceived += input => Post(connection, () => DisplayInput(input));
@@ -310,6 +317,7 @@ internal sealed class ControllerViewModel : INotifyPropertyChanged, IAsyncDispos
     private async Task FlashFirmwareCoreAsync(string port, int version)
     {
         _busy = _flashing = true;
+        _firmwareAttempted = true;
         _firmwareStatus = $"IO v{version} wird für {port} kompiliert …";
         _displayDebounce.Stop();
         Notify();
@@ -353,8 +361,9 @@ internal sealed class ControllerViewModel : INotifyPropertyChanged, IAsyncDispos
             {
                 try
                 {
+                    _nextConnectionPort = port;
                     await StartAsync();
-                    Log("Wiederverbindung gestartet.");
+                    Log($"Wiederverbindung zu {port} gestartet.");
                 }
                 catch (Exception e) when (e is IOException or InvalidOperationException)
                 {

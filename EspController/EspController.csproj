@@ -12,20 +12,20 @@
   </ItemGroup>
   <!-- Sketches are shipped with EspController, including published builds. -->
   <ItemGroup>
-    <None Include="..\\Launcher.Device\\Firmware\\LauncherIoEsp8266\\**\\*.ino;..\\Launcher.Device\\Firmware\\LauncherIoEsp8266\\**\\*.h"
-          Link="Firmware\\LauncherIoEsp8266\\%(RecursiveDir)%(Filename)%(Extension)"
+    <None Include="..\Launcher.Device\Firmware\LauncherIoEsp8266\**\*.ino;..\Launcher.Device\Firmware\LauncherIoEsp8266\**\*.h"
+          Link="Firmware\LauncherIoEsp8266\%(RecursiveDir)%(Filename)%(Extension)"
           CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
-    <None Include="..\\Launcher.Device\\Firmware\\LauncherIoEsp8266V2\\**\\*.ino;..\\Launcher.Device\\Firmware\\LauncherIoEsp8266V2\\**\\*.h"
-          Link="Firmware\\LauncherIoEsp8266V2\\%(RecursiveDir)%(Filename)%(Extension)"
+    <None Include="..\Launcher.Device\Firmware\LauncherIoEsp8266V2\**\*.ino;..\Launcher.Device\Firmware\LauncherIoEsp8266V2\**\*.h"
+          Link="Firmware\LauncherIoEsp8266V2\%(RecursiveDir)%(Filename)%(Extension)"
           CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
-    <None Include="..\\Launcher.Device\\Firmware\\LauncherIoEsp8266V3\\**\\*.ino;..\\Launcher.Device\\Firmware\\LauncherIoEsp8266V3\\**\\*.h"
-          Link="Firmware\\LauncherIoEsp8266V3\\%(RecursiveDir)%(Filename)%(Extension)"
+    <None Include="..\Launcher.Device\Firmware\LauncherIoEsp8266V3\**\*.ino;..\Launcher.Device\Firmware\LauncherIoEsp8266V3\**\*.h"
+          Link="Firmware\LauncherIoEsp8266V3\%(RecursiveDir)%(Filename)%(Extension)"
           CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
-    <None Include="..\\Launcher.Device\\Firmware\\LauncherIoEsp8266V4\\**\\*.ino;..\\Launcher.Device\\Firmware\\LauncherIoEsp8266V4\\**\\*.h"
-          Link="Firmware\\LauncherIoEsp8266V4\\%(RecursiveDir)%(Filename)%(Extension)"
+    <None Include="..\Launcher.Device\Firmware\LauncherIoEsp8266V4\**\*.ino;..\Launcher.Device\Firmware\LauncherIoEsp8266V4\**\*.h"
+          Link="Firmware\LauncherIoEsp8266V4\%(RecursiveDir)%(Filename)%(Extension)"
           CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
-    <None Include="..\\Launcher.Device\\Firmware\\LauncherIoEsp8266V5\\**\\*.ino;..\\Launcher.Device\\Firmware\\LauncherIoEsp8266V5\\**\\*.h"
-          Link="Firmware\\LauncherIoEsp8266V5\\%(RecursiveDir)%(Filename)%(Extension)"
+    <None Include="..\Launcher.Device\Firmware\LauncherIoEsp8266V5\**\*.ino;..\Launcher.Device\Firmware\LauncherIoEsp8266V5\**\*.h"
+          Link="Firmware\LauncherIoEsp8266V5\%(RecursiveDir)%(Filename)%(Extension)"
           CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>

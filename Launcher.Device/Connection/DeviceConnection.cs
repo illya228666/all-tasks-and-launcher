@@ -7,6 +7,7 @@ public sealed class DeviceConnection : IAsyncDisposable
 {
     private readonly object _gate = new();
     private readonly IDeviceTransportFactory _factory;
+    private readonly string? _onlyPort;
     private readonly DeviceConnectionTiming _timing;
     private readonly CancellationTokenSource _lifetime = new();
     private Task _loop = Task.CompletedTask;
@@ -19,11 +20,16 @@ public sealed class DeviceConnection : IAsyncDisposable
     public event Action<DeviceDiceRoll>? DiceReceived;
     public event Action<DeviceDisplay>? DisplayReceived;
     public DeviceState State { get { lock (_gate) return _state; } }
-    public DeviceConnection() : this(new SerialDeviceTransportFactory(), new()) { }
+    public DeviceConnection() : this(new SerialDeviceTransportFactory(), new(), null) { }
+    // A firmware update reconnects exclusively to its previously confirmed port.
+    public DeviceConnection(string port) : this(new SerialDeviceTransportFactory(), new(), port) { }
     internal DeviceConnection(IDeviceTransportFactory factory, DeviceConnectionTiming timing)
+        : this(factory, timing, null) { }
+    private DeviceConnection(IDeviceTransportFactory factory, DeviceConnectionTiming timing, string? onlyPort)
     {
         _factory = factory;
         _timing = timing;
+        _onlyPort = onlyPort;
     }
     public void Start()
     {
@@ -102,7 +108,7 @@ public sealed class DeviceConnection : IAsyncDisposable
                 token.ThrowIfCancellationRequested();
                 Publish(new(DeviceConnectionPhase.Searching));
                 IReadOnlyList<string> ports;
-                try { ports = _factory.GetPortNames(); }
+                try { ports = _onlyPort is null ? _factory.GetPortNames() : new[] { _onlyPort }; }
                 catch (Exception error) when (IsExpected(error))
                 {
                     Publish(new(DeviceConnectionPhase.Retry, Failure: Classify(error), Detail: error.Message));
