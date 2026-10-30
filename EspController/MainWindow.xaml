@@ -81,6 +81,45 @@
                         <Button Grid.Column="1" Content="{Binding ConnectionAction}" Command="{Binding ConnectionCommand}" Style="{StaticResource PrimaryButton}" VerticalAlignment="Center" MinWidth="116" AutomationProperties.Name="Verbindung umschalten" />
                     </Grid>
                 </Border>
+                <!-- Firmware actions are exposed only after HELLO recognized a live ESP. -->
+                <Border Style="{StaticResource Card}" Margin="0,0,0,20"
+                        Visibility="{Binding IsConnected, Converter={StaticResource BooleanVisibility}}">
+                    <StackPanel>
+                        <TextBlock Text="FIRMWARE · DIREKT AUF DAS GERÄT" Style="{StaticResource Caption}" Margin="0,0,0,7"/>
+                        <TextBlock Text="Firmware aktualisieren" FontSize="21" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                        <TextBlock Text="Der erkannte COM-Port wird benutzt. Die Verbindung wird erst vor dem Upload getrennt."
+                                   Foreground="{StaticResource MutedBrush}" FontSize="12" Margin="0,0,0,16"/>
+                        <WrapPanel VerticalAlignment="Center">
+                            <TextBlock Text="Zielversion" VerticalAlignment="Center" Margin="0,0,12,0"/>
+                            <ComboBox ItemsSource="{Binding FirmwareVersions}"
+                                      SelectedItem="{Binding SelectedFirmwareVersion, Mode=TwoWay}"
+                                      IsEnabled="{Binding CanFlashFirmware}" Width="126" Margin="0,0,12,0"
+                                      AutomationProperties.Name="Firmware-Version auswählen">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate><TextBlock Text="{Binding StringFormat='Launcher IO v{0}'}"/></DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
+                            <Button Content="Kompilieren &amp; Flashen" Command="{Binding FlashFirmwareCommand}"
+                                    Style="{StaticResource PrimaryButton}" AutomationProperties.Name="Erkannten ESP flashen" />
+                        </WrapPanel>
+                        <ProgressBar IsIndeterminate="True" Height="4" Margin="0,14,0,0">
+                            <ProgressBar.Style>
+                                <Style TargetType="ProgressBar">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsFlashing}" Value="True">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </ProgressBar.Style>
+                        </ProgressBar>
+                        <TextBlock Text="{Binding FirmwareStatus}" TextWrapping="Wrap"
+                                   Foreground="{StaticResource MutedBrush}" FontSize="12" Margin="0,10,0,0"/>
+                        <TextBlock Text="Vorher Pinbelegung, Display-Polarität und Verdrahtung der Zielversion prüfen."
+                                   Foreground="#F1C66D" FontSize="11" Margin="0,9,0,0"/>
+                    </StackPanel>
+                </Border>
                 <Border Style="{StaticResource Card}" Margin="0,0,0,20"
                         Visibility="{Binding IsDisplayFirmware, Converter={StaticResource BooleanVisibility}}">
                     <StackPanel>
