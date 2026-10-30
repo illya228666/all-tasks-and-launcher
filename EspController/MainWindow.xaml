@@ -123,26 +123,30 @@
                 <Border Style="{StaticResource Card}" Margin="0,0,0,20"
                         Visibility="{Binding IsDisplayFirmware, Converter={StaticResource BooleanVisibility}}">
                     <StackPanel>
-                        <TextBlock Text="7-SEGMENT · LIVE CONTROL" Style="{StaticResource Caption}" Margin="0,0,0,6" />
-                        <TextBlock Text="Direkte Hardwaresteuerung" FontSize="23" FontWeight="SemiBold" Margin="0,0,0,16" />
+                        <TextBlock Text="7-SEGMENT · RECHTE ZIFFER" Style="{StaticResource Caption}" Margin="0,0,0,6" />
+                        <TextBlock Text="Live Control · ein aktiver Digit" FontSize="23" FontWeight="SemiBold" Margin="0,0,0,16" />
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="300" /><ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
                             <StackPanel Margin="0,0,18,0">
-                                <controls:SevenSegmentView Number="{Binding DisplayValue}" Height="172" Width="280"
-                                    HorizontalAlignment="Left" AutomationProperties.Name="Virtuelle zweistellige Siebensegmentanzeige" />
+                                <controls:SevenSegmentView Number="{Binding DisplayValue}" ManualMode="{Binding IsPatternView}"
+                                    SegmentMask="{Binding DisplayMask}" SegmentCommand="{Binding DisplaySegmentCommand}"
+                                    Height="172" Width="280" HorizontalAlignment="Left"
+                                    AutomationProperties.Name="Rechte Ziffer: Segmente anklicken zum Umschalten" />
+                                <TextBlock Text="Links: nicht angeschlossen · Rechts: aktiv"
+                                    Foreground="{StaticResource MutedBrush}" FontSize="12" Margin="2,8,0,0" />
                                 <TextBlock Text="{Binding DisplayStateText}" Foreground="{StaticResource MutedBrush}"
                                     FontFamily="Consolas" FontSize="12" Margin="2,12,0,0" />
                             </StackPanel>
                             <StackPanel Grid.Column="1" Margin="8,0,0,0">
-                                <TextBlock Text="ZAHL · 00–99" Style="{StaticResource Caption}" Margin="0,0,0,9" />
-                                <Slider Minimum="0" Maximum="99" TickFrequency="1" IsSnapToTickEnabled="True"
+                                <TextBlock Text="ZAHL · 0–9 (nur rechts)" Style="{StaticResource Caption}" Margin="0,0,0,9" />
+                                <Slider Minimum="0" Maximum="9" TickFrequency="1" IsSnapToTickEnabled="True"
                                     Value="{Binding DisplayValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                     IsEnabled="{Binding CanUseDisplay}" AutomationProperties.Name="Zahl am ESP einstellen" />
                                 <StackPanel Orientation="Horizontal" Margin="0,10,0,16">
                                     <Button Content="−" Width="52" Command="{Binding DisplayMinusCommand}" />
-                                    <TextBlock Text="{Binding DisplayValue, StringFormat={}{0:D2}}" FontSize="30" FontWeight="Bold"
+                                    <TextBlock Text="{Binding DisplayValue, StringFormat={}{0:D1}}" FontSize="30" FontWeight="Bold"
                                         Foreground="{StaticResource AccentBrush}" Width="78" TextAlignment="Center" />
                                     <Button Content="+" Width="52" Command="{Binding DisplayPlusCommand}" />
                                 </StackPanel>
@@ -156,6 +160,27 @@
                             </StackPanel>
                         </Grid>
                         <Border Height="1" Background="{StaticResource BorderBrush}" Margin="0,20,0,18"/>
+                        <TextBlock Text="MANUELL · EINZELNE SEGMENTE A–G"
+                                   Style="{StaticResource Caption}" Margin="0,0,0,10" />
+                        <TextBlock Text="Segment direkt auf der rechten Anzeige anklicken oder Buchstaben wählen."
+                                   Foreground="{StaticResource MutedBrush}" FontSize="12" Margin="0,0,0,12" />
+                        <WrapPanel Margin="0,0,0,10">
+                            <Button Content="A" Command="{Binding DisplaySegmentCommand}" CommandParameter="0" Margin="0,0,7,7" Width="43" />
+                            <Button Content="B" Command="{Binding DisplaySegmentCommand}" CommandParameter="1" Margin="0,0,7,7" Width="43" />
+                            <Button Content="C" Command="{Binding DisplaySegmentCommand}" CommandParameter="2" Margin="0,0,7,7" Width="43" />
+                            <Button Content="D" Command="{Binding DisplaySegmentCommand}" CommandParameter="3" Margin="0,0,7,7" Width="43" />
+                            <Button Content="E" Command="{Binding DisplaySegmentCommand}" CommandParameter="4" Margin="0,0,7,7" Width="43" />
+                            <Button Content="F" Command="{Binding DisplaySegmentCommand}" CommandParameter="5" Margin="0,0,7,7" Width="43" />
+                            <Button Content="G" Command="{Binding DisplaySegmentCommand}" CommandParameter="6" Margin="0,0,7,7" Width="43" />
+                        </WrapPanel>
+                        <WrapPanel>
+                            <Button Content="Alle Segmente an" Command="{Binding DisplayAllSegmentsCommand}" Margin="0,0,10,8" />
+                            <Button Content="Alle Segmente aus" Command="{Binding DisplayNoSegmentsCommand}" Margin="0,0,10,8" />
+                            <Button Content="Zurück zu Zahlen" Command="{Binding DisplayNumbersCommand}" Margin="0,0,10,8" />
+                        </WrapPanel>
+                        <TextBlock Text="{Binding DisplayMask, StringFormat='Segmentmaske: {0} (0–127)'}"
+                                   Foreground="{StaticResource MutedBrush}" Margin="0,5,0,0" FontSize="12" />
+
                         <Grid>
                             <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="24" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
                             <StackPanel>
