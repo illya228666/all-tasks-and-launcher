@@ -67,7 +67,7 @@ public partial class DiceView : UserControl
 
         var bounce = new DoubleAnimationUsingKeyFrames { Duration = duration };
         bounce.KeyFrames.Add(new EasingDoubleKeyFrame(-0.25, KeyTime.FromTimeSpan(TimeSpan.Zero)));
-        bounce.KeyFrames.Add(new EasingDoubleKeyFrame(1.5, KeyTime.FromTimeSpan(TimeSpan.FromMilliseconds(420)), new QuadraticEase { EasingMode = EasingMode.EaseOut }));
+        bounce.KeyFrames.Add(new EasingDoubleKeyFrame(1.0, KeyTime.FromTimeSpan(TimeSpan.FromMilliseconds(420)), new QuadraticEase { EasingMode = EasingMode.EaseOut }));
         bounce.KeyFrames.Add(new EasingDoubleKeyFrame(-0.25, KeyTime.FromTimeSpan(TimeSpan.FromMilliseconds(1150)), new QuadraticEase { EasingMode = EasingMode.EaseIn }));
         bounce.KeyFrames.Add(new EasingDoubleKeyFrame(0.2, KeyTime.FromTimeSpan(TimeSpan.FromMilliseconds(1400)), new QuadraticEase { EasingMode = EasingMode.EaseOut }));
         bounce.KeyFrames.Add(new EasingDoubleKeyFrame(-0.25, KeyTime.FromTimeSpan(TimeSpan.FromMilliseconds(1650)), new QuadraticEase { EasingMode = EasingMode.EaseIn }));
