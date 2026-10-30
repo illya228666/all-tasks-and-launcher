@@ -16,6 +16,10 @@ internal sealed class ControllerViewModel : INotifyPropertyChanged, IAsyncDispos
     private DeviceLights _lights;
     private byte? _fade;
     private DeviceDiceRoll? _diceRoll;
+    private DeviceDisplay? _display;
+    private int _displayValue = 42, _displayBrightness = 20, _displayInterval = 500;
+    private bool _displayPending, _displaySending;
+    private readonly DispatcherTimer _displayDebounce;
     private int _inputCount;
     private string _lastInput = "Noch kein Tastendruck", _lastInputTime = "Warte auf Eingaben vom Controller";
     private string _commandStatus = "Ausgänge werden nach der Verbindung freigeschaltet.";
@@ -24,11 +28,21 @@ internal sealed class ControllerViewModel : INotifyPropertyChanged, IAsyncDispos
     {
         _dispatcher = dispatcher;
         _createConnection = createConnection ?? (() => new DeviceConnection());
+        _displayDebounce = new DispatcherTimer(DispatcherPriority.Normal, dispatcher)
+        {
+            Interval = TimeSpan.FromMilliseconds(120)
+        };
+        _displayDebounce.Tick += FlushDisplayValue;
         ConnectionCommand = new(_ => ToggleConnectionAsync(), () => !_closing && !_busy);
         IndicatorCommand = new(_ => SetIndicatorAsync(), () => CanUseIndicator);
         LightsCommand = new(ToggleLightAsync, () => CanUseLights);
         AllOffCommand = new(_ => SendLightsAsync(DeviceLights.None), () => CanUseLights);
         AllOnCommand = new(_ => SendLightsAsync(DeviceLights.All), () => CanUseLights);
+        DisplayMinusCommand = new(_ => { DisplayValue = Math.Max(0, DisplayValue - 1); return Task.CompletedTask; }, () => CanUseDisplay);
+        DisplayPlusCommand = new(_ => { DisplayValue = Math.Min(99, DisplayValue + 1); return Task.CompletedTask; }, () => CanUseDisplay);
+        DisplayModeCommand = new(SetDisplayModeAsync, () => CanUseDisplay);
+        DisplayTestCommand = new(_ => ExecuteDisplayAsync(c => c.StartDisplayTestAsync(), "Segmenttest gestartet"), () => CanUseDisplay);
+        DisplaySettingsCommand = new(_ => ApplyDisplaySettingsAsync(), () => CanUseDisplay);
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;
@@ -38,6 +52,11 @@ internal sealed class ControllerViewModel : INotifyPropertyChanged, IAsyncDispos
     public AsyncCommand LightsCommand { get; }
     public AsyncCommand AllOffCommand { get; }
     public AsyncCommand AllOnCommand { get; }
+    public AsyncCommand DisplayMinusCommand { get; }
+    public AsyncCommand DisplayPlusCommand { get; }
+    public AsyncCommand DisplayModeCommand { get; }
+    public AsyncCommand DisplayTestCommand { get; }
+    public AsyncCommand DisplaySettingsCommand { get; }
     public bool IsConnected => _state.IsConnected;
     public bool IsSearching => _connection is not null && !IsConnected && _state.Phase != DeviceConnectionPhase.Faulted;
     public string ConnectionAction => _connection is null ? "Verbinden" : "Trennen";
@@ -64,6 +83,50 @@ internal sealed class ControllerViewModel : INotifyPropertyChanged, IAsyncDispos
     public string Protocol => _state.ProtocolVersion is { } version ? $"Launcher IO v{(int)version}" : "Automatisch";
     public bool IsDiceFirmware => IsConnected && _state.ProtocolVersion == DeviceProtocolVersion.V4;
     public DeviceDiceRoll? DiceRoll => _diceRoll;
+    public bool IsDisplayFirmware => IsConnected && _state.ProtocolVersion == DeviceProtocolVersion.V5;
+    public bool IsLegacyFirmware => !IsDiceFirmware && !IsDisplayFirmware;
+    public bool CanUseDisplay => !_closing && !_busy && IsDisplayFirmware;
+    public int DisplayValue
+    {
+        get => _displayValue;
+        set
+        {
+            int next = Math.Clamp(value, 0, 99);
+            if (next == _displayValue) return;
+            _displayValue = next;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(DisplayValue)));
+            if (CanUseDisplay)
+            {
+                _displayPending = true;
+                _displayDebounce.Stop();
+                _displayDebounce.Start();
+            }
+        }
+    }
+    public int DisplayBrightness
+    {
+        get => _displayBrightness;
+        set
+        {
+            int next = Math.Clamp(value, 1, 100);
+            if (_displayBrightness == next) return;
+            _displayBrightness = next;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(DisplayBrightness)));
+        }
+    }
+    public int DisplayInterval
+    {
+        get => _displayInterval;
+        set
+        {
+            int next = Math.Clamp(value, 100, 2000);
+            if (_displayInterval == next) return;
+            _displayInterval = next;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(DisplayInterval)));
+        }
+    }
+    public string DisplayStateText => _display is null ? "Warte auf das Gerät …"
+        : $"ESP: {_display.Value:D2} · {_display.Mode} · {_display.Brightness}% · {_display.IntervalMs} ms";
     public string ConnectionBadge => IsConnected ? "ONLINE" : IsSearching ? "SUCHE" : "OFFLINE";
     public bool CanUseIndicator => !_closing && !_busy && IsConnected && _state.Capabilities.HasFlag(DeviceCapabilities.Indicator);
     public bool CanUseLights => !_closing && !_busy && IsConnected && _state.Capabilities.HasFlag(DeviceCapabilities.Lights);
@@ -100,6 +163,24 @@ internal sealed class ControllerViewModel : INotifyPropertyChanged, IAsyncDispos
             _diceRoll = dice;
             Log($"Wurf #{dice.Sequence} · ESP-Ergebnis: {dice.Value}");
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(DiceRoll)));
+        });
+        connection.DisplayReceived += display => Post(connection, () =>
+        {
+            bool first = _display is null;
+            _display = display;
+            if (!_displayPending && !_displaySending)
+            {
+                _displayValue = display.Value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(DisplayValue)));
+            }
+            if (first)
+            {
+                _displayBrightness = display.Brightness;
+                _displayInterval = display.IntervalMs;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(DisplayBrightness)));
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(DisplayInterval)));
+            }
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(DisplayStateText)));
         });
         Log("Verbindung gestartet · automatische COM-Port-Erkennung");
         connection.Start();
@@ -144,6 +225,9 @@ internal sealed class ControllerViewModel : INotifyPropertyChanged, IAsyncDispos
             _lights = DeviceLights.None;
             _fade = null;
             _diceRoll = null;
+            _displayDebounce.Stop();
+            _displayPending = false;
+            _display = null;
             _commandStatus = "Ausgänge werden nach der Verbindung freigeschaltet.";
         }
         else if (changed)
@@ -192,6 +276,64 @@ internal sealed class ControllerViewModel : INotifyPropertyChanged, IAsyncDispos
         return SendAsync(connection, () => connection.SetLightsAsync(lights), () => _lights = lights, "LEDs: " + lights);
     }
 
+    private async void FlushDisplayValue(object? sender, EventArgs args)
+    {
+        _displayDebounce.Stop();
+        if (!_displayPending || !CanUseDisplay || _connection is null) return;
+        _displayPending = false;
+        _displaySending = true;
+        DeviceConnection connection = _connection;
+        int value = _displayValue;
+        try
+        {
+            DeviceCommandResult result = await connection.SetDisplayValueAsync(value);
+            if (_closing || !ReferenceEquals(connection, _connection)) return;
+            if (result is not (DeviceCommandResult.Completed or DeviceCommandResult.Superseded))
+            {
+                _commandStatus = "Display SET: " + result;
+                Log(_commandStatus);
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(CommandStatus)));
+            }
+        }
+        finally
+        {
+            _displaySending = false;
+            if (_displayPending && !_closing)
+            {
+                _displayDebounce.Stop();
+                _displayDebounce.Start();
+            }
+        }
+    }
+
+    private Task SetDisplayModeAsync(object? parameter)
+    {
+        if (!Enum.TryParse<DeviceDisplayMode>(parameter?.ToString(), true, out var mode)
+            || mode is not (DeviceDisplayMode.Hold or DeviceDisplayMode.Up or DeviceDisplayMode.Down or DeviceDisplayMode.Bounce))
+            return Task.CompletedTask;
+        return ExecuteDisplayAsync(connection => connection.SetDisplayModeAsync(mode), "Modus: " + mode);
+    }
+
+    private Task ExecuteDisplayAsync(Func<DeviceConnection, Task<DeviceCommandResult>> operation, string description)
+    {
+        if (!CanUseDisplay || _connection is null) return Task.CompletedTask;
+        DeviceConnection connection = _connection;
+        _displayDebounce.Stop();
+        _displayPending = false;
+        return SendAsync(connection, () => operation(connection), () => { }, description);
+    }
+
+    private Task ApplyDisplaySettingsAsync()
+    {
+        int brightness = DisplayBrightness, speed = DisplayInterval;
+        return ExecuteDisplayAsync(async connection =>
+        {
+            var result = await connection.SetDisplayBrightnessAsync(brightness);
+            return result == DeviceCommandResult.Completed
+                ? await connection.SetDisplayIntervalAsync(speed) : result;
+        }, $"Helligkeit {brightness}% · Intervall {speed} ms");
+    }
+
     private async Task SendAsync(DeviceConnection connection, Func<Task<DeviceCommandResult>> send, Action confirmed, string description)
     {
         _busy = true;
@@ -226,6 +368,8 @@ internal sealed class ControllerViewModel : INotifyPropertyChanged, IAsyncDispos
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(null));
         ConnectionCommand.Refresh(); IndicatorCommand.Refresh(); LightsCommand.Refresh(); AllOffCommand.Refresh(); AllOnCommand.Refresh();
+        DisplayMinusCommand.Refresh(); DisplayPlusCommand.Refresh(); DisplayModeCommand.Refresh();
+        DisplayTestCommand.Refresh(); DisplaySettingsCommand.Refresh();
     }
     private void NotifyFade()
     {
@@ -247,6 +391,7 @@ internal sealed class ControllerViewModel : INotifyPropertyChanged, IAsyncDispos
     {
         if (_closing) return;
         _closing = true;
+        _displayDebounce.Stop();
         Notify();
         await StopConnectionAsync();
     }

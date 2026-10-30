@@ -73,3 +73,16 @@ HELLO wählt v1/v2. v1 verbindet Taste/Erdbeben und Indicator. v2-Eingaben sind 
 Der Launcher startet `EspController` als eigenes Programm. IO v4 würfelt selbst alle fünf Sekunden und liefert Wurfnummer und Augenzahl; WPF animiert den Würfel und zeigt das ESP-Ergebnis. v4 enthält keine Funktionen älterer Firmwareversionen.
 
 Подключение LED, формат протокола и загрузка: [Launcher IO v4](../Launcher.Device/Firmware/LauncherIoEsp8266V4/README.md).
+
+## 7-Segment Live Control / IO v5
+
+`EspController` recognizes `LAUNCHER_IO 5` and exposes a virtual two-digit
+display with a live 00–99 slider, +/- buttons, ESP-side counting animations,
+speed/brightness controls and a segment self-test. The Windows view polls the
+firmware for the actual value. Older firmware versions keep their own panels.
+
+The Fritzing picture alone does not prove the digit pinout or common polarity.
+Check the part datasheet, current-limiting resistors and digit drivers; the
+example pins are configurable in
+[`LauncherIoEsp8266V5/BoardConfig.h`](../Launcher.Device/Firmware/LauncherIoEsp8266V5/BoardConfig.h).
+Read [v5 setup](../Launcher.Device/Firmware/LauncherIoEsp8266V5/README.md) before flashing.
