@@ -27,7 +27,7 @@
                 <StackPanel DockPanel.Dock="Bottom">
                     <Border Height="1" Background="{StaticResource BorderBrush}" Margin="0,20" />
                     <TextBlock Text="ESP8266" FontWeight="SemiBold" />
-                    <TextBlock Text="Launcher IO v1 / v2 / v3 / v4" Foreground="{StaticResource MutedBrush}" FontSize="12" Margin="0,6,0,0" />
+                    <TextBlock Text="Launcher IO v1 / v2 / v3 / v4 / v5 / v4" Foreground="{StaticResource MutedBrush}" FontSize="12" Margin="0,6,0,0" />
                     <TextBlock Text="USB · 115 200 Baud" Foreground="{StaticResource MutedBrush}" FontSize="12" Margin="0,4,0,0" />
                     <TextBlock Text="Zahlen Launcher" Style="{StaticResource Caption}" Margin="0,24,0,0" />
                 </StackPanel>
@@ -81,11 +81,75 @@
                         <Button Grid.Column="1" Content="{Binding ConnectionAction}" Command="{Binding ConnectionCommand}" Style="{StaticResource PrimaryButton}" VerticalAlignment="Center" MinWidth="116" AutomationProperties.Name="Verbindung umschalten" />
                     </Grid>
                 </Border>
+                <Border Style="{StaticResource Card}" Margin="0,0,0,20"
+                        Visibility="{Binding IsDisplayFirmware, Converter={StaticResource BooleanVisibility}}">
+                    <StackPanel>
+                        <TextBlock Text="7-SEGMENT · LIVE CONTROL" Style="{StaticResource Caption}" Margin="0,0,0,6" />
+                        <TextBlock Text="Direkte Hardwaresteuerung" FontSize="23" FontWeight="SemiBold" Margin="0,0,0,16" />
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="300" /><ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Margin="0,0,18,0">
+                                <controls:SevenSegmentView Number="{Binding DisplayValue}" Height="172" Width="280"
+                                    HorizontalAlignment="Left" AutomationProperties.Name="Virtuelle zweistellige Siebensegmentanzeige" />
+                                <TextBlock Text="{Binding DisplayStateText}" Foreground="{StaticResource MutedBrush}"
+                                    FontFamily="Consolas" FontSize="12" Margin="2,12,0,0" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" Margin="8,0,0,0">
+                                <TextBlock Text="ZAHL · 00–99" Style="{StaticResource Caption}" Margin="0,0,0,9" />
+                                <Slider Minimum="0" Maximum="99" TickFrequency="1" IsSnapToTickEnabled="True"
+                                    Value="{Binding DisplayValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                    IsEnabled="{Binding CanUseDisplay}" AutomationProperties.Name="Zahl am ESP einstellen" />
+                                <StackPanel Orientation="Horizontal" Margin="0,10,0,16">
+                                    <Button Content="−" Width="52" Command="{Binding DisplayMinusCommand}" />
+                                    <TextBlock Text="{Binding DisplayValue, StringFormat={}{0:D2}}" FontSize="30" FontWeight="Bold"
+                                        Foreground="{StaticResource AccentBrush}" Width="78" TextAlignment="Center" />
+                                    <Button Content="+" Width="52" Command="{Binding DisplayPlusCommand}" />
+                                </StackPanel>
+                                <TextBlock Text="ANIMATIONEN AUF DER PLATINE" Style="{StaticResource Caption}" Margin="0,0,0,10" />
+                                <WrapPanel>
+                                    <Button Content="Stopp" Command="{Binding DisplayModeCommand}" CommandParameter="Hold" Margin="0,0,8,8"/>
+                                    <Button Content="Aufwärts" Command="{Binding DisplayModeCommand}" CommandParameter="Up" Margin="0,0,8,8"/>
+                                    <Button Content="Abwärts" Command="{Binding DisplayModeCommand}" CommandParameter="Down" Margin="0,0,8,8"/>
+                                    <Button Content="Ping-Pong" Command="{Binding DisplayModeCommand}" CommandParameter="Bounce" Margin="0,0,8,8"/>
+                                </WrapPanel>
+                            </StackPanel>
+                        </Grid>
+                        <Border Height="1" Background="{StaticResource BorderBrush}" Margin="0,20,0,18"/>
+                        <Grid>
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="24" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                            <StackPanel>
+                                <TextBlock Text="Helligkeit (%)" Style="{StaticResource Caption}" />
+                                <Slider Minimum="1" Maximum="100" TickFrequency="1" IsSnapToTickEnabled="True"
+                                    Value="{Binding DisplayBrightness, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                    IsEnabled="{Binding CanUseDisplay}" AutomationProperties.Name="Anzeigehelligkeit" Margin="0,8,0,0"/>
+                                <TextBlock Text="{Binding DisplayBrightness, StringFormat={}{0}%}" HorizontalAlignment="Right"
+                                    Foreground="{StaticResource AccentBrush}"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="2">
+                                <TextBlock Text="Schrittintervall (ms)" Style="{StaticResource Caption}" />
+                                <Slider Minimum="100" Maximum="2000" TickFrequency="50" IsSnapToTickEnabled="True"
+                                    Value="{Binding DisplayInterval, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                    IsEnabled="{Binding CanUseDisplay}" AutomationProperties.Name="Animationsgeschwindigkeit" Margin="0,8,0,0"/>
+                                <TextBlock Text="{Binding DisplayInterval, StringFormat={}{0} ms}" HorizontalAlignment="Right"
+                                    Foreground="{StaticResource AccentBrush}"/>
+                            </StackPanel>
+                        </Grid>
+                        <WrapPanel Margin="0,18,0,0">
+                            <Button Content="Einstellungen übernehmen" Command="{Binding DisplaySettingsCommand}"
+                                Style="{StaticResource PrimaryButton}" Margin="0,0,10,0"/>
+                            <Button Content="Alle Segmente testen" Command="{Binding DisplayTestCommand}" />
+                        </WrapPanel>
+                        <TextBlock Text="{Binding CommandStatus}" Foreground="{StaticResource MutedBrush}"
+                            FontSize="12" Margin="0,14,0,0"/>
+                    </StackPanel>
+                </Border>
                 <controls:DiceView Roll="{Binding DiceRoll}" Visibility="{Binding IsDiceFirmware, Converter={StaticResource BooleanVisibility}}" Margin="0,0,0,20" />
                 <StackPanel>
                     <StackPanel.Style>
                         <Style TargetType="StackPanel">
-                            <Style.Triggers><DataTrigger Binding="{Binding IsDiceFirmware}" Value="True"><Setter Property="Visibility" Value="Collapsed" /></DataTrigger></Style.Triggers>
+                            <Style.Triggers><DataTrigger Binding="{Binding IsLegacyFirmware}" Value="False"><Setter Property="Visibility" Value="Collapsed" /></DataTrigger></Style.Triggers>
                         </Style>
                     </StackPanel.Style>
                 <TextBlock Text="AUSGÄNGE" Style="{StaticResource Caption}" Margin="2,0,0,12" />

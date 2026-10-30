@@ -17,6 +17,7 @@ public sealed class DeviceConnection : IAsyncDisposable
     public event Action<DeviceInput>? InputReceived;
     public event Action<byte>? FadeReceived;
     public event Action<DeviceDiceRoll>? DiceReceived;
+    public event Action<DeviceDisplay>? DisplayReceived;
     public DeviceState State { get { lock (_gate) return _state; } }
     public DeviceConnection() : this(new SerialDeviceTransportFactory(), new()) { }
     internal DeviceConnection(IDeviceTransportFactory factory, DeviceConnectionTiming timing)
@@ -39,7 +40,32 @@ public sealed class DeviceConnection : IAsyncDisposable
         if ((lights & ~DeviceLights.All) != 0) throw new ArgumentOutOfRangeException(nameof(lights));
         return Queue(DeviceCapabilities.Lights, false, lights);
     }
-    private Task<DeviceCommandResult> Queue(DeviceCapabilities capability, bool indicator, DeviceLights lights)
+    public Task<DeviceCommandResult> SetDisplayValueAsync(int value)
+    {
+        if (value is < 0 or > 99) throw new ArgumentOutOfRangeException(nameof(value));
+        return QueueDisplay("SET " + value, "OK SET");
+    }
+    public Task<DeviceCommandResult> SetDisplayBrightnessAsync(int value)
+    {
+        if (value is < 1 or > 100) throw new ArgumentOutOfRangeException(nameof(value));
+        return QueueDisplay("BRIGHT " + value, "OK BRIGHT");
+    }
+    public Task<DeviceCommandResult> SetDisplayIntervalAsync(int milliseconds)
+    {
+        if (milliseconds is < 100 or > 2000) throw new ArgumentOutOfRangeException(nameof(milliseconds));
+        return QueueDisplay("SPEED " + milliseconds, "OK SPEED");
+    }
+    public Task<DeviceCommandResult> SetDisplayModeAsync(DeviceDisplayMode mode)
+    {
+        if (mode is not (DeviceDisplayMode.Hold or DeviceDisplayMode.Up or DeviceDisplayMode.Down or DeviceDisplayMode.Bounce))
+            throw new ArgumentOutOfRangeException(nameof(mode));
+        return QueueDisplay("MODE " + mode.ToString().ToUpperInvariant(), "OK MODE");
+    }
+    public Task<DeviceCommandResult> StartDisplayTestAsync() => QueueDisplay("TEST", "OK TEST");
+    private Task<DeviceCommandResult> QueueDisplay(string command, string expected) =>
+        Queue(DeviceCapabilities.Display, false, DeviceLights.None, new DeviceWireCommand(command, expected));
+
+    private Task<DeviceCommandResult> Queue(DeviceCapabilities capability, bool indicator, DeviceLights lights, DeviceWireCommand? wire = null)
     {
         lock (_gate)
         {
@@ -48,7 +74,7 @@ public sealed class DeviceConnection : IAsyncDisposable
             if ((_state.Capabilities & capability) == 0) return Task.FromResult(DeviceCommandResult.Unsupported);
             _pending?.Completion.TrySetResult(DeviceCommandResult.Superseded);
             var completion = new TaskCompletionSource<DeviceCommandResult>(TaskCreationOptions.RunContinuationsAsynchronously);
-            _pending = new(capability, indicator, lights, completion);
+            _pending = new(capability, indicator, lights, completion, wire);
             return completion.Task;
         }
     }
@@ -126,6 +152,7 @@ public sealed class DeviceConnection : IAsyncDisposable
     private async Task ServeAsync(IDeviceTransport transport, IDeviceProtocolVersion protocol, CancellationToken token)
     {
         uint? lastDiceSequence = null;
+        DeviceDisplay? lastDisplay = null;
         while (true)
         {
             token.ThrowIfCancellationRequested();
@@ -135,7 +162,8 @@ public sealed class DeviceConnection : IAsyncDisposable
             {
                 try
                 {
-                    var wire = pending.Capability == DeviceCapabilities.Indicator ? protocol.Indicator(pending.Indicator) : protocol.Lights(pending.Lights);
+                    var wire = pending.Wire ?? (pending.Capability == DeviceCapabilities.Indicator
+                        ? protocol.Indicator(pending.Indicator) : protocol.Lights(pending.Lights));
                     if (wire is null) pending.Completion.TrySetResult(DeviceCommandResult.Unsupported);
                     else
                     {
@@ -163,6 +191,11 @@ public sealed class DeviceConnection : IAsyncDisposable
             {
                 lastDiceSequence = dice.Sequence;
                 DiceReceived?.Invoke(dice);
+            }
+            if (poll.Display is { } display && display != lastDisplay)
+            {
+                lastDisplay = display;
+                DisplayReceived?.Invoke(display);
             }
             await Task.Delay(_timing.PollIntervalMs, token).ConfigureAwait(false);
         }
