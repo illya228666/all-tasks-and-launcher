@@ -67,6 +67,11 @@ public sealed class DeviceConnection : IAsyncDisposable
             throw new ArgumentOutOfRangeException(nameof(mode));
         return QueueDisplay("MODE " + mode.ToString().ToUpperInvariant(), "OK MODE");
     }
+    public Task<DeviceCommandResult> SetDisplaySegmentsAsync(int mask)
+    {
+        if (mask is < 0 or > 127) throw new ArgumentOutOfRangeException(nameof(mask));
+        return QueueDisplay("SEG " + mask, "OK SEG");
+    }
     public Task<DeviceCommandResult> StartDisplayTestAsync() => QueueDisplay("TEST", "OK TEST");
     private Task<DeviceCommandResult> QueueDisplay(string command, string expected) =>
         Queue(DeviceCapabilities.Display, false, DeviceLights.None, new DeviceWireCommand(command, expected));
