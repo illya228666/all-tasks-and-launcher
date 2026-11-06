@@ -1,4 +1,4 @@
-namespace Aquarium_Rechner;
+namespace Aquarium.Core;
 
 public class Aquarium
 {

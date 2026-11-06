@@ -1,0 +1,7 @@
+<Project>
+  <PropertyGroup>
+    <RepositoryTargetFramework>net7.0</RepositoryTargetFramework>
+    <RepositoryTargetFramework Condition="$([MSBuild]::VersionGreaterThanOrEquals('$(MSBuildVersion)', '18.0.0'))">net10.0</RepositoryTargetFramework>
+    <TargetFramework>$(RepositoryTargetFramework)</TargetFramework>
+  </PropertyGroup>
+</Project>

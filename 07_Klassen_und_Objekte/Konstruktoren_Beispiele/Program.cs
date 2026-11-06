@@ -1,5 +1,3 @@
-using System.Globalization;
-using Aquarium_Rechner;
 using Person1_Konstruktoren;
 using Person2_Properties;
 
@@ -17,8 +15,7 @@ class Program
             Console.WriteLine("\nKonstruktoren und Properties");
             Console.WriteLine("1 · CPerson: vier Konstruktoren");
             Console.WriteLine("2 · CPerson2: Properties");
-            Console.WriteLine("3 · Aquarium: Beispiel aus dem Arbeitsblatt");
-            Console.WriteLine("4 · CNatZahl: Fakultät aus dem Infoblatt");
+            Console.WriteLine("3 · CNatZahl: Fakultät aus dem Infoblatt");
             Console.WriteLine("0 · Beenden");
             Console.Write("Auswahl: ");
             string? auswahl = Console.ReadLine();
@@ -26,10 +23,9 @@ class Program
             {
                 if (auswahl == "1") Person1Beispiel();
                 else if (auswahl == "2") Person2Beispiel();
-                else if (auswahl == "3") AquariumBeispiel();
-                else if (auswahl == "4") FakultaetBeispiel();
+                else if (auswahl == "3") FakultaetBeispiel();
                 else if (auswahl == "0" || auswahl == null) weiter = false;
-                else Console.WriteLine("Bitte 0, 1, 2, 3 oder 4 eingeben.");
+                else Console.WriteLine("Bitte 0, 1, 2 oder 3 eingeben.");
             }
             catch (EndOfStreamException)
             {
@@ -81,14 +77,6 @@ class Program
         int alter = LeseZahl("Alter (Beispiel: 23): ", 0, int.MaxValue);
         CPerson2 personD = new CPerson2(name, alter);
         Console.WriteLine("Der Vierte heißt " + personD.Name + " und ist " + personD.Alter + " Jahre alt.");
-    }
-
-    static void AquariumBeispiel()
-    {
-        Aquarium meinAquarium = new Aquarium(80, 35, 35);
-        CultureInfo kultur = CultureInfo.GetCultureInfo("de-DE");
-        Console.WriteLine("Volumen: " + meinAquarium.Volumen.ToString("F2", kultur) + " Liter");
-        Console.WriteLine("Preis: " + meinAquarium.GetPreis(0.4).ToString("F2", kultur) + " Euro");
     }
 
     static void FakultaetBeispiel()
