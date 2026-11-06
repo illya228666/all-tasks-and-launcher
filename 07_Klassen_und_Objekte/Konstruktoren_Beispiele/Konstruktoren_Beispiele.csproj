@@ -7,6 +7,5 @@
   <ItemGroup>
     <Compile Include="..\Person1_Konstruktoren\CPerson.cs" Link="CPerson.cs" />
     <Compile Include="..\Person2_Properties\CPerson2.cs" Link="CPerson2.cs" />
-    <Compile Include="..\Aquarium_Rechner\Aquarium.cs" Link="Aquarium.cs" />
   </ItemGroup>
 </Project>

@@ -1,0 +1,34 @@
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aquarium.Core", "Aquarium.Core\Aquarium.Core.csproj", "{A2B1E8C2-9A7B-4CC2-B935-947BE84E44D9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aquarium.Console", "Aquarium.Console\Aquarium.Console.csproj", "{C3FD6650-6A85-4904-94CF-527055A00F9A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aquarium.Wpf", "Aquarium.Wpf\Aquarium.Wpf.csproj", "{6F475B33-3F21-4FD7-B1AA-FBDEB4367E14}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A2B1E8C2-9A7B-4CC2-B935-947BE84E44D9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A2B1E8C2-9A7B-4CC2-B935-947BE84E44D9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A2B1E8C2-9A7B-4CC2-B935-947BE84E44D9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A2B1E8C2-9A7B-4CC2-B935-947BE84E44D9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C3FD6650-6A85-4904-94CF-527055A00F9A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C3FD6650-6A85-4904-94CF-527055A00F9A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C3FD6650-6A85-4904-94CF-527055A00F9A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C3FD6650-6A85-4904-94CF-527055A00F9A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6F475B33-3F21-4FD7-B1AA-FBDEB4367E14}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6F475B33-3F21-4FD7-B1AA-FBDEB4367E14}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6F475B33-3F21-4FD7-B1AA-FBDEB4367E14}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6F475B33-3F21-4FD7-B1AA-FBDEB4367E14}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

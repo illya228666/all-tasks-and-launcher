@@ -44,7 +44,8 @@
   <ItemGroup>
     <ProjectReference Include="..\07_Klassen_und_Objekte\Person1_Konstruktoren\Person1_Konstruktoren.csproj" />
     <ProjectReference Include="..\07_Klassen_und_Objekte\Person2_Properties\Person2_Properties.csproj" />
-    <ProjectReference Include="..\07_Klassen_und_Objekte\Aquarium_Rechner\Aquarium_Rechner.csproj" />
+    <ProjectReference Include="..\07_Klassen_und_Objekte\Aquarium\Aquarium.Wpf\Aquarium.Wpf.csproj" />
+    <ProjectReference Include="..\07_Klassen_und_Objekte\Aquarium\Aquarium.Console\Aquarium.Console.csproj" />
     <ProjectReference Include="..\07_Klassen_und_Objekte\Konstruktoren_Beispiele\Konstruktoren_Beispiele.csproj" />
   </ItemGroup>
   <ItemGroup>
