@@ -41,8 +41,8 @@ Alle sechs Projekte stehen im Lösungsordner `Launcher`. Bibliotheken liegen neb
 Корневой `Directory.Build.props` выбирает .NET 7 либо .NET 10 по версии MSBuild. Windows-проекты явно добавляют `-windows`. WinForms используется только в `Launcher` и `Launcher.Pet.Windows`. `System.IO.Ports` принадлежит `Launcher.Device`.
 Die zentrale Datei wählt .NET 7 oder .NET 10 anhand der MSBuild-Version. Windows-Projekte ergänzen `-windows`; WinForms und SerialPort bleiben in ihren zuständigen Projekten.
 
-Профиль `Windows-x64` остаётся у Launcher и публикует автономное приложение в корневую папку `publish`.
-Das Profil `Windows-x64` bleibt im Startprojekt und erzeugt die eigenständige Ausgabe im Ordner `publish`.
+Команда публикации в корневом README передаёт параметры автономной сборки лаунчеру и проектам Aquarium. Готовый пакет появляется в папке `publish`.
+Der Publish-Befehl in der [README des Hauptrepositories](../README.md#launcher-veröffentlichen) übergibt die Laufzeitoptionen an den Launcher und die Aquarium-Projekte. Das fertige Paket liegt im Ordner `publish`.
 
 ## Документация / Dokumentation
 

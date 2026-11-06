@@ -1,4 +1,3 @@
 [submodule "07_Klassen_und_Objekte/Aquarium"]
 	path = 07_Klassen_und_Objekte/Aquarium
 	url = https://github.com/illya228666/Aquarium.git
-	branch = main

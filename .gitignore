@@ -1,7 +1,10 @@
 bin/
 obj/
 artifacts/
+/publish/
 .vs/
 .idea/
 *.user
 *.suo
+*.binlog
+*.lnk

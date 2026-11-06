@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk" InitialTargets="CheckAquariumSubmodule">
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>$(RepositoryTargetFramework)-windows</TargetFramework>
@@ -44,9 +44,12 @@
   <ItemGroup>
     <ProjectReference Include="..\07_Klassen_und_Objekte\Person1_Konstruktoren\Person1_Konstruktoren.csproj" />
     <ProjectReference Include="..\07_Klassen_und_Objekte\Person2_Properties\Person2_Properties.csproj" />
+    <ProjectReference Include="..\07_Klassen_und_Objekte\Konstruktoren_Beispiele\Konstruktoren_Beispiele.csproj" />
+  </ItemGroup>
+  <!-- Aquarium (Git-Submodul) -->
+  <ItemGroup>
     <ProjectReference Include="..\07_Klassen_und_Objekte\Aquarium\Aquarium.Wpf\Aquarium.Wpf.csproj" />
     <ProjectReference Include="..\07_Klassen_und_Objekte\Aquarium\Aquarium.Console\Aquarium.Console.csproj" />
-    <ProjectReference Include="..\07_Klassen_und_Objekte\Konstruktoren_Beispiele\Konstruktoren_Beispiele.csproj" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Launcher.Apps\Launcher.Apps.csproj" />
@@ -61,4 +64,8 @@
     </EmbeddedResource>
     <Compile Update="Windows\*.cs"><SubType>Code</SubType></Compile>
   </ItemGroup>
+  <Target Name="CheckAquariumSubmodule" Condition="'$(DesignTimeBuild)' != 'true'">
+    <Error Condition="!Exists('../07_Klassen_und_Objekte/Aquarium/Aquarium.sln')"
+           Text="Aquarium is missing. Run 'git submodule update --init --recursive' from the repository root." />
+  </Target>
 </Project>
