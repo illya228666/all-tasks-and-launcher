@@ -24,13 +24,16 @@ internal static class FirmwareFlasher
     private static string ToolPath()
     {
         string local = Path.Combine(AppContext.BaseDirectory, "arduino-cli.exe");
-        return File.Exists(local) ? local : "arduino-cli";
+        if (File.Exists(local)) return local;
+        string user = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            "Programs", "Arduino CLI", "arduino-cli.exe");
+        return File.Exists(user) ? user : "arduino-cli.exe";
     }
 
-    internal static async Task CompileAsync(int version, string outputFolder, IProgress<string> log)
+    internal static Task CompileAsync(int version, string outputFolder, IProgress<string> log, CancellationToken cancellation)
     {
         string sketch = SketchFolder(version);
-        await ExecuteAsync(sketch, log,
+        return ExecuteAsync(sketch, log, TimeSpan.FromMinutes(5), cancellation,
             "compile", "--fqbn", Board, "--output-dir", outputFolder, sketch);
     }
 
@@ -39,12 +42,16 @@ internal static class FirmwareFlasher
         // The port is taken from an active, recognized ESP, never from a scan.
         if (string.IsNullOrWhiteSpace(port)) throw new ArgumentException("Kein bestätigter COM-Port.", nameof(port));
         string sketch = SketchFolder(version);
-        return ExecuteAsync(sketch, log,
+        return ExecuteAsync(sketch, log, TimeSpan.FromMinutes(2), CancellationToken.None,
             "upload", "--fqbn", Board, "--port", port, "--input-dir", outputFolder, sketch);
     }
 
-    private static async Task ExecuteAsync(string directory, IProgress<string> log, params string[] args)
+    private static async Task ExecuteAsync(string directory, IProgress<string> log,
+        TimeSpan timeout, CancellationToken cancellation, params string[] args)
     {
+        cancellation.ThrowIfCancellationRequested();
+        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellation);
+        deadline.CancelAfter(timeout);
         var info = new ProcessStartInfo(ToolPath())
         {
             UseShellExecute = false,
@@ -80,14 +87,39 @@ internal static class FirmwareFlasher
             {
                 if (!process.Start()) throw new IOException("Arduino CLI konnte nicht gestartet werden.");
             }
+            catch (Win32Exception e) when (e.NativeErrorCode is 2 or 3)
+            {
+                throw new IOException("arduino-cli.exe fehlt. Neben EspController.exe, unter %LOCALAPPDATA%\\Programs\\Arduino CLI oder im PATH ablegen.", e);
+            }
             catch (Win32Exception e)
             {
-                throw new IOException("arduino-cli.exe nicht gefunden. Arduino CLI installieren oder neben EspController.exe ablegen.", e);
+                throw new IOException($"Arduino CLI konnte nicht gestartet werden ({info.FileName}): {e.Message}", e);
             }
             process.BeginOutputReadLine();
             process.BeginErrorReadLine();
-            await process.WaitForExitAsync();
-            process.WaitForExit(); // let asynchronous stdout/stderr handlers finish
+            try
+            {
+                await process.WaitForExitAsync(deadline.Token).ConfigureAwait(false);
+            }
+            catch (OperationCanceledException) when (deadline.IsCancellationRequested)
+            {
+                string message = args[0] == "upload"
+                    ? "Zeitlimit beim Flashen überschritten. Firmwarezustand unbekannt."
+                    : cancellation.IsCancellationRequested ? "Kompilierung abgebrochen." : "Zeitlimit beim Kompilieren überschritten.";
+                try
+                {
+                    try { process.Kill(entireProcessTree: true); }
+                    catch (InvalidOperationException) when (process.HasExited) { }
+                    using var stopDeadline = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+                    await process.WaitForExitAsync(stopDeadline.Token).ConfigureAwait(false);
+                }
+                catch (Exception error) when (error is Win32Exception or AggregateException or InvalidOperationException or OperationCanceledException)
+                {
+                    throw new IOException(message + " Das Ende von Arduino CLI konnte nicht bestätigt werden.", error);
+                }
+                cancellation.ThrowIfCancellationRequested();
+                throw new IOException(message);
+            }
             if (process.ExitCode != 0)
                 throw new IOException("Arduino CLI " + args[0] + " fehlgeschlagen (Exit " + process.ExitCode + "). " + errorTail);
         }

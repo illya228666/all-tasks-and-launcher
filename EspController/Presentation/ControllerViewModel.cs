@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
+using System.Windows;
 using EspController.Firmware;
 using System.Windows.Threading;
 using Launcher.Device.Connection;
@@ -11,9 +12,7 @@ namespace EspController.Presentation;
 internal sealed class ControllerViewModel : INotifyPropertyChanged, IAsyncDisposable
 {
     private readonly Dispatcher _dispatcher;
-    private readonly Func<DeviceConnection> _createConnection;
-    private readonly bool _defaultConnectionFactory;
-    private string? _nextConnectionPort;
+    private readonly Func<string?, DeviceConnection> _createConnection;
     private bool _firmwareAttempted;
     private DeviceConnection? _connection;
     private DeviceState _state = new(DeviceConnectionPhase.Waiting);
@@ -27,17 +26,17 @@ internal sealed class ControllerViewModel : INotifyPropertyChanged, IAsyncDispos
     private readonly DispatcherTimer _displayDebounce;
     private bool _flashing;
     private Task? _flashTask;
-    private int _selectedFirmwareVersion = 5;
+    private readonly CancellationTokenSource _closeCancellation = new();
+    private int? _selectedFirmwareVersion;
     private string _firmwareStatus = "Nur mit einem verbundenen ESP verfügbar.";
     private int _inputCount;
     private string _lastInput = "Noch kein Tastendruck", _lastInputTime = "Warte auf Eingaben vom Controller";
     private string _commandStatus = "Ausgänge werden nach der Verbindung freigeschaltet.";
 
-    internal ControllerViewModel(Dispatcher dispatcher, Func<DeviceConnection>? createConnection = null)
+    internal ControllerViewModel(Dispatcher dispatcher, Func<string?, DeviceConnection>? createConnection = null)
     {
         _dispatcher = dispatcher;
-        _defaultConnectionFactory = createConnection is null;
-        _createConnection = createConnection ?? (() => new DeviceConnection());
+        _createConnection = createConnection ?? (port => port is null ? new DeviceConnection() : new DeviceConnection(port));
         _displayDebounce = new DispatcherTimer(DispatcherPriority.Normal, dispatcher)
         {
             Interval = TimeSpan.FromMilliseconds(120)
@@ -70,19 +69,21 @@ internal sealed class ControllerViewModel : INotifyPropertyChanged, IAsyncDispos
     public AsyncCommand DisplaySettingsCommand { get; }
     public AsyncCommand FlashFirmwareCommand { get; }
     public IReadOnlyList<int> FirmwareVersions { get; } = new[] { 1, 2, 3, 4, 5 };
-    public int SelectedFirmwareVersion
+    public int? SelectedFirmwareVersion
     {
         get => _selectedFirmwareVersion;
         set
         {
-            if (!FirmwareVersions.Contains(value) || _selectedFirmwareVersion == value) return;
+            if (_selectedFirmwareVersion == value || (value is int version && !FirmwareVersions.Contains(version))) return;
             _selectedFirmwareVersion = value;
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SelectedFirmwareVersion)));
+            FlashFirmwareCommand.Refresh();
         }
     }
     public bool IsFlashing => _flashing;
     public bool ShowFirmwarePanel => IsConnected || _flashing || _firmwareAttempted;
-    public bool CanFlashFirmware => !_closing && !_busy && !_flashing && IsConnected && !string.IsNullOrWhiteSpace(_state.PortName);
+    public bool CanSelectFirmware => !_closing && !_busy && !_flashing && IsConnected && !string.IsNullOrWhiteSpace(_state.PortName);
+    private bool CanFlashFirmware => CanSelectFirmware && SelectedFirmwareVersion.HasValue;
     public string FirmwareStatus => _firmwareStatus;
     public bool IsConnected => _state.IsConnected;
     public bool IsSearching => _connection is not null && !IsConnected && _state.Phase != DeviceConnectionPhase.Faulted;
@@ -177,12 +178,10 @@ internal sealed class ControllerViewModel : INotifyPropertyChanged, IAsyncDispos
     public string InputCount => _inputCount.ToString("D2");
     public string InputHint => IsConnected && _state.ProtocolVersion == DeviceProtocolVersion.V3 ? "IO v3 meldet ausschließlich den Potentiometerwert." : "BUTTON · LEFT · RIGHT · BOTH";
 
-    internal Task StartAsync()
+    internal Task StartAsync(string? port = null)
     {
         if (_connection is not null || _closing) return Task.CompletedTask;
-        var connection = _nextConnectionPort is { } port && _defaultConnectionFactory
-            ? new DeviceConnection(port) : _createConnection();
-        _nextConnectionPort = null;
+        var connection = _createConnection(port);
         _connection = connection;
         connection.StateChanged += state => Post(connection, () => DisplayState(state));
         connection.InputReceived += input => Post(connection, () => DisplayInput(input));
@@ -211,7 +210,7 @@ internal sealed class ControllerViewModel : INotifyPropertyChanged, IAsyncDispos
             }
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(DisplayStateText)));
         });
-        Log("Verbindung gestartet · automatische COM-Port-Erkennung");
+        Log(port is null ? "Verbindung gestartet · automatische COM-Port-Erkennung" : $"Wiederverbindung zu {port} gestartet.");
         connection.Start();
         Notify();
         return Task.CompletedTask;
@@ -250,6 +249,7 @@ internal sealed class ControllerViewModel : INotifyPropertyChanged, IAsyncDispos
         _state = state;
         if (!state.IsConnected)
         {
+            SelectedFirmwareVersion = null;
             _indicator = false;
             _lights = DeviceLights.None;
             _fade = null;
@@ -307,15 +307,22 @@ internal sealed class ControllerViewModel : INotifyPropertyChanged, IAsyncDispos
 
     private Task FlashFirmwareAsync()
     {
-        if (!CanFlashFirmware || _state.PortName is not { } port) return Task.CompletedTask;
-        // The port has been confirmed via HELLO. No new port discovery is
-        // performed during compilation or upload.
-        Task task = FlashFirmwareCoreAsync(port, SelectedFirmwareVersion);
+        DeviceState session = _state;
+        if (!CanFlashFirmware || _connection is not { } connection || !ReferenceEquals(connection.State, session)
+            || session.PortName is not { } port || session.ProtocolVersion is not { } current
+            || SelectedFirmwareVersion is not int version) return Task.CompletedTask;
+        if ((int)current != version && MessageBox.Show(Application.Current.MainWindow,
+            $"Launcher IO v{(int)current} → v{version} auf {port}.\nPasst die Verdrahtung zur Zielversion?",
+            "Firmware wechseln", MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.No) != MessageBoxResult.Yes)
+            return Task.CompletedTask;
+        if (_closing || !ReferenceEquals(connection, _connection) || !ReferenceEquals(connection.State, session))
+            return Task.CompletedTask;
+        Task task = FlashFirmwareCoreAsync(connection, session, port, version);
         _flashTask = task;
         return task;
     }
 
-    private async Task FlashFirmwareCoreAsync(string port, int version)
+    private async Task FlashFirmwareCoreAsync(DeviceConnection connection, DeviceState session, string port, int version)
     {
         _busy = _flashing = true;
         _firmwareAttempted = true;
@@ -335,19 +342,20 @@ internal sealed class ControllerViewModel : INotifyPropertyChanged, IAsyncDispos
         {
             Directory.CreateDirectory(output);
             Log($"Firmware IO v{version} · Build gestartet · Ziel {port}");
-            await FirmwareFlasher.CompileAsync(version, output, progress);
-            if (_closing) return; // never start a new upload while the window is closing
+            await FirmwareFlasher.CompileAsync(version, output, progress, _closeCancellation.Token);
+            if (_closing) return;
             _firmwareStatus = $"Build fertig · {port} wird zum Flashen freigegeben …";
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(FirmwareStatus)));
 
-            // Compile while connected; close only the confirmed port just before
-            // uploading. Await StopAsync so SerialPort.Dispose has completed.
-            released = true;
+            released = await connection.TryReleaseAsync(session);
+            if (!released) throw new IOException($"Die bestätigte Verbindung zu {port} wurde unterbrochen.");
             await StopConnectionAsync();
+            if (_closing) return;
             await FirmwareFlasher.UploadAsync(version, port, output, progress);
             _firmwareStatus = $"IO v{version} erfolgreich auf {port} übertragen.";
             Log(_firmwareStatus);
         }
+        catch (OperationCanceledException) when (_closing) { }
         catch (Exception error) when (error is IOException or UnauthorizedAccessException or InvalidOperationException or ArgumentException)
         {
             _firmwareStatus = "Firmware fehlgeschlagen: " + error.Message;
@@ -362,9 +370,7 @@ internal sealed class ControllerViewModel : INotifyPropertyChanged, IAsyncDispos
             {
                 try
                 {
-                    _nextConnectionPort = port;
-                    await StartAsync();
-                    Log($"Wiederverbindung zu {port} gestartet.");
+                    await StartAsync(port);
                 }
                 catch (Exception e) when (e is IOException or InvalidOperationException)
                 {
@@ -491,9 +497,11 @@ internal sealed class ControllerViewModel : INotifyPropertyChanged, IAsyncDispos
     {
         if (_closing) return;
         _closing = true;
+        _closeCancellation.Cancel();
         _displayDebounce.Stop();
         Notify();
         if (_flashTask is not null) await _flashTask;
         await StopConnectionAsync();
+        _closeCancellation.Dispose();
     }
 }

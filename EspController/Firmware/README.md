@@ -6,8 +6,11 @@ compilation. Neither compiling nor uploading probes other serial ports.
 
 ## One-time Windows setup
 
-Install Arduino CLI and the `esp8266:esp8266` core. Put `arduino-cli.exe`
-beside `EspController.exe` or add it to PATH. If the core is not installed:
+Install Arduino CLI and the `esp8266:esp8266` core. ESP Controller looks for
+`arduino-cli.exe` beside `EspController.exe`, then in
+`%LOCALAPPDATA%\Programs\Arduino CLI`, then on PATH. The per-user folder also
+works when ESP Controller is started from the Launcher output directory.
+If the core is not installed:
 
 ```powershell
 arduino-cli core update-index --additional-urls https://arduino.esp8266.com/stable/package_esp8266com_index.json
@@ -21,18 +24,22 @@ publishing EspController; keep that directory beside the executable.
 
 1. Connect in ESP Controller, wait for the green connected state and a COM
    port confirmed by a valid Launcher IO v1–v5 HELLO response.
-2. Select desired target firmware and click **Kompilieren & Flashen**.
+2. Select the target firmware and click **Kompilieren & Flashen**. When changing
+   versions, confirm that the wiring matches the target.
 3. The controller compiles while the original firmware keeps running; a build
    failure does not close the serial connection.
-4. On successful compilation it closes the current connection, waits until
-   the COM port is released, then uploads the binary **only to the captured
-   COM port**.
+4. After compilation, the original HELLO session must answer one more poll.
+   If it was lost, even if the same COM port has reconnected, the upload is
+   cancelled. Otherwise the app releases the port and uploads **only to the
+   captured COM port**. A physical swap between releasing the port and Arduino
+   CLI opening it can go undetected if Windows assigns the same COM name.
 5. After the upload (successful or failed), it reconnects exclusively to
    that same COM port and automatically identifies the new firmware. To switch
    to another device, manually disconnect and connect again.
-6. The log shows command output, errors and the flash result. A closing window
-   skips uploading if it is still compiling, but waits for an ongoing upload
-   to finish.
+6. Closing the window cancels compilation or skips an upload that has yet to
+   start. An upload already in progress can finish. Compilation has a five
+   minute limit and upload has a two minute limit. After an upload timeout the
+   firmware state is unknown.
 
 The controller intentionally uses the standard Arduino CLI bootloader tool
 instead of implementing its own protocol or scanning disconnected ports.
@@ -51,7 +58,6 @@ upload may need manual recovery via Arduino IDE/CLI.
 dotnet build EspController/EspController.csproj -c Release
 ```
 
-Test a valid compile, an intentional compile failure, correct target port,
-successful upload, reconnection, and a disconnected board. Native Windows
-build and on-board flashing have **not** been exercised in the authoring
-environment.
+Test a successful upload and reconnection on the same COM port, a compilation
+failure, and a lost connection during compilation. Also check that closing
+the window before upload cancels the operation.

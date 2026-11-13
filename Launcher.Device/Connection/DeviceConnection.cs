@@ -13,6 +13,7 @@ public sealed class DeviceConnection : IAsyncDisposable
     private Task _loop = Task.CompletedTask;
     private DeviceState _state = new(DeviceConnectionPhase.Waiting);
     private PendingDeviceOutput? _pending;
+    private TaskCompletionSource<bool>? _release;
     private bool _started, _stopped, _disposed;
     public event Action<DeviceState>? StateChanged;
     public event Action<DeviceInput>? InputReceived;
@@ -91,6 +92,8 @@ public sealed class DeviceConnection : IAsyncDisposable
             _state = state;
             if (!state.IsConnected)
             {
+                _release?.TrySetResult(false);
+                _release = null;
                 _pending?.Completion.TrySetResult(_stopped ? DeviceCommandResult.Cancelled : DeviceCommandResult.Disconnected);
                 _pending = null;
             }
@@ -101,6 +104,7 @@ public sealed class DeviceConnection : IAsyncDisposable
     {
         var token = _lifetime.Token;
         bool faulted = false;
+        bool released = false;
         try
         {
             while (true)
@@ -122,18 +126,22 @@ public sealed class DeviceConnection : IAsyncDisposable
                     Publish(new(DeviceConnectionPhase.Connecting, name));
                     try
                     {
-                        using var transport = _factory.Open(name);
-                        await Task.Delay(_timing.StartupDelayMs, token).ConfigureAwait(false);
-                        string identity;
-                        try { identity = transport.Exchange(DeviceProtocol.Hello, token); }
-                        catch (TimeoutException)
+                        using (var transport = _factory.Open(name))
                         {
-                            await Task.Delay(_timing.HelloRetryMs, token).ConfigureAwait(false);
-                            identity = transport.Exchange(DeviceProtocol.Hello, token);
+                            await Task.Delay(_timing.StartupDelayMs, token).ConfigureAwait(false);
+                            string identity;
+                            try { identity = transport.Exchange(DeviceProtocol.Hello, token); }
+                            catch (TimeoutException)
+                            {
+                                await Task.Delay(_timing.HelloRetryMs, token).ConfigureAwait(false);
+                                identity = transport.Exchange(DeviceProtocol.Hello, token);
+                            }
+                            var protocol = DeviceProtocol.FromIdentity(identity);
+                            Publish(new(DeviceConnectionPhase.Connected, name, protocol.Version, protocol.Capabilities));
+                            await ServeAsync(transport, protocol, token).ConfigureAwait(false);
                         }
-                        var protocol = DeviceProtocol.FromIdentity(identity);
-                        Publish(new(DeviceConnectionPhase.Connected, name, protocol.Version, protocol.Capabilities));
-                        await ServeAsync(transport, protocol, token).ConfigureAwait(false);
+                        released = true;
+                        return;
                     }
                     catch (Exception error) when (IsExpected(error))
                     {
@@ -151,7 +159,12 @@ public sealed class DeviceConnection : IAsyncDisposable
         }
         finally
         {
-            lock (_gate) _stopped = true;
+            lock (_gate)
+            {
+                _release?.TrySetResult(released && !_stopped);
+                _release = null;
+                _stopped = true;
+            }
             if (!faulted) Publish(new(DeviceConnectionPhase.Stopped));
         }
     }
@@ -163,7 +176,13 @@ public sealed class DeviceConnection : IAsyncDisposable
         {
             token.ThrowIfCancellationRequested();
             PendingDeviceOutput? pending;
-            lock (_gate) { pending = _pending; _pending = null; }
+            bool releaseRequested;
+            lock (_gate)
+            {
+                pending = _pending;
+                _pending = null;
+                releaseRequested = _release is not null;
+            }
             if (pending is not null)
             {
                 try
@@ -191,6 +210,7 @@ public sealed class DeviceConnection : IAsyncDisposable
             }
             string inputReply = transport.Exchange(protocol.PollCommand, token);
             DevicePoll poll = protocol.ReadPoll(inputReply);
+            if (releaseRequested) return;
             if (poll.Input is DeviceInput input) InputReceived?.Invoke(input);
             if (poll.Fade is byte fade) FadeReceived?.Invoke(fade);
             if (poll.Dice is { } dice && dice.Sequence != lastDiceSequence)
@@ -214,6 +234,23 @@ public sealed class DeviceConnection : IAsyncDisposable
         TimeoutException => DeviceFailure.Timeout,
         _ => DeviceFailure.Transport
     };
+    // Only the worker can confirm the original session and release its transport.
+    public async Task<bool> TryReleaseAsync(DeviceState expected)
+    {
+        TaskCompletionSource<bool> release;
+        Task loop;
+        lock (_gate)
+        {
+            if (_stopped || _release is not null || !_state.IsConnected || !ReferenceEquals(_state, expected))
+                return false;
+            release = _release = new(TaskCreationOptions.RunContinuationsAsynchronously);
+            loop = _loop;
+        }
+        if (!await release.Task.ConfigureAwait(false)) return false;
+        await loop.ConfigureAwait(false);
+        return true;
+    }
+
     public async Task StopAsync()
     {
         Task loop;

@@ -93,10 +93,11 @@
                             <TextBlock Text="Zielversion" VerticalAlignment="Center" Margin="0,0,12,0"/>
                             <ComboBox ItemsSource="{Binding FirmwareVersions}"
                                       SelectedItem="{Binding SelectedFirmwareVersion, Mode=TwoWay}"
-                                      IsEnabled="{Binding CanFlashFirmware}" Width="126" Margin="0,0,12,0"
+                                      IsEnabled="{Binding CanSelectFirmware}" Width="126" Margin="0,0,12,0"
+                                      Foreground="{DynamicResource {x:Static SystemColors.ControlTextBrushKey}}"
                                       AutomationProperties.Name="Firmware-Version auswählen">
                                 <ComboBox.ItemTemplate>
-                                    <DataTemplate><TextBlock Text="{Binding StringFormat='Launcher IO v{0}'}"/></DataTemplate>
+                                    <DataTemplate><TextBlock Style="{x:Null}" Text="{Binding StringFormat='Launcher IO v{0}'}"/></DataTemplate>
                                 </ComboBox.ItemTemplate>
                             </ComboBox>
                             <Button Content="Kompilieren &amp; Flashen" Command="{Binding FlashFirmwareCommand}"
