@@ -26,4 +26,4 @@ See [v2 configuration and semantics](LauncherIoEsp8266V2/README.md) and
 It rolls every 5000 ms and lights a dice pattern on D1, D2, D3, D5, D6, D7, D8.
 ESP Controller animates each new sequence for 2100 ms and lands on the ESP result.
 
-[v5 two-digit display and hardware setup](LauncherIoEsp8266V5/README.md) supports 00–99 live control, ESP-side animations and segment self-test.
+[v5 two-digit display and hardware setup](LauncherIoEsp8266V5/README.md) supports right-digit 0–9, manual A–G segment toggles, autonomous animations and segment self-test.
