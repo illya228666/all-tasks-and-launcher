@@ -1,0 +1,176 @@
+<Window x:Class="CRaumschiff.WPF.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Raumschiff" Width="1100" Height="760" MinWidth="850" MinHeight="600"
+        WindowStartupLocation="CenterScreen" Background="#080F1D" Foreground="#E5EFFA"
+        FontFamily="Segoe UI" FontSize="14" UseLayoutRounding="True">
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
+        <Style TargetType="Button">
+            <Setter Property="Background" Value="#183B58" />
+            <Setter Property="Foreground" Value="#ECF6FF" />
+            <Setter Property="BorderBrush" Value="#315B7A" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Padding" Value="12,7" />
+            <Setter Property="MinHeight" Value="36" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="ButtonBorder" CornerRadius="7"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"
+                                              RecognizesAccessKey="True" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ButtonBorder" Property="Background" Value="#245171" />
+                                <Setter TargetName="ButtonBorder" Property="BorderBrush" Value="#77C8E8" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="ButtonBorder" Property="Background" Value="#102B42" />
+                            </Trigger>
+                            <Trigger Property="IsKeyboardFocused" Value="True">
+                                <Setter TargetName="ButtonBorder" Property="BorderBrush" Value="#E1F7FF" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="ButtonBorder" Property="Opacity" Value="0.45" />
+                                <Setter Property="Cursor" Value="Arrow" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style TargetType="TextBox">
+            <Setter Property="Background" Value="#091726" />
+            <Setter Property="Foreground" Value="#ECF6FF" />
+            <Setter Property="BorderBrush" Value="#31506B" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Padding" Value="8,5" />
+            <Setter Property="CaretBrush" Value="#9DE4FF" />
+            <Setter Property="SelectionBrush" Value="#346A92" />
+            <Style.Triggers>
+                <Trigger Property="IsKeyboardFocusWithin" Value="True">
+                    <Setter Property="BorderBrush" Value="#9DE4FF" />
+                </Trigger>
+                <Trigger Property="IsEnabled" Value="False">
+                    <Setter Property="Opacity" Value="0.45" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <Border Margin="0,0,0,6" CornerRadius="12" BorderBrush="#263E57" BorderThickness="1">
+            <Border.Background>
+                <ImageBrush ImageSource="Assets/starfield.png" Stretch="UniformToFill" />
+            </Border.Background>
+            <Grid Margin="16">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <DockPanel LastChildFill="True">
+                    <TextBlock DockPanel.Dock="Right" Text="X: 0–800   ·   Y: 0–600"
+                               Foreground="#A9C0D5" FontSize="12" VerticalAlignment="Center" />
+                    <TextBlock Text="Raumschiffe" FontSize="20" FontWeight="SemiBold" />
+                </DockPanel>
+                <Canvas x:Name="SpaceCanvas" Grid.Row="1" Margin="0,12,0,0"
+                        ClipToBounds="True" Background="Transparent" SizeChanged="SpaceCanvas_SizeChanged">
+                    <Image x:Name="PlayerImage" Width="64" Height="64"
+                           Visibility="{Binding HasPlayer, Converter={StaticResource BoolToVisibility}}"
+                           Stretch="Uniform" ToolTip="{Binding PlayerToolTip}"
+                           AutomationProperties.Name="Eigenes Raumschiff">
+                        <Image.Source>
+                            <BitmapImage UriSource="Assets/player-ship.png" DecodePixelWidth="128" />
+                        </Image.Source>
+                    </Image>
+                    <Image x:Name="EnemyImage" Width="64" Height="64"
+                           Visibility="{Binding HasEnemy, Converter={StaticResource BoolToVisibility}}"
+                           Stretch="Uniform" ToolTip="{Binding EnemyToolTip}"
+                           AutomationProperties.Name="Gegnerisches Raumschiff">
+                        <Image.Source>
+                            <BitmapImage UriSource="Assets/enemy-ship.png" DecodePixelWidth="128" />
+                        </Image.Source>
+                    </Image>
+                </Canvas>
+            </Grid>
+        </Border>
+        <Grid Grid.Row="1" Margin="0,6,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Border Margin="0,0,6,0" Padding="16" CornerRadius="12"
+                    Background="#101E30" BorderBrush="#263E57" BorderThickness="1">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <TextBlock Text="Ereignisprotokoll" FontSize="18" FontWeight="SemiBold" Margin="0,0,0,12" />
+                    <TextBox x:Name="LogBox" Grid.Row="1" IsReadOnly="True" AcceptsReturn="True"
+                             Text="{Binding LogText, Mode=OneWay}" TextChanged="LogBox_TextChanged"
+                             TextWrapping="Wrap" VerticalScrollBarVisibility="Auto"
+                             Background="Transparent" BorderThickness="0" Padding="0"
+                             FontFamily="Consolas" FontSize="12" Foreground="#B8CDE0"
+                             AutomationProperties.Name="Ereignisprotokoll" />
+                </Grid>
+            </Border>
+            <Border Grid.Column="1" Margin="6,0,0,0" Padding="16" CornerRadius="12"
+                    Background="#101E30" BorderBrush="#263E57" BorderThickness="1">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                    <StackPanel>
+                        <TextBlock Text="Steuerung" FontSize="18" FontWeight="SemiBold" />
+                        <Button x:Name="CreatePlayerButton" Content="Eigenes Raumschiff erstellen"
+                                Margin="0,8,0,10" Command="{Binding CreatePlayerCommand}" />
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="12" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel>
+                                <Label Content="_X-Position des Gegners" Target="{Binding ElementName=EnemyXBox}"
+                                       Foreground="#A9C0D5" FontSize="12" Padding="0,0,0,3" />
+                                <TextBox x:Name="EnemyXBox"
+                                         Text="{Binding EnemyXText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                         IsEnabled="{Binding CanEditEnemy}"
+                                         AutomationProperties.Name="X-Position des Gegners" />
+                                <TextBlock x:Name="XError" Text="{Binding XError, Mode=OneWay}"
+                                           MinHeight="16" Foreground="#FFB4AA"
+                                           FontSize="11" TextWrapping="Wrap" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="2">
+                                <Label Content="_Y-Position des Gegners" Target="{Binding ElementName=EnemyYBox}"
+                                       Foreground="#A9C0D5" FontSize="12" Padding="0,0,0,3" />
+                                <TextBox x:Name="EnemyYBox"
+                                         Text="{Binding EnemyYText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                         IsEnabled="{Binding CanEditEnemy}"
+                                         AutomationProperties.Name="Y-Position des Gegners" />
+                                <TextBlock x:Name="YError" Text="{Binding YError, Mode=OneWay}"
+                                           MinHeight="16" Foreground="#FFB4AA"
+                                           FontSize="11" TextWrapping="Wrap" />
+                            </StackPanel>
+                        </Grid>
+                        <Button x:Name="CreateEnemyButton" Content="Gegnerisches Raumschiff erstellen"
+                                Margin="0,6,0,0" Command="{Binding CreateEnemyCommand}" />
+                        <Button x:Name="DeleteButton" Content="Beide Raumschiffe löschen"
+                                Margin="0,8,0,0" Background="#263044" BorderBrush="#4D5670"
+                                Command="{Binding DeleteCommand}" />
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
+        </Grid>
+    </Grid>
+</Window>
