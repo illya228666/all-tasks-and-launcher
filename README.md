@@ -1,6 +1,6 @@
 # all-tasks-and-launcher
 
-C#-Übungsprojekte mit einem Windows-Launcher für Konsolen- und WPF-Anwendungen. Die gemeinsame Lösung ist `zahlen.sln`. Aquarium hat ein eigenes Repository und ist unter `07_Klassen_und_Objekte/Aquarium` als Git-Submodul eingebunden.
+C#-Übungsprojekte mit einem Windows-Launcher für Konsolen- und WPF-Anwendungen. Die gemeinsame Lösung ist `zahlen.sln`. Aquarium hat ein eigenes Repository und ist unter `07_Klassen_und_Objekte/leicht/Aquarium` als Git-Submodul eingebunden.
 
 ## Klonen und starten
 
@@ -19,7 +19,7 @@ In einem vorhandenen Checkout nach einem Pull das Submodul auf die festgelegte R
 git submodule update --init --recursive
 ```
 
-Falls Git bei einem Checkout von vor der Umstellung meldet, dass das Aquarium-Verzeichnis bereits Dateien enthält, prüfe den Inhalt. Wenn dort nur alte Build-Artefakte liegen, verschiebe das gesamte Verzeichnis `07_Klassen_und_Objekte/Aquarium` aus dem Checkout und führe den Submodulbefehl erneut aus.
+Falls Git bei einem Checkout von vor der Umstellung meldet, dass das Aquarium-Verzeichnis bereits Dateien enthält, prüfe den Inhalt. Wenn dort nur alte Build-Artefakte liegen, verschiebe das gesamte Verzeichnis `07_Klassen_und_Objekte/leicht/Aquarium` aus dem Checkout und führe den Submodulbefehl erneut aus.
 
 ## Aquarium separat verwenden
 
@@ -29,7 +29,7 @@ cd Aquarium
 dotnet build Aquarium.sln
 ```
 
-Im Hauptrepository erscheinen die Konsolen- und WPF-Version von Aquarium im Launcher. In `zahlen.sln` stehen ihre Projekte mit der gemeinsamen Bibliothek im Lösungsordner `07_Klassen_und_Objekte/Aquarium`.
+Im Hauptrepository erscheinen die Konsolen- und WPF-Version von Aquarium im Launcher. In `zahlen.sln` stehen ihre Projekte mit der gemeinsamen Bibliothek im Lösungsordner `07_Klassen_und_Objekte/leicht/Aquarium`.
 
 ## Launcher veröffentlichen
 
