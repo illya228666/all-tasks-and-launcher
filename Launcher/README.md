@@ -81,11 +81,9 @@ display with a live 0–9 slider (right digit only), individual A–G segment to
 speed/brightness controls and a segment self-test. The Windows view polls the
 firmware for the actual value. Older firmware versions keep their own panels.
 
-The Fritzing picture alone does not prove the digit pinout or common polarity.
-Check the part datasheet, current-limiting resistors and digit drivers; the
-example pins are configurable in
-[`LauncherIoEsp8266V5/BoardConfig.h`](../Launcher.Device/Firmware/LauncherIoEsp8266V5/BoardConfig.h).
-Read [v5 setup](../Launcher.Device/Firmware/LauncherIoEsp8266V5/README.md) before flashing.
+The v5 firmware drives two common-cathode digits with shared A–G on D1–D7 and
+the left and right cathodes on D0 and D8. It displays 00–99 and tests both digits.
+See the [v5 wiring and serial commands](../Launcher.Device/Firmware/LauncherIoEsp8266V5/README.md).
 
 ## D0–D8 / IO v6
 

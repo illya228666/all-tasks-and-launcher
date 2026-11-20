@@ -51,8 +51,8 @@ instead of implementing its own protocol or scanning disconnected ports.
 
 **Before flashing:** verify that the destination firmware's board pinout,
 GPIO boot-mode constraints, LED current and active polarity match the physical
-breadboard. Firmware versions have different wiring. The provided v5
-`BoardConfig.h` has example pins that are not verified from the screenshot.
+breadboard. Firmware versions have different wiring. See the
+[v5 common-cathode wiring](../../Launcher.Device/Firmware/LauncherIoEsp8266V5/README.md).
 See [v6 output levels and startup wiring](../../Launcher.Device/Firmware/LauncherIoEsp8266V6/README.md).
 
 The firmware tool does not attempt to recover non-responsive boards; a failed

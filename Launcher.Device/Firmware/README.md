@@ -6,7 +6,7 @@
 | v2 | LAUNCHER_IO 2 | INPUT NONE / LEFT_PRESSED / RIGHT_PRESSED / BOTH_PRESSED | LEDS 0..7 |
 | v3 | LAUNCHER_IO 3 | FADE 0..255 | none |
 | v4 | LAUNCHER_IO 4 | DICE sequence value (1..6) | none |
-| v5 | LAUNCHER_IO 5 | DISPLAY value brightness mode interval | SET / BRIGHT / SPEED / MODE / TEST |
+| v5 | LAUNCHER_IO 5 | DISPLAY value brightness mode interval right-mask | SET / SEG / BRIGHT / SPEED / MODE / TEST |
 | v6 | LAUNCHER_IO 6 | PINS 0..511 | PIN D0..D8 LOW/HIGH |
 
 Commands end with LF; CRLF is accepted. v1 and v2 firmware remain unchanged.
@@ -27,6 +27,6 @@ See [v2 configuration and semantics](LauncherIoEsp8266V2/README.md) and
 It rolls every 5000 ms and lights a dice pattern on D1, D2, D3, D5, D6, D7, D8.
 ESP Controller animates each new sequence for 2100 ms and lands on the ESP result.
 
-[v5 two-digit display and hardware setup](LauncherIoEsp8266V5/README.md) supports right-digit 0–9, manual A–G segment toggles, autonomous animations and segment self-test.
+[v5 two-digit display and hardware setup](LauncherIoEsp8266V5/README.md) supports 00–99, manual right-digit segment toggles, autonomous animations and a self-test of both digits.
 
 [v6 digital output control](LauncherIoEsp8266V6/README.md) sets D0–D8 independently from ESP Controller over USB.

@@ -1,8 +1,6 @@
 #include "BoardConfig.h"
 
-// LAUNCHER_IO 5: right-digit-only by default, 0..9 + manual seven-segment mask.
-// Animations and refreshing run on the ESP. Do not drive a whole digit's
-// return current directly through a GPIO: use an appropriately rated driver.
+// LAUNCHER_IO 5: two common-cathode digits, 00..99 + manual right-digit mask.
 const uint8_t digitPatterns[10] = {
   0b00111111, 0b00000110, 0b01011011, 0b01001111, 0b01100110,
   0b01101101, 0b01111101, 0b00000111, 0b01111111, 0b01101111
@@ -10,37 +8,28 @@ const uint8_t digitPatterns[10] = {
 // Bit 0=A (top), 1=B, 2=C, 3=D, 4=E, 5=F, 6=G (middle).
 enum DisplayMode { HOLD, UP, DOWN, BOUNCE, TEST, MANUAL };
 DisplayMode mode = HOLD;
-const uint8_t highestValue = digitConnected[0] ? 99 : 9;
-const uint8_t enabledCount = (digitConnected[0] ? 1 : 0) + (digitConnected[1] ? 1 : 0);
+constexpr uint8_t highestValue = 99;
+constexpr uint8_t segmentsPerDigit = 7;
+constexpr uint8_t totalSegments = 2 * segmentsPerDigit;
 uint8_t value = 4;
 uint8_t manualMask = 0x66; // last entered mask, independent of numeric value
-uint8_t rightVisibleMask = digitPatterns[4];
 uint8_t brightness = defaultBrightness;
 uint16_t intervalMs = defaultIntervalMs;
 bool ascending = true;
 uint32_t previousStepMs = 0, testStartMs = 0, previousSlotUs = 0;
-uint8_t currentDigit = 1;
+uint8_t scanSlot = totalSegments - 1;
 bool lit = false;
 char line[32];
 uint8_t lineLength = 0;
 bool tooLong = false;
 
-void digitsOff() {
-  for (uint8_t i = 0; i < 2; ++i) {
-    if (digitConnected[i]) digitalWrite(digitPins[i], digitActiveHigh ? LOW : HIGH);
-  }
+void blankSlot() {
+  if (!lit) return;
+  digitalWrite(digitPins[scanSlot / segmentsPerDigit], HIGH);
+  digitalWrite(segmentPins[scanSlot % segmentsPerDigit], LOW);
+  lit = false;
 }
-void segmentsWrite(uint8_t mask) {
-  for (uint8_t i = 0; i < 7; ++i) {
-    bool on = (mask & (1U << i)) != 0;
-    digitalWrite(segmentPins[i], on == segmentActiveHigh ? HIGH : LOW);
-  }
-}
-uint8_t nextDigit() {
-  if (digitConnected[0] && digitConnected[1]) return currentDigit ^ 1;
-  return digitConnected[1] ? 1 : 0;
-}
-uint32_t segmentTestDuration() { return (uint32_t)enabledCount * 7UL * 200UL; }
+uint32_t segmentTestDuration() { return totalSegments * 200UL; }
 uint8_t visiblePattern(uint8_t digit) {
   if (mode == MANUAL) return digit == 1 ? manualMask : 0;
   if (mode != TEST) return digitPatterns[digit == 0 ? value / 10 : value % 10];
@@ -48,29 +37,31 @@ uint8_t visiblePattern(uint8_t digit) {
   uint32_t walkDuration = segmentTestDuration();
   if (elapsed < walkDuration) {
     uint8_t step = elapsed / 200;
-    uint8_t target = digitConnected[0] ? step / 7 : 1;
-    return target == digit ? (1U << (step % 7)) : 0;
+    uint8_t target = step / segmentsPerDigit;
+    return target == digit ? (1U << (step % segmentsPerDigit)) : 0;
   }
   if (elapsed < walkDuration + 750) return 0x7F;
   return digitPatterns[digit == 0 ? value / 10 : value % 10];
 }
 void refreshDisplay() {
-  if (!enabledCount) return;
   uint32_t now = micros();
-  if ((uint32_t)(now - previousSlotUs) >= digitSlotUs) {
-    digitsOff(); // blank commons before switching shared segments
+  uint32_t elapsed = now - previousSlotUs;
+  if (elapsed >= segmentSlotUs) {
+    blankSlot();
     previousSlotUs = now;
-    currentDigit = nextDigit();
-    uint8_t mask = visiblePattern(currentDigit);
-    segmentsWrite(mask);
-    if (currentDigit == 1) rightVisibleMask = mask;
-    digitalWrite(digitPins[currentDigit], digitActiveHigh ? HIGH : LOW);
+    uint16_t activeSegments = visiblePattern(0) | (uint16_t(visiblePattern(1)) << segmentsPerDigit);
+    if (activeSegments == 0) return;
+    // Skip dark segments without increasing the cathode's peak current.
+    do {
+      scanSlot = (scanSlot + 1) % totalSegments;
+    } while ((activeSegments & (1U << scanSlot)) == 0);
+    uint8_t digit = scanSlot / segmentsPerDigit;
+    uint8_t segment = scanSlot % segmentsPerDigit;
+    digitalWrite(segmentPins[segment], HIGH);
+    digitalWrite(digitPins[digit], LOW);
     lit = true;
-  }
-  uint32_t onTime = (digitSlotUs * (uint32_t)brightness) / 100;
-  if (lit && (uint32_t)(now - previousSlotUs) >= onTime) {
-    digitsOff();
-    lit = false;
+  } else if (elapsed >= (segmentSlotUs * brightness) / 100) {
+    blankSlot();
   }
 }
 void advance() {
@@ -125,7 +116,7 @@ void command(const char* request) {
     Serial.print(' '); Serial.print(brightness);
     Serial.print(' '); Serial.print(modeName());
     Serial.print(' '); Serial.print(intervalMs);
-    Serial.print(' '); Serial.println(rightVisibleMask); // mask of physical right digit
+    Serial.print(' '); Serial.println(visiblePattern(1));
     return;
   }
   int n;
@@ -175,18 +166,16 @@ void processSerial() {
   }
 }
 void setup() {
-  // The disconnected left-digit GPIO is never configured as an output.
-  for (uint8_t i = 0; i < 2; ++i) {
-    if (!digitConnected[i]) continue;
-    digitalWrite(digitPins[i], digitActiveHigh ? LOW : HIGH);
-    pinMode(digitPins[i], OUTPUT);
+  for (uint8_t pin : segmentPins) {
+    digitalWrite(pin, LOW);
+    pinMode(pin, OUTPUT);
   }
-  for (uint8_t i = 0; i < 7; ++i) {
-    digitalWrite(segmentPins[i], segmentActiveHigh ? LOW : HIGH);
-    pinMode(segmentPins[i], OUTPUT);
+  for (uint8_t pin : digitPins) {
+    digitalWrite(pin, HIGH);
+    pinMode(pin, OUTPUT);
   }
   Serial.begin(115200);
-  previousSlotUs = micros() - digitSlotUs;
+  previousSlotUs = micros() - segmentSlotUs;
   previousStepMs = millis();
 }
 void loop() {
