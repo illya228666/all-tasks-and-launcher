@@ -63,24 +63,24 @@ internal static class FirmwareFlasher
         foreach (string arg in args) info.ArgumentList.Add(arg);
 
         using var process = new Process { StartInfo = info };
-        var errorTail = new StringBuilder();
+        var outputTail = new StringBuilder();
+        bool uploadVerified = false, uploadFailed = false;
         void Output(object sender, DataReceivedEventArgs e)
-        {
-            if (!string.IsNullOrWhiteSpace(e.Data)) log.Report(e.Data.Trim());
-        }
-        void Error(object sender, DataReceivedEventArgs e)
         {
             if (string.IsNullOrWhiteSpace(e.Data)) return;
             string line = e.Data.Trim();
-            lock (errorTail)
+            lock (outputTail)
             {
-                errorTail.AppendLine(line);
-                if (errorTail.Length > 4000) errorTail.Remove(0, errorTail.Length - 4000);
+                outputTail.AppendLine(line);
+                if (outputTail.Length > 4000) outputTail.Remove(0, outputTail.Length - 4000);
+                // ESP8266 core 3.1.2 can swallow esptool failures and return exit code 0.
+                uploadVerified |= line == "Hash of data verified.";
+                uploadFailed |= line.Contains("fatal", StringComparison.OrdinalIgnoreCase);
             }
             log.Report(line);
         }
         process.OutputDataReceived += Output;
-        process.ErrorDataReceived += Error;
+        process.ErrorDataReceived += Output;
         try
         {
             try
@@ -120,13 +120,18 @@ internal static class FirmwareFlasher
                 cancellation.ThrowIfCancellationRequested();
                 throw new IOException(message);
             }
-            if (process.ExitCode != 0)
-                throw new IOException("Arduino CLI " + args[0] + " fehlgeschlagen (Exit " + process.ExitCode + "). " + errorTail);
+            lock (outputTail)
+            {
+                if (process.ExitCode != 0)
+                    throw new IOException("Arduino CLI " + args[0] + " fehlgeschlagen (Exit " + process.ExitCode + "). " + outputTail);
+                if (args[0] == "upload" && (!uploadVerified || uploadFailed))
+                    throw new IOException("Flashen nicht bestätigt. Firmwarezustand unbekannt. " + outputTail);
+            }
         }
         finally
         {
             process.OutputDataReceived -= Output;
-            process.ErrorDataReceived -= Error;
+            process.ErrorDataReceived -= Output;
         }
     }
 }

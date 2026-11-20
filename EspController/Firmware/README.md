@@ -34,8 +34,13 @@ publishing EspController; keep that directory beside the executable.
    captured COM port**. A physical swap between releasing the port and Arduino
    CLI opening it can go undetected if Windows assigns the same COM name.
 5. After the upload (successful or failed), it reconnects exclusively to
-   that same COM port and automatically identifies the new firmware. To switch
-   to another device, manually disconnect and connect again.
+   that same COM port. Success requires esptool's `Hash of data verified.`
+   confirmation, no fatal loader error, and a HELLO identifying the selected
+   firmware within 15 seconds. Exit code 0 or 100% progress alone is insufficient:
+   ESP8266 core 3.1.2's `upload.py` can return 0 after an esptool failure.
+   If verification or startup fails, the controller reports an error and leaves
+   reconnection active on that port. To switch to another device, manually
+   disconnect and connect again.
 6. Closing the window cancels compilation or skips an upload that has yet to
    start. An upload already in progress can finish. Compilation has a five
    minute limit and upload has a two minute limit. After an upload timeout the
@@ -56,6 +61,7 @@ upload may need manual recovery via Arduino IDE/CLI.
 
 ```powershell
 dotnet build EspController/EspController.csproj -c Release
+dotnet run --project EspController.Checks -c Release
 ```
 
 Test a successful upload and reconnection on the same COM port, a compilation

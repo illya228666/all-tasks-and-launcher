@@ -376,7 +376,16 @@ internal sealed class ControllerViewModel : INotifyPropertyChanged, IAsyncDispos
             await StopConnectionAsync();
             if (_closing) return;
             await FirmwareFlasher.UploadAsync(version, port, output, progress);
-            _firmwareStatus = $"IO v{version} erfolgreich auf {port} übertragen.";
+            if (_closing) return;
+            _firmwareStatus = $"Übertragung geprüft · warte auf IO v{version} auf {port} …";
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(FirmwareStatus)));
+            await StartAsync(port);
+            for (int attempt = 0; attempt < 150 && _connection?.State.IsConnected != true; attempt++)
+                await Task.Delay(100, _closeCancellation.Token);
+            if (_closing) return;
+            if (_connection?.State.ProtocolVersion != (DeviceProtocolVersion)version)
+                throw new IOException($"Übertragung geprüft, aber kein HELLO von IO v{version} auf {port}. Verbindung und Firmware prüfen.");
+            _firmwareStatus = $"IO v{version} auf {port} übertragen, geprüft und verbunden.";
             Log(_firmwareStatus);
         }
         catch (OperationCanceledException) when (_closing) { }
