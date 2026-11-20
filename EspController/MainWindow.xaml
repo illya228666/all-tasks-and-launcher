@@ -27,7 +27,7 @@
                 <StackPanel DockPanel.Dock="Bottom">
                     <Border Height="1" Background="{StaticResource BorderBrush}" Margin="0,20" />
                     <TextBlock Text="ESP8266" FontWeight="SemiBold" />
-                    <TextBlock Text="Launcher IO v1 / v2 / v3 / v4 / v5 / v4" Foreground="{StaticResource MutedBrush}" FontSize="12" Margin="0,6,0,0" />
+                    <TextBlock Text="Launcher IO v1–v6" Foreground="{StaticResource MutedBrush}" FontSize="12" Margin="0,6,0,0" />
                     <TextBlock Text="USB · 115 200 Baud" Foreground="{StaticResource MutedBrush}" FontSize="12" Margin="0,4,0,0" />
                     <TextBlock Text="Zahlen Launcher" Style="{StaticResource Caption}" Margin="0,24,0,0" />
                 </StackPanel>
@@ -81,6 +81,48 @@
                         <Button Grid.Column="1" Content="{Binding ConnectionAction}" Command="{Binding ConnectionCommand}" Style="{StaticResource PrimaryButton}" VerticalAlignment="Center" MinWidth="116" AutomationProperties.Name="Verbindung umschalten" />
                     </Grid>
                 </Border>
+                <Border Style="{StaticResource Card}" Margin="0,0,0,20"
+                        Visibility="{Binding IsPinFirmware, Converter={StaticResource BooleanVisibility}}">
+                    <StackPanel>
+                        <TextBlock Text="Digitale Ausgänge D0–D8" FontSize="23" FontWeight="SemiBold" Margin="0,0,0,12" />
+                        <ItemsControl ItemsSource="{Binding Pins}" Margin="-5,0">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate><UniformGrid Columns="3" /></ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Background="{StaticResource BackgroundBrush}" CornerRadius="10" Padding="12" Margin="5">
+                                        <StackPanel>
+                                            <DockPanel Margin="0,0,0,8">
+                                                <TextBlock DockPanel.Dock="Right" Text="{Binding Level}" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock" BasedOn="{StaticResource Caption}">
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding Level}" Value="HIGH">
+                                                                    <Setter Property="Foreground" Value="{StaticResource AccentBrush}" />
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
+                                                <TextBlock Text="{Binding Name}" FontSize="17" FontWeight="SemiBold" />
+                                            </DockPanel>
+                                            <UniformGrid Columns="2">
+                                                <Button Content="LOW" Padding="8,7" Margin="0,0,4,0"
+                                                        Command="{Binding DataContext.PinLowCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                        CommandParameter="{Binding Number}" AutomationProperties.Name="{Binding Name, StringFormat='{}{0} LOW'}" />
+                                                <Button Content="HIGH" Padding="8,7" Margin="4,0,0,0"
+                                                        Command="{Binding DataContext.PinHighCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                        CommandParameter="{Binding Number}" AutomationProperties.Name="{Binding Name, StringFormat='{}{0} HIGH'}" />
+                                            </UniformGrid>
+                                        </StackPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        <TextBlock Text="{Binding CommandStatus}" Foreground="{StaticResource MutedBrush}" FontSize="12" Margin="0,9,0,0" />
+                    </StackPanel>
+                </Border>
                 <!-- Firmware actions are exposed only after HELLO recognized a live ESP. -->
                 <Border Style="{StaticResource Card}" Margin="0,0,0,20"
                         Visibility="{Binding ShowFirmwarePanel, Converter={StaticResource BooleanVisibility}}">
@@ -117,7 +159,7 @@
                         </ProgressBar>
                         <TextBlock Text="{Binding FirmwareStatus}" TextWrapping="Wrap"
                                    Foreground="{StaticResource MutedBrush}" FontSize="12" Margin="0,10,0,0"/>
-                        <TextBlock Text="Vorher Pinbelegung, Display-Polarität und Verdrahtung der Zielversion prüfen."
+                        <TextBlock Text="Vorher Pinbelegung und Verdrahtung der Zielversion prüfen."
                                    Foreground="#F1C66D" FontSize="11" Margin="0,9,0,0"/>
                     </StackPanel>
                 </Border>

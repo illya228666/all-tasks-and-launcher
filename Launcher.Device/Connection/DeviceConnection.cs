@@ -20,6 +20,7 @@ public sealed class DeviceConnection : IAsyncDisposable
     public event Action<byte>? FadeReceived;
     public event Action<DeviceDiceRoll>? DiceReceived;
     public event Action<DeviceDisplay>? DisplayReceived;
+    public event Action<int>? PinLevelsReceived;
     public DeviceState State { get { lock (_gate) return _state; } }
     public DeviceConnection() : this(new SerialDeviceTransportFactory(), new(), null) { }
     // A firmware update reconnects exclusively to its previously confirmed port.
@@ -74,15 +75,20 @@ public sealed class DeviceConnection : IAsyncDisposable
         return QueueDisplay("SEG " + mask, "OK SEG");
     }
     public Task<DeviceCommandResult> StartDisplayTestAsync() => QueueDisplay("TEST", "OK TEST");
+    public Task<DeviceCommandResult> SetPinAsync(int pin, bool high, DeviceState session) =>
+        Queue(DeviceCapabilities.DigitalOutputs, false, DeviceLights.None, DeviceProtocolV6.SetPin(pin, high), session);
+
     private Task<DeviceCommandResult> QueueDisplay(string command, string expected) =>
         Queue(DeviceCapabilities.Display, false, DeviceLights.None, new DeviceWireCommand(command, expected));
 
-    private Task<DeviceCommandResult> Queue(DeviceCapabilities capability, bool indicator, DeviceLights lights, DeviceWireCommand? wire = null)
+    private Task<DeviceCommandResult> Queue(DeviceCapabilities capability, bool indicator, DeviceLights lights,
+        DeviceWireCommand? wire = null, DeviceState? expectedSession = null)
     {
         lock (_gate)
         {
             if (_stopped) return Task.FromResult(DeviceCommandResult.Cancelled);
-            if (!_state.IsConnected) return Task.FromResult(DeviceCommandResult.Disconnected);
+            if (!_state.IsConnected || (expectedSession is not null && !ReferenceEquals(_state, expectedSession)))
+                return Task.FromResult(DeviceCommandResult.Disconnected);
             if ((_state.Capabilities & capability) == 0) return Task.FromResult(DeviceCommandResult.Unsupported);
             _pending?.Completion.TrySetResult(DeviceCommandResult.Superseded);
             var completion = new TaskCompletionSource<DeviceCommandResult>(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -177,6 +183,7 @@ public sealed class DeviceConnection : IAsyncDisposable
     {
         uint? lastDiceSequence = null;
         DeviceDisplay? lastDisplay = null;
+        int? lastPinLevels = null;
         while (true)
         {
             token.ThrowIfCancellationRequested();
@@ -227,6 +234,11 @@ public sealed class DeviceConnection : IAsyncDisposable
             {
                 lastDisplay = display;
                 DisplayReceived?.Invoke(display);
+            }
+            if (poll.PinLevels is int levels && levels != lastPinLevels)
+            {
+                lastPinLevels = levels;
+                PinLevelsReceived?.Invoke(levels);
             }
             await Task.Delay(_timing.PollIntervalMs, token).ConfigureAwait(false);
         }

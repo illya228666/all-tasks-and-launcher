@@ -21,6 +21,7 @@ internal sealed class ControllerViewModel : INotifyPropertyChanged, IAsyncDispos
     private byte? _fade;
     private DeviceDiceRoll? _diceRoll;
     private DeviceDisplay? _display;
+    private bool _pinLevelsReady;
     private int _displayValue = 4, _displayBrightness = 20, _displayInterval = 500;
     private int _manualMask = 0;
     private bool _isManualMode, _manualPending;
@@ -49,6 +50,8 @@ internal sealed class ControllerViewModel : INotifyPropertyChanged, IAsyncDispos
         LightsCommand = new(ToggleLightAsync, () => CanUseLights);
         AllOffCommand = new(_ => SendLightsAsync(DeviceLights.None), () => CanUseLights);
         AllOnCommand = new(_ => SendLightsAsync(DeviceLights.All), () => CanUseLights);
+        PinLowCommand = new(pin => SetPinAsync(pin, false), () => CanUsePins);
+        PinHighCommand = new(pin => SetPinAsync(pin, true), () => CanUsePins);
         DisplayMinusCommand = new(_ => { DisplayValue = Math.Max(0, DisplayValue - 1); return Task.CompletedTask; }, () => CanUseDisplay);
         DisplayPlusCommand = new(_ => { DisplayValue = Math.Min(99, DisplayValue + 1); return Task.CompletedTask; }, () => CanUseDisplay);
         DisplayModeCommand = new(SetDisplayModeAsync, () => CanUseDisplay);
@@ -68,6 +71,9 @@ internal sealed class ControllerViewModel : INotifyPropertyChanged, IAsyncDispos
     public AsyncCommand LightsCommand { get; }
     public AsyncCommand AllOffCommand { get; }
     public AsyncCommand AllOnCommand { get; }
+    public AsyncCommand PinLowCommand { get; }
+    public AsyncCommand PinHighCommand { get; }
+    public IReadOnlyList<PinOutput> Pins { get; } = Enumerable.Range(0, 9).Select(pin => new PinOutput(pin)).ToArray();
     public AsyncCommand DisplayMinusCommand { get; }
     public AsyncCommand DisplayPlusCommand { get; }
     public AsyncCommand DisplayModeCommand { get; }
@@ -78,7 +84,7 @@ internal sealed class ControllerViewModel : INotifyPropertyChanged, IAsyncDispos
     public AsyncCommand DisplayNoSegmentsCommand { get; }
     public AsyncCommand DisplayNumbersCommand { get; }
     public AsyncCommand FlashFirmwareCommand { get; }
-    public IReadOnlyList<int> FirmwareVersions { get; } = new[] { 1, 2, 3, 4, 5 };
+    public IReadOnlyList<int> FirmwareVersions { get; } = new[] { 1, 2, 3, 4, 5, 6 };
     public int? SelectedFirmwareVersion
     {
         get => _selectedFirmwareVersion;
@@ -122,7 +128,9 @@ internal sealed class ControllerViewModel : INotifyPropertyChanged, IAsyncDispos
     public bool IsDiceFirmware => IsConnected && _state.ProtocolVersion == DeviceProtocolVersion.V4;
     public DeviceDiceRoll? DiceRoll => _diceRoll;
     public bool IsDisplayFirmware => IsConnected && _state.ProtocolVersion == DeviceProtocolVersion.V5;
-    public bool IsLegacyFirmware => !IsDiceFirmware && !IsDisplayFirmware;
+    public bool IsPinFirmware => IsConnected && _state.Capabilities.HasFlag(DeviceCapabilities.DigitalOutputs);
+    public bool IsLegacyFirmware => !IsDiceFirmware && !IsDisplayFirmware && !IsPinFirmware;
+    private bool CanUsePins => !_closing && !_busy && IsPinFirmware && _pinLevelsReady;
     public bool CanUseDisplay => !_closing && !_busy && IsDisplayFirmware;
     public int DisplayValue
     {
@@ -202,6 +210,7 @@ internal sealed class ControllerViewModel : INotifyPropertyChanged, IAsyncDispos
         connection.StateChanged += state => Post(connection, () => DisplayState(state));
         connection.InputReceived += input => Post(connection, () => DisplayInput(input));
         connection.FadeReceived += fade => Post(connection, () => { _fade = fade; NotifyFade(); });
+        connection.PinLevelsReceived += levels => Post(connection, () => UpdatePinLevels(levels));
         connection.DiceReceived += dice => Post(connection, () =>
         {
             _diceRoll = dice;
@@ -275,6 +284,7 @@ internal sealed class ControllerViewModel : INotifyPropertyChanged, IAsyncDispos
             _lights = DeviceLights.None;
             _fade = null;
             _diceRoll = null;
+            UpdatePinLevels(null);
             _displayDebounce.Stop();
             _displayPending = false;
             _manualPending = false;
@@ -327,6 +337,24 @@ internal sealed class ControllerViewModel : INotifyPropertyChanged, IAsyncDispos
         if (!CanUseLights || _connection is null) return Task.CompletedTask;
         var connection = _connection;
         return SendAsync(connection, () => connection.SetLightsAsync(lights), () => _lights = lights, "LEDs: " + lights);
+    }
+
+    private Task SetPinAsync(object? parameter, bool high)
+    {
+        if (!CanUsePins || _connection is not { } connection
+            || parameter is not int pin || pin < 0 || pin >= Pins.Count) return Task.CompletedTask;
+        DeviceState session = _state;
+        return SendAsync(connection, () => connection.SetPinAsync(pin, high, session), () => { },
+            $"{Pins[pin].Name} {(high ? "HIGH" : "LOW")}");
+    }
+
+    private void UpdatePinLevels(int? levels)
+    {
+        foreach (PinOutput pin in Pins) pin.Update(levels);
+        if (_pinLevelsReady == levels.HasValue) return;
+        _pinLevelsReady = levels.HasValue;
+        PinLowCommand.Refresh();
+        PinHighCommand.Refresh();
     }
 
     private Task FlashFirmwareAsync()
@@ -540,6 +568,7 @@ internal sealed class ControllerViewModel : INotifyPropertyChanged, IAsyncDispos
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(null));
         ConnectionCommand.Refresh(); IndicatorCommand.Refresh(); LightsCommand.Refresh(); AllOffCommand.Refresh(); AllOnCommand.Refresh();
+        PinLowCommand.Refresh(); PinHighCommand.Refresh();
         DisplayMinusCommand.Refresh(); DisplayPlusCommand.Refresh(); DisplayModeCommand.Refresh();
         DisplayTestCommand.Refresh(); DisplaySettingsCommand.Refresh(); FlashFirmwareCommand.Refresh();
         DisplaySegmentCommand.Refresh(); DisplayAllSegmentsCommand.Refresh();

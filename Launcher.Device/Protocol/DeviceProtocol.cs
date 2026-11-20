@@ -4,7 +4,8 @@ internal static class DeviceProtocol
 {
     internal const string Hello = "HELLO";
     private static readonly IReadOnlyDictionary<string, IDeviceProtocolVersion> Versions =
-        new IDeviceProtocolVersion[] { new DeviceProtocolV1(), new DeviceProtocolV2(), new DeviceProtocolV3(), new DeviceProtocolV4(), new DeviceProtocolV5() }
+        new IDeviceProtocolVersion[] { new DeviceProtocolV1(), new DeviceProtocolV2(), new DeviceProtocolV3(),
+            new DeviceProtocolV4(), new DeviceProtocolV5(), new DeviceProtocolV6() }
             .ToDictionary(version => version.Identity, StringComparer.Ordinal);
     internal static IDeviceProtocolVersion FromIdentity(string identity) =>
         Versions.TryGetValue(identity, out var version) ? version :

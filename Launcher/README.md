@@ -68,7 +68,7 @@ HELLO wählt v1/v2. v1 verbindet Taste/Erdbeben und Indicator. v2-Eingaben sind 
 
 ## ESP Controller / ESP-Steuerung
 
-Из лаунчера запускается отдельная программа `EspController`. Она автоматически распознаёт IO v1–v4. В v4 ESP8266 сам бросает кубик каждые 5 секунд, включает от 1 до 6 LED и сообщает номер броска и число. WPF показывает анимацию подбрасывания и соответствующую грань. У v4 нет функций старых прошивок; карточки v1–v3 скрываются.
+Из лаунчера запускается отдельная программа `EspController`. Она автоматически распознаёт IO v1–v6. В v4 ESP8266 сам бросает кубик каждые 5 секунд, включает от 1 до 6 LED и сообщает номер броска и число. WPF показывает анимацию подбрасывания и соответствующую грань. У v4 нет функций старых прошивок; карточки v1–v3 скрываются.
 
 Der Launcher startet `EspController` als eigenes Programm. IO v4 würfelt selbst alle fünf Sekunden und liefert Wurfnummer und Augenzahl; WPF animiert den Würfel und zeigt das ESP-Ergebnis. v4 enthält keine Funktionen älterer Firmwareversionen.
 
@@ -86,3 +86,9 @@ Check the part datasheet, current-limiting resistors and digit drivers; the
 example pins are configurable in
 [`LauncherIoEsp8266V5/BoardConfig.h`](../Launcher.Device/Firmware/LauncherIoEsp8266V5/BoardConfig.h).
 Read [v5 setup](../Launcher.Device/Firmware/LauncherIoEsp8266V5/README.md) before flashing.
+
+## D0–D8 / IO v6
+
+IO v6 показывает уровни D0–D8 и позволяет отдельно задавать LOW или HIGH на каждом выходе по USB.
+IO v6 zeigt die Pegel von D0–D8 und setzt jeden Ausgang einzeln per USB auf LOW oder HIGH.
+[Прошивка и подключение / Firmware und Anschluss](../Launcher.Device/Firmware/LauncherIoEsp8266V6/README.md).

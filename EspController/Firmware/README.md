@@ -1,6 +1,6 @@
 # Firmware upload from ESP Controller
 
-The firmware panel can flash Launcher IO v1–v5 **only when an ESP is already
+The firmware panel can flash Launcher IO v1–v6 **only when an ESP is already
 connected and identified by HELLO**. The selected port is captured before
 compilation. Neither compiling nor uploading probes other serial ports.
 
@@ -23,7 +23,7 @@ publishing EspController; keep that directory beside the executable.
 ## Operation
 
 1. Connect in ESP Controller, wait for the green connected state and a COM
-   port confirmed by a valid Launcher IO v1–v5 HELLO response.
+   port confirmed by a valid Launcher IO v1–v6 HELLO response.
 2. Select the target firmware and click **Kompilieren & Flashen**. When changing
    versions, confirm that the wiring matches the target.
 3. The controller compiles while the original firmware keeps running; a build
@@ -51,8 +51,9 @@ instead of implementing its own protocol or scanning disconnected ports.
 
 **Before flashing:** verify that the destination firmware's board pinout,
 GPIO boot-mode constraints, LED current and active polarity match the physical
-breadboard. Versions v1–v5 have *different* wiring. The provided v5
+breadboard. Firmware versions have different wiring. The provided v5
 `BoardConfig.h` has example pins that are not verified from the screenshot.
+See [v6 output levels and startup wiring](../../Launcher.Device/Firmware/LauncherIoEsp8266V6/README.md).
 
 The firmware tool does not attempt to recover non-responsive boards; a failed
 upload may need manual recovery via Arduino IDE/CLI.

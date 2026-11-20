@@ -13,7 +13,7 @@ internal static class FirmwareFlasher
 
     internal static string SketchFolder(int version)
     {
-        if (version is < 1 or > 5) throw new ArgumentOutOfRangeException(nameof(version));
+        if (version is < 1 or > 6) throw new ArgumentOutOfRangeException(nameof(version));
         string name = "LauncherIoEsp8266" + (version == 1 ? "" : "V" + version);
         string folder = Path.Combine(AppContext.BaseDirectory, "Firmware", name);
         if (!File.Exists(Path.Combine(folder, name + ".ino")))

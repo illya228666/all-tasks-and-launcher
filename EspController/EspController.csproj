@@ -27,5 +27,8 @@
     <None Include="..\Launcher.Device\Firmware\LauncherIoEsp8266V5\**\*.ino;..\Launcher.Device\Firmware\LauncherIoEsp8266V5\**\*.h"
           Link="Firmware\LauncherIoEsp8266V5\%(RecursiveDir)%(Filename)%(Extension)"
           CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <None Include="..\Launcher.Device\Firmware\LauncherIoEsp8266V6\LauncherIoEsp8266V6.ino"
+          Link="Firmware\LauncherIoEsp8266V6\LauncherIoEsp8266V6.ino"
+          CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>

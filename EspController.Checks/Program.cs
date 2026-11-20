@@ -22,6 +22,8 @@ internal static class Program
             return mode == "exit-error" ? 3 : 0;
         }
 
+        await DigitalOutputChecks.RunAsync();
+
         string fakeCli = Path.Combine(AppContext.BaseDirectory, "arduino-cli.exe");
         string? previousScenario = Environment.GetEnvironmentVariable(Scenario);
         if (File.Exists(fakeCli)) throw new IOException("Refusing to replace an existing arduino-cli.exe.");
@@ -48,7 +50,7 @@ internal static class Program
                     () => FirmwareFlasher.UploadAsync(3, "COM_TEST", AppContext.BaseDirectory, log), expected);
             }
             Environment.SetEnvironmentVariable(Scenario, "unverified");
-            await FirmwareFlasher.CompileAsync(3, AppContext.BaseDirectory, log, CancellationToken.None);
+            await FirmwareFlasher.CompileAsync(6, AppContext.BaseDirectory, log, CancellationToken.None);
             Environment.SetEnvironmentVariable(Scenario, "exit-error");
             await ExpectAsync<IOException>(
                 () => FirmwareFlasher.CompileAsync(3, AppContext.BaseDirectory, log, CancellationToken.None), "Exit 3");
